@@ -81,36 +81,43 @@ Das Plugin soll bevorzugt an Lehrstühlen zur Verfügung stehen.
 
 Die fachlichen Anforderungen sind:
 \begin{enumerate}[label= FA \arabic*:]
+\item Es soll ein Plugin zur Implementierung von reviewbaren Fragen erstellt werden.
+\item Eine reviewbare Frage soll alle Eigenschaften einer normalen Ilias-Frage besitzen.
 \item Es soll ein Plugin zur Verwaltung von reviewbaren Fragen und Reviews geschrieben werden.
 \item Es soll eine Übersicht-Benutzeroberfläche zur Verwaltung von reviewbaren Fragen und Reviews geben.
+\item Es soll eine Eingabe-Benutzeroberfläche geben, die zur Eingabe der Reviewdaten dient.
+\item Die Eingabe-Benutzeroberfläche soll nur Personen bereitstehen, die ausgewählt wurden, um ein Review zu beantworten.
+\item Die Eingabe-Benutzeroberfläche soll bereits bestehende Daten eines Reviews anzeigen können.
+\item Alle über die Eingabe-Benutzeroberfläche eingegebenen Daten sollen gespeichert werden.
+\item Es soll eine Ausgabe-Benutzeroberfläche geben, die zur Ausgabe von Reviews dient.
+\item Die Ausgabe-Benutzeroberfläche soll einem Autor, einem Reviewer und einem Administrator bereitstehen.
+\item Es soll eine Zuweisungs-Benutzeroberfläche zur Zuweisung von Reviewern zu Autoren geben.
+\item Die Zuweisungs-Benutzeroberfläche soll nur Administratoren bereitstehen.
 \item Ein Autor soll alle von ihm erstellten reviewbaren Fragen als Übersicht sehen können.
-\item Ein Autor soll zu einer reviewbaren Frage, zu der noch keine Reviews angefordert wurden, Reviews anfragen können.
-\item Wenn zu einer reviewbaren Frage Reviews angefordert werden, sollen automatisch eine oder mehrere Personen aus der Gruppe des zur reviewbaren Frage zugehörigen Autors per Nachricht informiert und aufgefordert werden, dass ihnen zugeordnete Review zu beantworten.
-\item Die Auswahl von zu einer reviewbaren Frage zugehörigen Reviewern soll zufällig erfolgen.
-\item Die Anzahl der zu einer reviewbaren Frage zugehörigen Reviewer soll einstellbar sein.
+\item Ein Autor soll keine Namen von Personen sehen, die ausgewählt wurden, um Reviews zu seinen Fragen zu erstellen.
+\item Ein Autor soll zu einer reviewbaren Frage, zu der noch keine Reviews angefordert wurden, Reviews anfordern können.
+\item Ein Autor soll nach Bearbeitung einer reviewbaren Frage zur neuen Version der Frage neue Reviews  anfordern können.
 \item Ein Autor soll die zu einer reviewbaren Frage, zu der bereits Reviews angefordert wurden, zugehörigen Reviews in einer Ausgabe-Benutzeroberfläche öffnen können.
-\item Ein Autor soll nach Bearbeitung einer reviewbaren Frage die Möglichkeit haben, die bereits der Frage zugehörigen Reviews zur erneuten Bearbeitung freizugeben. Die zugehörigen Reviewer sollen automatisch darüber informiert werden.
 \item Ein Reviewer soll alle von ihm beantworteten und noch zu beantwortende Reviews als Übersicht sehen können.
 \item Ein Reviewer soll ein von ihm noch nicht beantwortetes Review zur Eingabe in einer Eingabe-Benutzeroberfläche öffnen können.
 \item Ein Reviewer soll ein von ihm bereits beantwortetes Review zur Einsicht in einer Ausgabe-Benutzeroberfläche öffnen können.
-\item Es soll eine Eingabe-Benutzeroberfläche geben, die zur Eingabe der Reviewdaten dient.
-\item Die Eingabe-Benutzeroberfläche steht nur Personen bereit, die ausgewählt wurden, um ein Review zu beantworten.
-\item Die Eingabe-Benutzeroberfläche soll bereits bestehende Daten eines Reviews anzeigen können.
-\item Alle über die Eingabe-Benutzeroberfläche eingegebenen Daten sollen gespeichert werden.
+\item Ein Administrator soll den Namen eines zu einem Review zugehörigen Reviewers sehen können.
+\item Ein Administrator soll über eine Zuweisungs-Benutzeroberfläche Autoren Reviewer zuweisen können.
+\item Wenn zu einer reviewbaren Frage Reviews angefordert werden, sollen automatisch die dem Autor der reviewbaren Frage zugeordneten Reviewer per Nachricht informiert und aufgefordert werden, dass ihnen zugeordnete Review zu beantworten.
 \item Wenn ein Review ausgefüllt wurde, soll der Autor der zum Review zugehörigen Frage per Nachricht informiert werden.
-\item Es soll eine Ausgabe-Benutzeroberfläche geben, die zur Ausgabe von Reviews dient.
-\item Die Ausgabe-Benutzeroberfläche soll nur dem Autor der zum Review zugehörigen Frage und einem Administrator bereit stehen.
-\item Der Autor der zum Review zugehörigen Frage soll keine Namen von Personen sehen, die ausgewählt wurden, um die Reviews zu beantworten.
-\item Der Administrator soll die Namen von Personen sehen, die ausgewählt wurden, um die Reviews zu beantworten.
-\item Es soll ein Plugin zur Implementierung von reviewbaren Fragen erstellt werden.
-\item Eine reviewbare Frage soll alle Eigenschaften einer normalen Ilias-Frage besitzen.
+\item Reviews sollen den Reviewern einer Gruppe entweder per Zufall oder manuell über eine Eingabemaske zugeordnet werden.
+\item Der Nutzer soll stets dazu aufgefordert werden  vor dem Absenden des Formulars  leere Formularfelder auszufüllen.  
+\item Fragen sollen manuell vom Gruppenadministrator freigegeben werden können, um das Reviewing auch außerhalb von Ilias zu ermöglichen.
 \end{enumerate}
+
 
 Die nicht-fachlichen Anforderungen sind:
 \begin{enumerate}[label=NFA \arabic*:]
 \item Es soll Sprachunterstützung für Deutsch und Englisch bereitgestellt werden.
-\item Das Plugin nutzt die in ILIAS vorhandene Plugin-Schnittstelle.
+\item Das Plugin nutzt die in ILIAS vorhandenen Plugin-Schnittstellen.
 \end{enumerate}
+
+
 \section{Kannkriterien}
 Ein Kannkriterium ist die Itemkonstruktion:
 \begin{itemize}
@@ -129,6 +136,12 @@ Das zweite Kannkriterium ist der Blueprint:
 \item Die Fragen werden nach den Kriterien Taxonomiestufe und Themenbereich ausgewählt. 
 \item Die Klausur wird dementprechend aus den Fragen erstellt.
 \end{itemize}
+Ein drittes Kannkriterium ist eine Fragenhistory:
+\begin{itemize}
+\item Wenn eine Frage bearbeitet wird, soll die alte Version der Frage weiter gespeichert werden.
+\item Alle zu einer so gespeicherten Frage zugehörigen Reviews sollen ebenfalls gespeichert werden.
+\end{itemize}
+
 
 
 \section{Konventionen}
