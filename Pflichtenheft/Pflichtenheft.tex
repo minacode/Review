@@ -40,7 +40,7 @@ Version & Status & Datum & Autor(en) & Erläuterung\\\hline
 Version & Status & Datum & Autor(en) & Erläuterung\\\hline
 2.0 & In Arbeit & 5.11.14 & Team Ilias & Überprüfung des Pflichtenhefts, Überarbeitung\\
 &&&& der Diagramme und Anforderungen\\\hline
-4.0 & In Arbeit & 11.11.14 & Team Ilias & Besprechung der GUI und Ablaufproezess eines\\
+4.0 & In Arbeit & 11.11.14 & Team Ilias & Besprechung der GUI und Ablaufprozess eines\\
 &&&& Review-Durchgangs\\\hline
 \end{tabular}
 \end{abstract}
@@ -105,7 +105,6 @@ Die fachlichen Anforderungen sind:
 \item Ein Administrator soll über eine Zuweisungs-Benutzeroberfläche Autoren Reviewer zuweisen können.
 \item Wenn zu einer reviewbaren Frage Reviews angefordert werden, sollen automatisch die dem Autor der reviewbaren Frage zugeordneten Reviewer per Nachricht informiert und aufgefordert werden, dass ihnen zugeordnete Review zu beantworten.
 \item Wenn ein Review ausgefüllt wurde, soll der Autor der zum Review zugehörigen Frage per Nachricht informiert werden.
-\item Reviews sollen den Reviewern einer Gruppe entweder per Zufall oder manuell über eine Eingabemaske zugeordnet werden.
 \item Der Nutzer soll stets dazu aufgefordert werden  vor dem Absenden des Formulars  leere Formularfelder auszufüllen.  
 \item Fragen sollen manuell vom Gruppenadministrator freigegeben werden können, um das Reviewing auch außerhalb von Ilias zu ermöglichen.
 \end{enumerate}
@@ -141,6 +140,11 @@ Ein drittes Kannkriterium ist eine Fragenhistory:
 \item Wenn eine Frage bearbeitet wird, soll die alte Version der Frage weiter gespeichert werden.
 \item Alle zu einer so gespeicherten Frage zugehörigen Reviews sollen ebenfalls gespeichert werden.
 \end{itemize}
+Das vierte Kannkriterium ist eine zufällige Reviewverteilung:
+\begin{itemize}
+\item Reviews werden per Zufall an eingetragene Reviewer verteilt.
+\item Es soll auf die gleichmäßige Verteilung geachtet werden.
+\end{itemize}
 
 
 
@@ -164,7 +168,7 @@ Für die Plugins werden verschiedene Plugin-Slots verwendet. Ilias stellt eine S
  
 \section{Klassen}
 \texttt{Review}\\
-Alle Reviews sind intern mit einer Nummerierung versehen und eindeutig einer Frage zugeordnet, wobei zu einer Frage beliebig viele Reviews vorhanden sein können. Ein Review beinhaltet die Einschätzung des Reviewers hinsichtlich der fachlichen Richtigkeit, Relevanz und Formulierung der Beschreibung, Fragestellung und Antwortoptionen einer Frage. Zusätzlich gibt der Reviewer die von ihm bevorzugte Einordnung der Frage in Taxonomiestufe und Wissensdimension an. Außerdem beinhaltet ein Review das Urteil des Reviwers und weitere Bemerkungen, die je nach Urteil Anmerkungen zur Überarbeitung oder eine Begründung der Ablehnung darstellen. Zusätzlich werden der Name des Reviewers, seine selbsteingeschätzte Expertise und der Zustand des Reviews gespeichert.\\
+Alle Reviews sind intern mit einer Nummerierung versehen und eindeutig einer Frage zugeordnet. Zu einer Frage können beliebig viele Reviews vorhanden sein. Ein Review beinhaltet die Einschätzung des Reviewers hinsichtlich der fachlichen Richtigkeit, Relevanz und Formulierung der Beschreibung, Fragestellung und Antwortoptionen einer Frage. Zusätzlich gibt der Reviewer die von ihm bevorzugte Einordnung der Frage in Taxonomiestufe und Wissensdimension an. Ein Review beinhaltet das Urteil des Reviewers und weitere Bemerkungen, die je nach Urteil Anmerkungen zur Überarbeitung oder eine Begründung der Ablehnung darstellen. Zusätzlich werden der Name des Reviewers, seine selbsteingeschätzte Expertise und der Zustand des Reviews gespeichert.\\
 \texttt{Frage}\\
 Allen Fragen, die in Ilias erstellt werden können, ist gemein, dass sie über einen Autor, einen Titel, die eigentliche Fragestellung und eine weiterführende Beschreibung verfügen.\\
 
@@ -205,7 +209,7 @@ Das Review Plugin deckt zwei Anwendungsfälle ab:
 
 \begin{tabular}{|p{0.5cm}|p{3cm}|p{0.5cm}|p{4cm}|p{4.5cm}|}\hline
 Nr. & Anwendungsfall & Nr. & Anfrage & Antwort\\\hline
-1.0 & Ein Autor fordert Reviews & 1.1 & Es ist noch kein Review vorhanden & Es werden neue Reviewer ausgewählt und ihnen zugeordnete, unbearbeitete Reviews erstellt. Die Reviewer werden darüber informiert, dass sie ein Review zu schreiben haben.\\\hline
+1.0 & Ein Autor fordert Reviews & 1.1 & Es ist noch kein Review vorhanden & Die vom Administrator zum Autor zugeordneten Reviewer werden ermittelt und unbearbeitete Reviews erstellt. Die Reviewer werden darüber informiert, dass sie ein Review zu schreiben haben.\\\hline
 &&1.2 & Es sind bereits Reviews zu der Frage vorhanden. & Die bereits vorhandenen Reviews werden auf unbearbeitet gesetzt. Die Reviewer werden darüber informiert.\\\hline
 2.0 & Reviewer erstellt ein Review & 2.1 & Der Reviewer füllt alle Felder vollständig aus. & Das Review wird auf bearbeitet gesetzt und in der Datenbank gespeichert. Zudem wird vermerkt das wievielte Review der Reviewer gegeben hat.\\\hline
 &&2.2 & Der Reviewer vergisst, Felder auszufüllen. & Der Reviewer erhält eine Meldung, dass er vergessen hat manche Felder auszufüllen. \\\hline
