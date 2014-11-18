@@ -60,26 +60,90 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$answers = new ilNonEditableValueGUI("Antwortoptionen:");
 		$ao = "";
 		foreach ($this->simulateData() as $answer)
-			$ao .= "                                                                                " . $answer["answer"];
-		$answers->setValue($question);
+			$ao .= "</pre><br><pre>" . $answer["answer"];
+		$answers->setValue($ao);
 		$group_q->addSubItem($answers);
 		$this->addItem($group_q);
 		
 		$group_r = new ilRadioGroupInputGUI("Review" ,"group_r");
 		
-		$group_t = new ilRadioGroupInputGUI("Taxonomiestufe und Wissensdimension" ,"group_t");
+		$group_ta = new ilRadioGroupInputGUI("Einordnung des Autors" ,"group_ta");
+		$tax = new ilSelectInputGUI("Taxonomiestufe", "tax");
+		$tax->setValue(2);
+		$tax->setOptions( array(
+								0 => "",
+								1 => "Remember",
+								2 => "Understand",
+								3 => "Apply",
+								4 => "Analyze",
+								5 => "Evaluate",
+								6 => "Create",
+							)
+		);
+		$tax->setDisabled(true);
+		$group_ta->addSubItem($tax);
+		$dim = new ilSelectInputGUI("Wissensdimension", "dim");
+		$dim->setValue(3);
+		$dim->setOptions( array(
+								0 => "",
+								1 => "Conceptual",
+								2 => "Factual",
+								3 => "Procedural",
+								4 => "Metacognitive",
+							)
+		);
+		$dim->setDisabled(true);
+		$group_ta->addSubItem($dim);
+		$this->addItem($group_ta);
+		
+		$group_tu = new ilRadioGroupInputGUI("Einordnung des Reviewers" ,"group_tu");
+		$tax = new ilSelectInputGUI("Taxonomiestufe", "tax");
+		$tax->setRequired(true);
+		$tax->setValue(0);
+		$tax->setOptions( array(
+								0 => "",
+								1 => "Remember",
+								2 => "Understand",
+								3 => "Apply",
+								4 => "Analyze",
+								5 => "Evaluate",
+								6 => "Create",
+							)
+		);
+		$group_tu->addSubItem($tax);
+		$dim = new ilSelectInputGUI("Wissensdimension", "dim");
+		$dim->setRequired(true);
+		$tax->setValue(0);
+		$dim->setOptions( array(
+								0 => "",
+								1 => "Conceptual",
+								2 => "Factual",
+								3 => "Procedural",
+								4 => "Metacognitive",
+							)
+		);
+		$group_tu->addSubItem($dim);
+		$this->addItem($group_tu);
 		
 		$group_e = new ilRadioGroupInputGUI("Urteil" ,"group_e");
+		$op_a = new ilRadioOption("Frage akzeptiert", "1", "");
+		$group_e->addOption($op_a);
+		$op_e = new ilRadioOption("Frage überarbeiten", "2", "");
+		$group_e->addOption($op_e);
+		$op_d = new ilRadioOption("Frage abgelehnt", "3", "");
+		$group_e->addOption($op_d);
+		$this->addItem($group_e);
 		
 		$group_c = new ilRadioGroupInputGUI("Bemerkungen" ,"group_c");
 		$comment = new ilTextAreaInputGUI("Bemerkungen:", "comment");
+		$comment->setCols(70);
 		$group_c->addSubItem($comment);
 		$this->addItem($group_c);
-				
-		$group_a = new ilRadioGroupInputGUI("Autor" ,"group_a");
+		
+		$group_a = new ilRadioGroupInputGUI("Autor", "group_a");
 		$author = new ilNonEditableValueGUI("Autor:");
 		$author->setValue("Dummy-Autor");
-		$group_q->addSubItem($author);
+		$group_a->addSubItem($author);
 		$this->addItem($group_a);
 		
 		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Absenden");
