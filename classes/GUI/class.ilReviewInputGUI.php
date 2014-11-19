@@ -45,86 +45,92 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->setTitle("Review-Eingabeformular");
 		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
 		
-		$group_q = new ilRadioGroupInputGUI("Frage" ,"group_q");
-		$title = new ilNonEditableValueGUI("Titel:");
-		$title->setValue("Dummy-Titel");
-		$group_q->addSubItem($title);
-		$description = new ilNonEditableValueGUI("Beschreibung:");
-		$description->setValue("Dummy-Beschreibung der zu diesem Dummy-Review gehörigen Dummy-Frage");
-		$group_q->addSubItem($description);
-		$question = new ilNonEditableValueGUI("Fragestellung:");
-		$question->setValue("Ist diese Dummy-Frage eine Dummy-Frage?");
-		$group_q->addSubItem($question);
+		$this->populateQuestionFormPart();
+		$this->populateReviewFormPart();
+		$this->populateTaxonomyFormPart();
+		$this->populateEvaluationFormPart();
+		$this->populateAdditionalData();		
+		
+		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Absenden");
+		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
+	}
+	
+	private function populateQuestionFormPart() {
+		$head_q = new ilFormSectionHeaderGUI();
+		$head_q->setTitle("Frage");
+		$this->addItem($head_q);
+		
+		$title = new ilNonEditableValueGUI("Titel");
+		$title->setValue($this->simulateData()["title"]);
+		$this->addItem($title);
+		
+		$description = new ilNonEditableValueGUI("Beschreibung");
+		$description->setValue($this->simulateData()["description"]);
+		$this->addItem($description);
+		
+		$question = new ilNonEditableValueGUI("Fragestellung");
+		$question->setValue($this->simulateData()["question"]);
+		$this->addItem($question);
+		
 		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
-		include_once("$dir/classes/GUI/class.ilAnswerTableGUI.php");
-		$answers = new ilNonEditableValueGUI("Antwortoptionen:");
-		$ao = "";
-		foreach ($this->simulateData() as $answer)
-			$ao .= "\n" . $answer["answer"];
-		$answers->setValue($ao);
-		$group_q->addSubItem($answers);
-		$this->addItem($group_q);
+
+		$answers = $this->createAnswers($this->simulateData()["answers"]);
+		$this->addItem($answers);
+	}
+	
+	private function populateReviewFormPart() {
+		$head_r = new ilFormSectionHeaderGUI();
+		$head_r->setTitle("Review");
+		$this->addItem($head_r);
 		
-		$group_r = new ilRadioGroupInputGUI("Review" ,"group_r");
+		$eva_head = $this->createHead();
+		$this->addItem($eva_head);	
 		
-		$group_ta = new ilRadioGroupInputGUI("Einordnung des Autors" ,"group_ta");
-		$tax = new ilSelectInputGUI("Taxonomiestufe", "tax");
-		$tax->setValue(2);
-		$tax->setOptions( array(
-								0 => "",
-								1 => "Remember",
-								2 => "Understand",
-								3 => "Apply",
-								4 => "Analyze",
-								5 => "Evaluate",
-								6 => "Create",
-							)
-		);
-		$tax->setDisabled(true);
-		$group_ta->addSubItem($tax);
-		$dim = new ilSelectInputGUI("Wissensdimension", "dim");
-		$dim->setValue(3);
-		$dim->setOptions( array(
-								0 => "",
-								1 => "Conceptual",
-								2 => "Factual",
-								3 => "Procedural",
-								4 => "Metacognitive",
-							)
-		);
-		$dim->setDisabled(true);
-		$group_ta->addSubItem($dim);
-		$this->addItem($group_ta);
+		$eva_desc = $this->createAspect("Beschreibung", "d");
+		$this->addItem($eva_desc);
 		
-		$group_tu = new ilRadioGroupInputGUI("Einordnung des Reviewers" ,"group_tu");
-		$tax = new ilSelectInputGUI("Taxonomiestufe", "tax");
-		$tax->setRequired(true);
-		$tax->setValue(0);
-		$tax->setOptions( array(
-								0 => "",
-								1 => "Remember",
-								2 => "Understand",
-								3 => "Apply",
-								4 => "Analyze",
-								5 => "Evaluate",
-								6 => "Create",
-							)
-		);
-		$group_tu->addSubItem($tax);
-		$dim = new ilSelectInputGUI("Wissensdimension", "dim");
-		$dim->setRequired(true);
-		$tax->setValue(0);
-		$dim->setOptions( array(
-								0 => "",
-								1 => "Conceptual",
-								2 => "Factual",
-								3 => "Procedural",
-								4 => "Metacognitive",
-							)
-		);
-		$group_tu->addSubItem($dim);
-		$this->addItem($group_tu);
+		$eva_quest = $this->createAspect("Fragestellung", "q");
+		$this->addItem($eva_quest);
 		
+		$eva_answ = $this->createAspect("Antworten", "a");
+		$this->addItem($eva_answ);
+	}
+	
+	private function populateTaxonomyFormPart() {
+		$head_t = new ilFormSectionHeaderGUI();
+		$head_t->setTitle("Taxonomiestufe und Wissensdimension");
+		$this->addItem($head_t);
+		
+		$cog_a = new ilSelectInputGUI("Taxonomiestufe Autor", "cog_a");
+		$cog_a->setValue($this->simulateData()["cog"]);
+		$cog_a->setOptions($this->cognitiveProcess());
+		$cog_a->setDisabled(true);
+		$this->addItem($cog_a);
+		
+		$kno_a = new ilSelectInputGUI("Wissensdimension Autor", "kno_a");
+		$kno_a->setValue($this->simulateData()["kno"]);
+		$kno_a->setOptions($this->knowledge());
+		$kno_a->setDisabled(true);
+		$this->addItem($kno_a);
+		
+		$cog_r = new ilSelectInputGUI("Taxonomiestufe Reviewer", "cog_r");
+		$cog_r->setRequired(true);
+		$cog_r->setValue(0);
+		$cog_r->setOptions($this->cognitiveProcess());
+		$this->addItem($cog_r);
+		
+		$kno_r = new ilSelectInputGUI("Wissensdimension Reviewer", "kno_r");
+		$kno_r->setRequired(true);
+		$kno_r->setValue(0);
+		$kno_r->setOptions($this->knowledge());
+		$this->addItem($kno_r);
+	}
+		
+	private function populateEvaluationFormPart() {
+		$head_e = new ilFormSectionHeaderGUI();
+		$head_e->setTitle("Bewertung");
+		$this->addItem($head_e);
+
 		$group_e = new ilRadioGroupInputGUI("Urteil" ,"group_e");
 		$op_a = new ilRadioOption("Frage akzeptiert", "1", "");
 		$group_e->addOption($op_a);
@@ -133,32 +139,121 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$op_d = new ilRadioOption("Frage abgelehnt", "3", "");
 		$group_e->addOption($op_d);
 		$this->addItem($group_e);
-		
-		$group_c = new ilRadioGroupInputGUI("Bemerkungen" ,"group_c");
-		$comment = new ilTextAreaInputGUI("Bemerkungen:", "comment");
+
+		$comment = new ilTextAreaInputGUI("Bemerkungen", "comment");
 		$comment->setCols(70);
-		$group_c->addSubItem($comment);
-		$this->addItem($group_c);
+		$comment->setRows(10);
+		$this->addItem($comment);
+	}
 		
-		$group_a = new ilRadioGroupInputGUI("Autor", "group_a");
-		$author = new ilNonEditableValueGUI("Autor:");
-		$author->setValue("Dummy-Autor");
-		$group_a->addSubItem($author);
-		$this->addItem($group_a);
+	private function populateAdditionalData() {
+		$head_a = new ilFormSectionHeaderGUI();
+		$head_a->setTitle("Weitere Informationen");
+		$this->addItem($head_a);
 		
-		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Absenden");
-		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
+		$author = new ilNonEditableValueGUI("Autor der Frage");
+		$author->setValue($this->simulateData()["author"]);
+		$this->addItem($author);
 	}
 	
-	private function simulateData() {
-		$data = array(
-			array("id" => 0, "answer" => "42"),
-			array("id" => 1, "answer" => "zweiundvierzig"),
-			array("id" => 2, "answer" => "forty two")				
-		);
-		return $data;
+	private function createHead() {
+		$eva_head = new ilCustomInputGUI();
+		$html = 
+			'<table border="0" cellpadding="20">
+				<tr>
+					<td align="center" width="130" height="16">Fachl. Richtigkeit</td>
+					<td align="center" width="130">Relevanz</td>
+					<td align="center" width="130">Formulierung</td>
+				</tr>
+			</table>';
+		$eva_head->setHTML($html);
+		return $eva_head;
+	}
+	
+	private function createAspect($aspect, $abbr) {
+		$eva_row = new ilCustomInputGUI();
+		$eva_row->setTitle($aspect);
+		$html = sprintf(
+			'<table border="0" cellpadding="20">
+				<tr>
+					<td align="center" width="130" height="16">
+						<select name="%cc">
+							<option value="nil"></option>
+							<option value="good">gut</option>
+							<option value="correct">Korrektur</option>
+							<option value="refused">ungeeignet</option>
+						</select>
+					</td>
+					<td align="center" width="130">
+						<select name="%cr">
+							<option value="nil"></option>
+							<option value="good">gut</option>
+							<option value="correct">Korrektur</option>
+							<option value="refused">ungeeignet</option>
+						</select>
+					</td>
+					<td align="center" width="130">
+						<select name="%ce">
+							<option value="nil"></option>
+							<option value="good">gut</option>
+							<option value="correct">Korrektur</option>
+							<option value="refused">ungeeignet</option>
+						</select>
+					</td>
+				</tr>
+			</table>',
+			$abbr, $abbr, $abbr
+		);	
+		$eva_row->setHTML($html);
+		return $eva_row;
+	}
+	
+	private function createAnswers($answers) {
+		$answ_list = new ilCustomInputGUI();
+		$answ_list->setTitle("Antwortoptionen");
+		$html = "<ul>";
+		foreach ($answers as $answer)
+			$html .= "<li>" . $answer["answer"] . "</li>";
+		$html .= "</ul>";
+		$answ_list->setHTML($html);
+		return $answ_list;
 	}
 
+	private function simulateData() {
+		$data = array("answers" => array(
+													array("id" => 0, "answer" => "42"),
+													array("id" => 1, "answer" => "zweiundvierzig"),
+													array("id" => 2, "answer" => "forty two")
+												  ),
+						  "title" => "Dummy-Titel",
+						  "question" => "Ist diese Dummy-Frage eine Dummy-Frage?",
+						  "description" => "Dummy-Beschreibung der zu diesem Dummy-Review gehörigen Dummy-Frage",
+						  "author" => "Dummy Autor",
+						  "cog" => 2,
+						  "kno" => 3
+						 );
+		return $data;
+	}
+	
+	private function cognitiveProcess() {
+		return array(0 => "",
+						 1 => "Remember",
+						 2 => "Understand",
+						 3 => "Apply",
+						 4 => "Analyze",
+						 5 => "Evaluate",
+						 6 => "Create",
+						);
+	}
+	
+	private function knowledge() {
+		return array(0 => "",
+						 1 => "Conceptual",
+						 2 => "Factual",
+						 3 => "Procedural",
+						 4 => "Metacognitive",
+						);
+	}
 } 
 
 ?>
