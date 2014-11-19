@@ -51,7 +51,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateEvaluationFormPart();
 		$this->populateAdditionalData();		
 		
-		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Absenden");
+		$this->addCommandButton($ilCtrl->getFormAction($a_parent_cmd), "Absenden");
 		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
 	}
 	
@@ -213,7 +213,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$answ_list->setTitle("Antwortoptionen");
 		$html = "<ul>";
 		foreach ($answers as $answer)
-			$html .= "<li>" . $answer . "</li>";
+			$html .= "<li>" . $answer["answer"] . "</li>";
 		$html .= "</ul>";
 		$answ_list->setHTML($html);
 		return $answ_list;

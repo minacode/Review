@@ -155,8 +155,62 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 		$ilTabs->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
-		$tpl->setContent($this->form->getHTML());
+		$this->initReviewAllocForm();
+		$this->alloc_form->setValuesByPost();
+		$tpl->setContent($this->form->getHTML() . "<br><hr><br>" . $this->alloc_form->getHTML());
+		
+		
+		
+		
 	}
+	
+	public function initReviewAllocForm(){
+		global $ilCtrl;
+		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+		$this->alloc_form = new ilPropertyFormGUI();
+		$this->alloc_form->setTitle($this->txt("reviewer_zuordnung"));
+		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
+		
+		$q1 = new ilSelectInputGUI($this->txt("q1"), "q1");
+		$q1->setRequired(true);
+		$q1->setValue(0);
+		$q1->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		$this->alloc_form->addItem($q1);
+		
+		$q2 = new ilSelectInputGUI($this->txt("q2"), "q2");
+		$q2->setRequired(true);
+		$q2->setValue(0);
+		$q2->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		
+		$this->alloc_form->addItem($q2);
+		$q3 = new ilSelectInputGUI($this->txt("q3"), "q3");
+		$q3->setRequired(true);
+		$q3->setValue(0);
+		$q3->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		$this->alloc_form->addItem($q3);
+		$this->alloc_form->addCommandButton("updateProperties", $this->txt("save"));
+		
+	}
+	
+	
 	
 	/**
 	* Init  form.
@@ -183,6 +237,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 	                
 		$this->form->setTitle($this->txt("edit_properties"));
 		$this->form->setFormAction($ilCtrl->getFormAction($this));
+		
 	}
 	
 	/**
@@ -201,19 +256,35 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 	public function updateProperties()
 	{
 		global $tpl, $lng, $ilCtrl;
+		$submit = false;
 	
 		$this->initPropertiesForm();
-		if ($this->form->checkInput())
-		{
+		if ($this->form->checkInput()) {
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->update();
+			$submit = true;
+		}
+		$this->form->setValuesByPost();
+		
+		$this->initReviewAllocForm();
+		if ($this->alloc_form->checkInput()) {
+			/*
+			/ Wir haben nur Dummy-Daten, nichts wird gespeichert
+			$this->object->setValue($this->alloc_form->getValue("q1"));
+			$this->object->setValue($this->alloc_form->getValue("q2"));
+			$this->object->setValue($this->alloc_form->getValue("q3"));
+			$this->object->update();
+			*/
+			$submit = true;
+		}
+		$this->alloc_form->setValuesByPost();
+		if ($submit) {
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "editProperties");
 		}
-
-		$this->form->setValuesByPost();
-		$tpl->setContent($this->form->getHtml());
+		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());
+		
 	}
 	
 //
@@ -243,7 +314,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 		
 		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		include_once("$dir/classes/GUI/class.ilReviewInputGUI.php");
-		$form = new ilReviewInputGUI($this, "showContent");
+		$form = new ilReviewInputGUI($this, "inputReview");
 		$tpl->setContent($form->getHtml());
 	}
 	

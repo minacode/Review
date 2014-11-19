@@ -51,7 +51,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateEvaluationFormPart();
 		$this->populateAdditionalData();		
 		
-		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Absenden");
+		$this->addCommandButton($ilCtrl->getFormAction($a_parent_obj), "Absenden");
 		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
 	}
 	
