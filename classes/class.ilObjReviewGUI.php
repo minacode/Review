@@ -155,8 +155,59 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 		$ilTabs->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
+		
 		$tpl->setContent($this->form->getHTML());
+		$this->initReviewAllocForm();
+		$tpl->setContent($this->form->getHTML());
+		
+		
+		
+		
 	}
+	
+	public function initReviewAllocForm(){
+		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+		$this->form = new ilPropertyFormGUI();
+		$this->form->setTitle($this->txt("reviewer_zuordnung"));
+		
+		$q1 = new ilSelectInputGUI($this->txt("q1"), "q1");
+		$q1->setRequired(true);
+		$q1->setValue(0);
+		$q1->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		$this->form->addItem($q1);
+		$q2 = new ilSelectInputGUI($this->txt("q2"), "q2");
+		$q2->setRequired(true);
+		$q2->setValue(0);
+		$q2->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		$this->form->addItem($q2);
+		$q3 = new ilSelectInputGUI($this->txt("q3"), "q3");
+		$q3->setRequired(true);
+		$q3->setValue(0);
+		$q3->setOptions( array(
+								0=> "",
+								1=> "Dummy-Reviewer 1",
+								2=> "Dummy-Reviewer 2",
+								3=> "Dummy-Reviewer 3",
+							)
+		);
+		$this->form->addItem($q3);
+		$this->form->addCommandButton("updateProperties", $this->txt("save"));
+		
+	}
+	
+	
 	
 	/**
 	* Init  form.
@@ -183,6 +234,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 	                
 		$this->form->setTitle($this->txt("edit_properties"));
 		$this->form->setFormAction($ilCtrl->getFormAction($this));
+		
 	}
 	
 	/**
@@ -214,6 +266,21 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 
 		$this->form->setValuesByPost();
 		$tpl->setContent($this->form->getHtml());
+		
+		$this->initReviewAllocForm();
+		if ($this->form->checkInput())
+		{
+			$this->object->setValue($this->form->getValue("q1"));
+			$this->object->setValue($this->form->getValue("q2"));
+			$this->object->setValue($this->form->getValue("q3"));
+			$this->object->update();
+			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "editProperties");
+		}
+
+		$this->form->setValuesByPost();
+		$tpl->setContent($this->form->getHtml());
+		
 	}
 	
 //

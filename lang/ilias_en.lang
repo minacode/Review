@@ -25,6 +25,10 @@ properties#:#Properties
 edit_properties#:#Edit Properties
 title#:#Title
 description#:#Description
+reviewer_zuordnung#:#Reviewer allocation
+q1#:#Question 1
+q2#:#Question 2
+q3#:#Question 3
 option_one#:#Option One
 option_two#:#Option Two
 save#:#Save
