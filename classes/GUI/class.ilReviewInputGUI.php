@@ -86,13 +86,13 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$eva_head = $this->createHead();
 		$this->addItem($eva_head);	
 		
-		$eva_desc = $this->createAspect("Beschreibung", "d");
+		$eva_desc = $this->createAspect("Beschreibung", "d", $this->rating());
 		$this->addItem($eva_desc);
 		
-		$eva_quest = $this->createAspect("Fragestellung", "q");
+		$eva_quest = $this->createAspect("Fragestellung", "q", $this->rating());
 		$this->addItem($eva_quest);
 		
-		$eva_answ = $this->createAspect("Antworten", "a");
+		$eva_answ = $this->createAspect("Antworten", "a", $this->rating());
 		$this->addItem($eva_answ);
 	}
 	
@@ -170,7 +170,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		return $eva_head;
 	}
 	
-	private function createAspect($aspect, $abbr) {
+	private function createAspect($aspect, $abbr, $choices) {
 		$eva_row = new ilCustomInputGUI();
 		$eva_row->setTitle($aspect);
 		$html = sprintf(
@@ -178,31 +178,33 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 				<tr>
 					<td align="center" width="130" height="16">
 						<select name="%cc">
-							<option value="nil"></option>
-							<option value="good">gut</option>
-							<option value="correct">Korrektur</option>
-							<option value="refused">ungeeignet</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
 						</select>
 					</td>
 					<td align="center" width="130">
 						<select name="%cr">
-							<option value="nil"></option>
-							<option value="good">gut</option>
-							<option value="correct">Korrektur</option>
-							<option value="refused">ungeeignet</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
 						</select>
 					</td>
 					<td align="center" width="130">
 						<select name="%ce">
-							<option value="nil"></option>
-							<option value="good">gut</option>
-							<option value="correct">Korrektur</option>
-							<option value="refused">ungeeignet</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
+							<option value="%d">%s</option>
 						</select>
 					</td>
 				</tr>
 			</table>',
-			$abbr, $abbr, $abbr
+			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"],
+			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"],
+			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"]
 		);	
 		$eva_row->setHTML($html);
 		return $eva_row;
@@ -212,8 +214,12 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$answ_list = new ilCustomInputGUI();
 		$answ_list->setTitle("Antwortoptionen");
 		$html = "<ul>";
-		foreach ($answers as $answer)
-			$html .= "<li>" . $answer["answer"] . "</li>";
+		foreach ($answers as $answer) {
+			if ($answer["correct"])
+				$html .= "<li>" . $answer["answer"] . " <i>(korrekt)</i>" . "</li>";
+			else
+				$html .= "<li>" . $answer["answer"] . " <i>(falsch)</i>" . "</li>";
+		}
 		$html .= "</ul>";
 		$answ_list->setHTML($html);
 		return $answ_list;
@@ -221,9 +227,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 
 	private function simulateData() {
 		$data = array("answers" => array(
-													array("id" => 0, "answer" => "42"),
-													array("id" => 1, "answer" => "zweiundvierzig"),
-													array("id" => 2, "answer" => "forty two")
+													array("id" => 0, "answer" => "42", "correct" => 1),
+													array("id" => 1, "answer" => "zweiundvierzig", "correct" => 0),
+													array("id" => 2, "answer" => "forty two", "correct" => 0)
 												  ),
 						  "title" => "Dummy-Titel",
 						  "question" => "Ist diese Dummy-Frage eine Dummy-Frage?",
@@ -252,6 +258,14 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 						 2 => "Factual",
 						 3 => "Procedural",
 						 4 => "Metacognitive",
+						);
+	}
+	
+	private function rating() {
+		return array(0 => "",
+						 1 => "gut",
+						 2 => "Korrektur",
+						 3 => "ungeeignet",
 						);
 	}
 } 
