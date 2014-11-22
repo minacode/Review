@@ -168,7 +168,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 		global $ilCtrl;
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$this->alloc_form = new ilPropertyFormGUI();
-		$this->alloc_form->setTitle($this->txt("reviewer_zuordnung"));
+		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
 		
 		$q1 = new ilSelectInputGUI($this->txt("q1"), "q1");
@@ -269,6 +269,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 		
 		$this->initReviewAllocForm();
 		if ($this->alloc_form->checkInput()) {
+			if (!($_POST["q1"] || $_POST["q2"] || $_POST["q3"])) die();
 			/*
 			/ Wir haben nur Dummy-Daten, nichts wird gespeichert
 			$this->object->setValue($this->alloc_form->getValue("q1"));

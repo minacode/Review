@@ -25,10 +25,10 @@ properties#:#Properties
 edit_properties#:#Edit Properties
 title#:#Title
 description#:#Description
-reviewer_allocation#:#Reviewer allocation
-q1#:#Question 1
-q2#:#Question 2
-q3#:#Question 3
+rep_robj_xrev_reviewer_zuordnung#:#Reviewer allocation
+rep_robj_xrev_q1#:#Question 1
+rep_robj_xrev_q2#:#Question 2
+rep_robj_xrev_q3#:#Question 3
 option_one#:#Option One
 option_two#:#Option Two
 save#:#Save
