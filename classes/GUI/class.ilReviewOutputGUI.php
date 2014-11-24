@@ -21,40 +21,35 @@
 	+-----------------------------------------------------------------------------+
 */
 
-
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilReviewInputGUI.php";
 
-/**
-* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
-*
-* $Id$
-*/
-
-class ilReviewTableGUI extends ilTable2GUI {
-
+class ilReviewOutputGUI extends ilTable2GUI {
+	
 	public function __construct($a_parent_obj, $a_parent_cmd) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn("Titel der Frage", "", "30%");
-		$this->addColumn("Autor der Frage", "", "40%");
-      $this->addColumn("Aktion", "", "30%");
-      $this->setEnableHeader(true);
-      $this->setFormAction($ilCtrl->getFormAction($this->getParentObject(), 'showContent'));
-     	$this->setRowTemplate("tpl.review_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
+		$this->addColumn("Reviews", "", "100%");
+      $this->setEnableHeader(false);
+      $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+     	$this->setRowTemplate("tpl.output_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       
       $this->simulateData();
  
-      $this->setTitle("Meine Reviews");
+      $this->setTitle("Reviews zu dieser Frage");
 	}
 	
 	private function simulateData() {
-		$data = array(
-			array("id" => 0, "title" => "Dummy 1 [neu]", "author" => "Hans Wurst", "completed" => 0),
-			array("id" => 1, "title" => "Dummy 2 [auch unbearbeitet]", "author" => "Random Name", "completed" => 0),
-			array("id" => 2, "title" => "Dummy 3 [fertiggestellt]", "author" => "Max Mustermann", "completed" => 1)				
-		);
+		$data = array();
+		$rev1 = new ilReviewInputGUI($this, "");
+		$rev1->setReadOnly();
+		$data[] = array("id" => 0, "review" => $rev1->getHTML());
+		$rev2 = new ilReviewInputGUI($this, "");
+		$rev2->setReadOnly();
+		$data[] = array("id" => 1, "review" => $rev2->getHTML());
 		$this->setData($data);
 	}
 	
@@ -63,17 +58,6 @@ class ilReviewTableGUI extends ilTable2GUI {
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
-		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
-		$this->tpl->setVariable("TXT_AUTHOR", $a_set["author"]);
-		if ($a_set["completed"]) {
-			$this->tpl->setVariable("TXT_ACTION", "Ansehen");
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
-		}
-		else {
-			$this->tpl->setVariable("TXT_ACTION", "Erstellen");
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->forwardCommand(new ilReviewInputGUI($this->getParentObject(), "inputReview")));
-		}
+		$this->tpl->setVariable("TXT_REVIEW", $a_set["review"]);
 	}
 }
-
-?>

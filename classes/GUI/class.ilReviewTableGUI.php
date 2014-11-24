@@ -39,7 +39,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 		$this->addColumn("Autor der Frage", "", "40%");
       $this->addColumn("Aktion", "", "30%");
       $this->setEnableHeader(true);
-      $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+      $this->setFormAction($ilCtrl->getFormAction($this->getParentObject(), 'showContent'));
      	$this->setRowTemplate("tpl.review_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
@@ -67,7 +67,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 		$this->tpl->setVariable("TXT_AUTHOR", $a_set["author"]);
 		if ($a_set["completed"]) {
 			$this->tpl->setVariable("TXT_ACTION", "Ansehen");
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showContent"));
+			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
 		}
 		else {
 			$this->tpl->setVariable("TXT_ACTION", "Erstellen");

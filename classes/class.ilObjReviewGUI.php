@@ -23,6 +23,8 @@
 
 
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilReviewOutputGUI.php";
 
 /**
 * User Interface class for Review repository object.
@@ -40,7 +42,7 @@ include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI
+* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI
 *
 */
 class ilObjReviewGUI extends ilObjectPluginGUI
@@ -85,6 +87,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 				break;
 				
 			case "inputReview":
+			case "showReviews":
 			//Write Access für User prüfen
 			 	$this->$cmd();
 				break;
@@ -311,12 +314,23 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 	}
 	
 	public function inputReview() {
+		global $ilCtrl, $tpl, $ilTabs;		
+		$ilTabs->activateTab("content");
+		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
+		include_once("$dir/classes/GUI/class.ilReviewInputGUI.php");
+		//$ilCtrl->setReturn($this, "showContent");
+		$form = new ilReviewInputGUI($this, "showContent");
+		$tpl->setContent($form->getHTML());
+      //$ret = $ilCtrl->forwardCommand($form);
+	}
+	
+	public function showReviews() {
 		global $tpl;		
 		
 		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
-		include_once("$dir/classes/GUI/class.ilReviewInputGUI.php");
-		$form = new ilReviewInputGUI($this, "inputReview");
-		$tpl->setContent($form->getHtml());
+		include_once("$dir/classes/GUI/class.ilReviewOutputGUI.php");
+		$tbl = new ilReviewOutputGUI($this, "showReviews");
+		$tpl->setContent($tbl->getHtml());
 	}
 	
 

@@ -24,6 +24,12 @@
 
 include_once 'Services/Form/classes/class.ilPropertyFormGUI.php';
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilAspectSelectInputGUI.php";
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilAspectHeadGUI.php";
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilAspectListGUI.php";
 
 /**
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
@@ -43,7 +49,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->a_parent_cmd = $a_parent_cmd;
 		
 		$this->setTitle("Review-Eingabeformular");
-		$this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
 		
 		$this->populateQuestionFormPart();
 		$this->populateReviewFormPart();
@@ -51,7 +57,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateEvaluationFormPart();
 		$this->populateAdditionalData();		
 		
-		$this->addCommandButton($ilCtrl->getFormAction($a_parent_obj), "Absenden");
+		$this->addCommandButton($ilCtrl->getFormAction($this), "Abbrechen");
 		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
 	}
 	
@@ -71,10 +77,8 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$question = new ilNonEditableValueGUI("Fragestellung");
 		$question->setValue($this->simulateData()["question"]);
 		$this->addItem($question);
-		
-		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 
-		$answers = $this->createAnswers($this->simulateData()["answers"]);
+		$answers = new ilAspectListGUI("Antworten", $this->simulateData()["answers"]);
 		$this->addItem($answers);
 	}
 	
@@ -83,83 +87,58 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$head_r->setTitle("Review");
 		$this->addItem($head_r);
 		
-		$eva_head = $this->createEvaluationHead();
-		$this->addItem($eva_head);	
+		$head = new ilAspectHeadGUI(array("Fachl. Richtigkeit", "Relevanz", "Formulierung"));
+		$this->addItem($head);
 		
-		$eva_desc = $this->createEvaluationAspect("Beschreibung", "d", $this->rating());
-		$this->addItem($eva_desc);
+		$desc = new ilAspectSelectInputGUI("Beschreibung", array("dc" => array("options" => $this->rating(),
+																									  "selected" => 0),
+																					"dr" => array("options" => $this->rating(),
+																									  "selected" => 0),
+																					"de" => array("options" => $this->rating(),
+																									  "selected" => 0)),
+													  false);
+		$this->addItem($desc);
 		
-		$eva_quest = $this->createEvaluationAspect("Fragestellung", "q", $this->rating());
-		$this->addItem($eva_quest);
+		$quest = new ilAspectSelectInputGUI("Fragestellung", array("qc" => array("options" => $this->rating(),
+																										 "selected" => 0),
+																					  "qr" => array("options" => $this->rating(),
+																										 "selected" => 0),
+																					  "qe" => array("options" => $this->rating(),
+																										 "selected" => 0)),
+													  false);
+		$this->addItem($quest);
 		
-		$eva_answ = $this->createEvaluationAspect("Antworten", "a", $this->rating());
-		$this->addItem($eva_answ);
+		$answ = new ilAspectSelectInputGUI("Antworten", array("ac" => array("options" => $this->rating(),
+																								  "selected" => 0),
+																				"ar" => array("options" => $this->rating(),
+																								  "selected" => 0),
+																				"ae" => array("options" => $this->rating(),
+																								  "selected" => 0)),
+													  false);
+		$this->addItem($answ);
 	}
 	
 	private function populateTaxonomyFormPart() {
 		$head_t = new ilFormSectionHeaderGUI();
 		$head_t->setTitle("Taxonomiestufe und Wissensdimension");
 		$this->addItem($head_t);
-		/*
-		$tax_head = $this->createTaxonomyHead();
-		$this->addItem($tax_head);
-		*/
 		
-		$head_1 = new ilNonEditableValueGUI("Taxonomiestufe");
-		$head_1->setValue("Taxonomiestufe");
-		$head_2 = new ilNonEditableValueGUI("Wissensdimension");
-		$head_2->setValue("Wissensdimension");
-		$head_tpl = new ilTemplate("tpl.aspect_row.html", true, true, ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
-		foreach (array($head_1, $head_2) as $part) {
-			$part->insert($head_tpl);		
-		}
-		$head = new ilCustomInputGUI();
-		$head->setHTML($head_tpl->get());
-		$this->addItem($head);	
+		$head = new ilAspectHeadGUI(array("Taxonomiestufe", "Wissensdimension"));
+		$this->addItem($head);
 		
-		$cog_a = new ilSelectInputGUI("Taxonomiestufe Autor", "cog_a");
-		$cog_a->setValue($this->simulateData()["cog"]);
-		$cog_a->setOptions($this->cognitiveProcess());
-		$cog_a->setDisabled(true);
-		//$this->addItem($cog_a);
+		$auth = new ilAspectSelectInputGUI("Autor", array("cog_a" => array("options" => $this->cognitiveProcess(),
+																								 "selected" => $this->simulateData()["cog"]),
+																		  "kno_a" => array("options" => $this->knowledge(),
+																								 "selected" => $this->simulateData()["kno"])),
+													  true);
+		$this->addItem($auth);
 		
-		$kno_a = new ilSelectInputGUI("Wissensdimension Autor", "kno_a");
-		$kno_a->setValue($this->simulateData()["kno"]);
-		$kno_a->setOptions($this->knowledge());
-		$kno_a->setDisabled(true);
-		//$this->addItem($kno_a);
-		
-		$tax_a_tpl = new ilTemplate("tpl.aspect_row.html", true, true, ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
-		foreach (array($cog_a, $kno_a) as $part) {
-			$part->insert($tax_a_tpl);		
-		}
-		
-		$tax_a = new ilCustomInputGUI();
-		$tax_a->setTitle("Autor");
-		$tax_a->setHTML($tax_a_tpl->get());
-		$this->addItem($tax_a);
-		
-		$cog_r = new ilSelectInputGUI("Taxonomiestufe Reviewer", "cog_r");
-		$cog_r->setRequired(true);
-		$cog_r->setValue(0);
-		$cog_r->setOptions($this->cognitiveProcess());
-		//$this->addItem($cog_r);
-		
-		$kno_r = new ilSelectInputGUI("Wissensdimension Reviewer", "kno_r");
-		$kno_r->setRequired(true);
-		$kno_r->setValue(0);
-		$kno_r->setOptions($this->knowledge());
-		//$this->addItem($kno_r);
-		
-		$tax_r_tpl = new ilTemplate("tpl.aspect_row.html", true, true, ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
-		foreach (array($cog_r, $kno_r) as $part) {
-			$part->insert($tax_r_tpl);		
-		}
-		
-		$tax_r = new ilCustomInputGUI();
-		$tax_r->setTitle("Reviewer");
-		$tax_r->setHTML($tax_r_tpl->get());
-		$this->addItem($tax_r);
+		$revi = new ilAspectSelectInputGUI("Reviewer", array("cog_r" => array("options" => $this->cognitiveProcess(),
+																									 "selected" => 0),
+																		  	  "kno_r" => array("options" => $this->knowledge(),
+																									 "selected" => 0)),
+													  false);
+		$this->addItem($revi);
 		
 	}
 		
@@ -181,6 +160,11 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$comment->setCols(70);
 		$comment->setRows(10);
 		$this->addItem($comment);
+		
+		$expertise = new ilSelectInputGUI("Expertise", "exp");
+		$expertise->setValue(0);
+		$expertise->setOptions($this->expertise());
+		$this->addItem($expertise);
 	}
 		
 	private function populateAdditionalData() {
@@ -191,121 +175,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$author = new ilNonEditableValueGUI("Autor der Frage");
 		$author->setValue($this->simulateData()["author"]);
 		$this->addItem($author);
-	}
-	
-	private function createEvaluationHead() {
-		$eva_head = new ilCustomInputGUI();
-		$html = 
-			'<table border="0">
-				<tr>
-					<td align="center" width="130" height="16">Fachl. Richtigkeit</td>
-					<td align="center" width="130">Relevanz</td>
-					<td align="center" width="130">Formulierung</td>
-				</tr>
-			</table>';
-		$eva_head->setHTML($html);
-		return $eva_head;
-	}
-	
-	private function createEvaluationAspect($aspect, $abbr, $choices) {
-		$eva_row = new ilCustomInputGUI();
-		$eva_row->setTitle($aspect);
-		$html = sprintf(
-			'<table border="0">
-				<tr>
-					<td align="center" width="130" height="16">
-						<select name="%cc">
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-						</select>
-					</td>
-					<td align="center" width="130">
-						<select name="%cr">
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-						</select>
-					</td>
-					<td align="center" width="130">
-						<select name="%ce">
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-						</select>
-					</td>
-				</tr>
-			</table>',
-			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"],
-			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"],
-			$abbr, 0, $choices["0"], 1, $choices["1"], 2, $choices["2"], 3, $choices["3"]
-		);	
-		$eva_row->setHTML($html);
-		return $eva_row;
-	}
-	
-	private function createTaxonomyHead() {
-		$tax_head = new ilCustomInputGUI();
-		$html = 
-			'<table border="0">
-				<tr>
-					<td align="center" width="130" height="16">Taxonomiestufe</td>
-					<td align="center" width="130">Wissensdimension</td>
-				</tr>
-			</table>';
-		$tax_head->setHTML($html);
-		return $tax_head;
-	}
-	
-	private function createTaxonomyAspect($aspect, $abbr, $cog, $kno) {
-		$tax_row = new ilCustomInputGUI();
-		$row_row->setTitle($aspect);
-		$html = sprintf(
-			'<table border="0">
-				<tr>
-					<td align="center" width="130" height="16">
-						<select name="cog_%c">
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-						</select>
-					</td>
-					<td align="center" width="130">
-						<select name="kno_%c">
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-							<option value="%d">%s</option>
-						</select>
-					</td>
-				</tr>
-			</table>',
-			$abbr, 0, $cog["0"], 1, $cog["1"], 2, $cog["2"], 3, $cog["3"], 4, $cog["4"], 5, $cog["5"],
-			$abbr, 0, $kno["0"], 1, $kno["1"], 2, $kno["2"], 3, $kno["3"]
-		);	
-		$tax_row->setHTML($html);
-		return $tax_row;
-	}
-	
-	private function createAnswers($answers) {
-		$answ_list = new ilCustomInputGUI();
-		$answ_list->setTitle("Antwortoptionen");
-		$html = "<ul>";
-		foreach ($answers as $answer) {
-			if ($answer["correct"])
-				$html .= "<li>" . $answer["answer"] . " <i>(korrekt)</i>" . "</li>";
-			else
-				$html .= "<li>" . $answer["answer"] . " <i>(falsch)</i>" . "</li>";
-		}
-		$html .= "</ul>";
-		$answ_list->setHTML($html);
-		return $answ_list;
 	}
 
 	private function simulateData() {
@@ -350,6 +219,22 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 						 2 => "Korrektur",
 						 3 => "ungeeignet",
 						);
+	}
+	
+	private function expertise() {
+		return array(0 => "",
+						 1 => "No familiarity",
+						 2 => "Some familiarity",
+						 3 => "Knowledgeable",
+						 4 => "Expert"
+						);
+	}
+	
+	public function setReadOnly() {
+		foreach ($this->getItems() as $item)
+			if (method_exists($item, "setDisabled"))
+				$item->setDisabled(true);
+		$this->clearCommandButtons();
 	}
 } 
 

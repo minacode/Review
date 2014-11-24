@@ -67,7 +67,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
 		$this->tpl->setVariable("TXT_QUESTION", $a_set["question"]);
 		if (!$a_set["state"]) {
 			$this->tpl->setVariable("TXT_ACTION", "Reviews anfordern");
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "inputReview"));
+			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showContent"));
 		}
 		else {
 			$this->tpl->setVariable("TXT_ACTION", "Reviews einsehen");

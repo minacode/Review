@@ -16,6 +16,6 @@ $ilDB->addPrimaryKey("rep_robj_xrev_revobj", array("id"));
 ?>
 <#3>
 <?php
-// global $ilCtrlStructureReader;
-// $ilCtrlStructureReader->getStructure();
+global $ilCtrlStructureReader;
+$ilCtrlStructureReader->getStructure();
 ?>
