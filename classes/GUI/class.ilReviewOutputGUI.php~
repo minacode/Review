@@ -23,7 +23,7 @@
 
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewOutputGUI.php";
+				 "/classes/GUI/class.ilReviewInputGUI.php";
 
 class ilReviewOutputGUI extends ilTable2GUI {
 	
@@ -32,11 +32,12 @@ class ilReviewOutputGUI extends ilTable2GUI {
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		$this->addColumn("Reviews", "", "100%");
       $this->setEnableHeader(false);
-      $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+      $this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
      	$this->setRowTemplate("tpl.output_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
-      
+      $this->setShowTopButtons(false);
+      $this->addCommandButton($ilCtrl->getFormAction($this), "Zurück");
       $this->simulateData();
  
       $this->setTitle("Reviews zu dieser Frage");

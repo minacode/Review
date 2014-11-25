@@ -25,6 +25,8 @@
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewOutputGUI.php";
+include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilReviewInputGUI.php";
 
 /**
 * User Interface class for Review repository object.
@@ -209,7 +211,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 							)
 		);
 		$this->alloc_form->addItem($q3);
-		$this->alloc_form->addCommandButton("updateProperties", $this->txt("save"));
+		$this->alloc_form->addCommandButton("updateProperties", "Reviews anfordern");
 		
 	}
 	
@@ -314,21 +316,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI
 	}
 	
 	public function inputReview() {
-		global $ilCtrl, $tpl, $ilTabs;		
+		global $tpl, $ilTabs;		
 		$ilTabs->activateTab("content");
-		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
-		include_once("$dir/classes/GUI/class.ilReviewInputGUI.php");
-		//$ilCtrl->setReturn($this, "showContent");
 		$form = new ilReviewInputGUI($this, "showContent");
 		$tpl->setContent($form->getHTML());
-      //$ret = $ilCtrl->forwardCommand($form);
 	}
 	
 	public function showReviews() {
-		global $tpl;		
-		
-		$dir = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
-		include_once("$dir/classes/GUI/class.ilReviewOutputGUI.php");
+		global $tpl, $ilTabs;		
+		$ilTabs->activateTab("content");
 		$tbl = new ilReviewOutputGUI($this, "showReviews");
 		$tpl->setContent($tbl->getHtml());
 	}
