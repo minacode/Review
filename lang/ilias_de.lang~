@@ -25,7 +25,7 @@ properties#:#Properties
 edit_properties#:#Edit Properties
 title#:#Title
 description#:#Description
-reviewer_zuordnung#:#Reviewer Zuordnung
+reviewer_allocation#:#Reviewer Zuordnung
 q1#:#Frage 1
 q2#:#Frage 2
 q3#:#Frage 3
@@ -40,3 +40,17 @@ Review_plugin_configuration#:#Exampl Plugin Configuration
 setting_1#:#Setting 1
 setting_2#:#Setting 2
 saving_invoked#:#Save procedure has been executed. Please note that this Review does not save anything to DB.
+request#:#Reviews anfordern
+action#:#Aktion
+title_quest#:#Titel der Frage
+my_reviews#:#Meinse Reviews
+my_questions#:#Meine Fragen
+review_output#:#Aktuelle Reviews zu dieser Frage
+reviews#:#Reviews
+back#:#Zurück
+question#:#Frage
+review#:#Review
+answers#:#Antworten
+rep_robj_xrev_correctness#:#Fachl. Richtigkeit
+relevance#:#Relevanz
+expression#:#Formulierung

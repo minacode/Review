@@ -42,7 +42,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_cmd;
 	
 	public function __construct($a_parent_obj, $a_parent_cmd) {
-		global $ilCtrl;
+		global $ilCtrl, $lng;
 		parent::__construct();
 		
 		$this->a_parent_obj = $a_parent_obj;
@@ -57,68 +57,71 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateEvaluationFormPart();
 		$this->populateAdditionalData();		
 		
-		$this->addCommandButton($ilCtrl->getFormAction($this));
+		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("cancel"));
 		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
 	}
 	
 	private function populateQuestionFormPart() {
+		global $lng;
 		$head_q = new ilFormSectionHeaderGUI();
-		$head_q->setTitle("Frage");
+		$head_q->setTitle($lng->txt("question"));
 		$this->addItem($head_q);
 		
-		$title = new ilNonEditableValueGUI("Titel");
+		$title = new ilNonEditableValueGUI($lng->txt("title"));
 		$title->setValue($this->simulateData()["title"]);
 		$this->addItem($title);
 		
-		$description = new ilNonEditableValueGUI("Beschreibung");
+		$description = new ilNonEditableValueGUI($lng->txt("description"));
 		$description->setValue($this->simulateData()["description"]);
 		$this->addItem($description);
 		
-		$question = new ilNonEditableValueGUI("Fragestellung");
+		$question = new ilNonEditableValueGUI($lng->txt("question"));
 		$question->setValue($this->simulateData()["question"]);
 		$this->addItem($question);
 
-		$answers = new ilAspectListGUI("Antworten", $this->simulateData()["answers"]);
+		$answers = new ilAspectListGUI($lng->txt("answers"), $this->simulateData()["answers"]);
 		$this->addItem($answers);
 	}
 	
 	private function populateReviewFormPart() {
+		global $lng;
 		$head_r = new ilFormSectionHeaderGUI();
-		$head_r->setTitle("Review");
+		$head_r->setTitle($lng->txt("review"));
 		$this->addItem($head_r);
 		
-		$head = new ilAspectHeadGUI(array("Fachl. Richtigkeit", "Relevanz", "Formulierung"));
+		$head = new ilAspectHeadGUI(array($lng->txt("rep_robj_xrev_correctness"), $lng->txt("relevance"), $lng->txt("expression")));
 		$this->addItem($head);
 		
-		$desc = new ilAspectSelectInputGUI("Beschreibung", array("dc" => array("options" => $this->rating(),
-																									  "selected" => 0),
-																					"dr" => array("options" => $this->rating(),
-																									  "selected" => 0),
-																					"de" => array("options" => $this->rating(),
-																									  "selected" => 0)),
+		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->rating(),
+																													"selected" => 0),
+																								 "dr" => array("options" => $this->rating(),
+																												  "selected" => 0),
+																								 "de" => array("options" => $this->rating(),
+																												  "selected" => 0)),
 													  false);
 		$this->addItem($desc);
 		
-		$quest = new ilAspectSelectInputGUI("Fragestellung", array("qc" => array("options" => $this->rating(),
-																										 "selected" => 0),
-																					  "qr" => array("options" => $this->rating(),
-																										 "selected" => 0),
-																					  "qe" => array("options" => $this->rating(),
-																										 "selected" => 0)),
+		$quest = new ilAspectSelectInputGUI($lng->txt("question"), array("qc" => array("options" => $this->rating(),
+																										 		 "selected" => 0),
+																					 		  "qr" => array("options" => $this->rating(),
+																												 "selected" => 0),
+																							  "qe" => array("options" => $this->rating(),
+																												 "selected" => 0)),
 													  false);
 		$this->addItem($quest);
 		
-		$answ = new ilAspectSelectInputGUI("Antworten", array("ac" => array("options" => $this->rating(),
-																								  "selected" => 0),
-																				"ar" => array("options" => $this->rating(),
-																								  "selected" => 0),
-																				"ae" => array("options" => $this->rating(),
-																								  "selected" => 0)),
+		$answ = new ilAspectSelectInputGUI($lng->txt("answers"), array("ac" => array("options" => $this->rating(),
+																											  "selected" => 0),
+																							"ar" => array("options" => $this->rating(),
+																											  "selected" => 0),
+																							"ae" => array("options" => $this->rating(),
+																											  "selected" => 0)),
 													  false);
 		$this->addItem($answ);
 	}
 	
 	private function populateTaxonomyFormPart() {
+		global $lng;
 		$head_t = new ilFormSectionHeaderGUI();
 		$head_t->setTitle("Taxonomiestufe und Wissensdimension");
 		$this->addItem($head_t);
@@ -143,6 +146,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	}
 		
 	private function populateEvaluationFormPart() {
+		global $lng;
 		$head_e = new ilFormSectionHeaderGUI();
 		$head_e->setTitle("Bewertung");
 		$this->addItem($head_e);
@@ -168,6 +172,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	}
 		
 	private function populateAdditionalData() {
+		global $lng;
 		$head_a = new ilFormSectionHeaderGUI();
 		$head_a->setTitle("Weitere Informationen");
 		$this->addItem($head_a);

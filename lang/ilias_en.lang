@@ -40,3 +40,17 @@ Review_plugin_configuration#:#Exampl Plugin Configuration
 setting_1#:#Setting 1
 setting_2#:#Setting 2
 saving_invoked#:#Save procedure has been executed. Please note that this Review does not save anything to DB.
+request#:#Request reviews
+action#:#Action
+title_quest#:#Title of question
+my_reviews#:#My reviews
+my_questions#:#My questions
+review_output#:#Current reviews for that question
+reviews#:#Reviews
+back#:#Back
+question#:#Question
+review#:#Review
+answers#:#Answers
+correctness#:#Correctness
+relevance#:#Relevance
+expression#:#Expression

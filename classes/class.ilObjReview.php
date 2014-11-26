@@ -30,15 +30,13 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 *
 * $Id$
 */
-class ilObjReview extends ilObjectPlugin
-{
+class ilObjReview extends ilObjectPlugin {
 	/**
 	* Constructor
 	*
 	* @access	public
 	*/
-	function __construct($a_ref_id = 0)
-	{
+	function __construct($a_ref_id = 0) {
 		parent::__construct($a_ref_id);
 	}
 	
@@ -46,16 +44,14 @@ class ilObjReview extends ilObjectPlugin
 	/**
 	* Get type.
 	*/
-	final function initType()
-	{
+	final function initType() {
 		$this->setType("xrev");
 	}
 	
 	/**
 	* Create object
 	*/
-	function doCreate()
-	{
+	function doCreate() {
 		global $ilDB;
 		
 		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
@@ -67,32 +63,27 @@ class ilObjReview extends ilObjectPlugin
 	/**
 	* Read data from db
 	*/
-	function doRead()
-	{
+	function doRead() {
 		global $ilDB;
 		
 		$set = $ilDB->query("SELECT * FROM rep_robj_xrev_revobj ".
 			" WHERE id = ".$ilDB->quote($this->getId(), "integer")
 			);
-		while ($rec = $ilDB->fetchAssoc($set))
-		{
+		while ($rec = $ilDB->fetchAssoc($set)) {
 		}
 	}
 	
 	/**
 	* Update data
 	*/
-	function doUpdate()
-	{
+	function doUpdate() {
 		global $ilDB;
-		
 	}
 	
 	/**
 	* Delete data from db
 	*/
-	function doDelete()
-	{
+	function doDelete() {
 		global $ilDB;
 		
 		$ilDB->manipulate("DELETE FROM rep_robj_xrev_revobj WHERE ".
@@ -104,12 +95,10 @@ class ilObjReview extends ilObjectPlugin
 	/**
 	* Do Cloning
 	*/
-	function doClone($a_target_id,$a_copy_id,$new_obj)
-	{
+	function doClone($a_target_id,$a_copy_id,$new_obj) {
 		global $ilDB;
 		
 		$new_obj->update();
-	}
-	
+	}	
 }
 ?>

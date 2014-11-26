@@ -71,7 +71,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 		}
 		else {
 			$this->tpl->setVariable("TXT_ACTION", "Erstellen");
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->forwardCommand(new ilReviewInputGUI($this->getParentObject(), "inputReview")));
+			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "inputReview"));
 		}
 	}
 }

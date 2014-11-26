@@ -21,44 +21,78 @@
 	+-----------------------------------------------------------------------------+
 */
 
-include_once 'Services/Table/classes/class.ilTable2GUI.php';
-include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewInputGUI.php";
+include_once "./Services/Repository/classes/class.ilObjectPluginListGUI.php";
 
-class ilReviewOutputGUI extends ilTable2GUI {
+/**
+* ListGUI implementation for Review object plugin. This one
+* handles the presentation in container items (categories, courses, ...)
+* together with the corresponding ...Access class.
+*
+* PLEASE do not create instances of larger classes here. Use the
+* ...Access class to get DB data and keep it small.
+*
+* @author 		Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+*/
+class ilObjReviewListGUI extends ilObjectPluginListGUI
+{
 	
-	public function __construct($a_parent_obj, $a_parent_cmd) {
-		global $ilCtrl, $lng;
-		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn("Reviews", "", "100%");
-      $this->setEnableHeader(false);
-      $this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
-     	$this->setRowTemplate("tpl.output_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
-      $this->setDefaultOrderField("id");
-      $this->setDefaultOrderDirection("asc");
-      $this->setTopCommands(false);
-      $this->addCommandButton($ilCtrl->getFormAction($this), "Zurück");
-      $this->simulateData();
- 
-      $this->setTitle("Reviews zu dieser Frage");
-	}
-	
-	private function simulateData() {
-		$data = array();
-		$rev1 = new ilReviewInputGUI($this, "");
-		$rev1->setReadOnly();
-		$data[] = array("id" => 0, "review" => $rev1->getHTML());
-		$rev2 = new ilReviewInputGUI($this, "");
-		$rev2->setReadOnly();
-		$data[] = array("id" => 1, "review" => $rev2->getHTML());
-		$this->setData($data);
-	}
-	
-	/*
-	* Fill a single data row
+	/**
+	* Init type
 	*/
-	protected function fillRow($a_set) {
-		global $ilCtrl, $lng;
-		$this->tpl->setVariable("TXT_REVIEW", $a_set["review"]);
+	function initType()
+	{
+		$this->setType("xrev");
+	}
+	
+	/**
+	* Get name of gui class handling the commands
+	*/
+	function getGuiClass()
+	{
+		return "ilObjReviewGUI";
+	}
+	
+	/**
+	* Get commands
+	*/
+	function initCommands()
+	{
+		return array
+		(
+			array(
+				"permission" => "read",
+				"cmd" => "showContent",
+				"default" => true),
+			array(
+				"permission" => "write",
+				"cmd" => "editProperties",
+				"txt" => $this->txt("edit"),
+				"default" => false),
+		);
+	}
+
+	/**
+	* Get item properties
+	*
+	* @return	array		array of property arrays:
+	*						"alert" (boolean) => display as an alert property (usually in red)
+	*						"property" (string) => property name
+	*						"value" (string) => property value
+	*/
+	function getProperties()
+	{
+		global $lng, $ilUser;
+
+		$props = array();
+		
+		$this->plugin->includeClass("class.ilObjReviewAccess.php");
+		if (!ilObjReviewAccess::checkOnline($this->obj_id))
+		{
+			$props[] = array("alert" => true, "property" => $this->txt("status"),
+				"value" => $this->txt("offline"));
+		}
+
+		return $props;
 	}
 }
+?>

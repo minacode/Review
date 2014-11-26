@@ -33,32 +33,27 @@ include_once "./Services/Repository/classes/class.ilObjectPluginListGUI.php";
 *
 * @author 		Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 */
-class ilObjReviewListGUI extends ilObjectPluginListGUI
-{
+class ilObjReviewListGUI extends ilObjectPluginListGUI {
 	
 	/**
 	* Init type
 	*/
-	function initType()
-	{
+	function initType() {
 		$this->setType("xrev");
 	}
 	
 	/**
 	* Get name of gui class handling the commands
 	*/
-	function getGuiClass()
-	{
+	function getGuiClass() {
 		return "ilObjReviewGUI";
 	}
 	
 	/**
 	* Get commands
 	*/
-	function initCommands()
-	{
-		return array
-		(
+	function initCommands() {
+		return array(
 			array(
 				"permission" => "read",
 				"cmd" => "showContent",
@@ -79,8 +74,7 @@ class ilObjReviewListGUI extends ilObjectPluginListGUI
 	*						"property" (string) => property name
 	*						"value" (string) => property value
 	*/
-	function getProperties()
-	{
+	function getProperties() {
 		global $lng, $ilUser;
 
 		$props = array();

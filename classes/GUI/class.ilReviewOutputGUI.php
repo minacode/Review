@@ -30,17 +30,17 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	public function __construct($a_parent_obj, $a_parent_cmd) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn("Reviews", "", "100%");
+		$this->addColumn($lng->txt("reviews"), "", "100%");
       $this->setEnableHeader(false);
       $this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
      	$this->setRowTemplate("tpl.output_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       $this->setTopCommands(false);
-      $this->addCommandButton($ilCtrl->getFormAction($this), "Zurück");
+      $this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("back"));
       $this->simulateData();
  
-      $this->setTitle("Reviews zu dieser Frage");
+      $this->setTitle($lng->txt("review_output"));
 	}
 	
 	private function simulateData() {
@@ -56,6 +56,8 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	
 	/*
 	* Fill a single data row
+	*
+	* @param	array		$a_set		Data record (1 review), displayed as one table row
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;

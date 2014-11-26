@@ -35,9 +35,8 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	public function __construct($a_parent_obj, $a_parent_cmd) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn("Titel", "", "30%");
-		$this->addColumn("Fragestellung", "", "40%");
-      $this->addColumn("Aktion", "", "30%");
+		$this->addColumn($lng->txt("title"), "", "80%");
+      $this->addColumn($lng->txt("action"), "", "20%");
       $this->setEnableHeader(true);
       $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
      	$this->setRowTemplate("tpl.question_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
@@ -46,7 +45,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
       
       $this->simulateData();
  
-      $this->setTitle("Meine Fragen");
+      $this->setTitle($lng->txt("my_questions"));
 	}
 	
 	private function simulateData() {
@@ -60,14 +59,14 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	
 	/*
 	* Fill a single data row
+	*
+	* @param	array		$a_set		Data record, displayed as one table row
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
-		$this->tpl->setVariable("TXT_QUESTION", $a_set["question"]);
 		$this->tpl->setVariable("TXT_ACTION", "Reviews einsehen");
 		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
 	}
 }
-
 ?>

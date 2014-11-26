@@ -85,5 +85,7 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 		*/
 		return true;
 	}
+	
 }
+
 ?>
