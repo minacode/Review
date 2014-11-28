@@ -38,6 +38,7 @@ class ilObjReview extends ilObjectPlugin {
 	*/
 	function __construct($a_ref_id = 0) {
 		parent::__construct($a_ref_id);
+		$this->syncQuestionDB();
 	}
 	
 
@@ -99,6 +100,44 @@ class ilObjReview extends ilObjectPlugin {
 		global $ilDB;
 		
 		$new_obj->update();
-	}	
+	}
+		
+	/**
+	* Load all questions from the groups´ Question Pools,
+	* thus updating the plugin´s question db
+	*/
+	private function syncQuestionDB() {
+		global $ilDB;
+		
+		$qpl = $ilDB->query("SELECT question_id, tstamp FROM qpl_questions ".
+								  /*"INNER JOIN qpl_questionpool ON qpl_questionpool.obj_fi=qpl_questions.obj_fi ".*/
+								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL"
+			);
+
+		while ($db_question = $ilDB->fetchAssoc($qpl)) {
+			$contained = false;
+			$pqs = $ilDB->query("SELECT * FROM rep_robj_xrev_quest");
+			while ($pl_question = $ilDB->fetchAssoc($pqs)) {
+				if ($db_question["question_id"] == $pl_question["id"])
+					$contained = true;
+				if ($db_question["tstamp"] > $pl_question["timestamp"]) {
+					$ilDB->manipulateF("UPDATE rep_robj_xrev_quest SET timestamp=%s WHERE id=%s",
+											 array("timestamp", "integer"),
+											 array($db_question["tstamp"], $db_question["question_id"]));
+					// TODO update reviews
+					break;
+				}
+			}
+			if (!$contained) {
+				$ilDB->manipulateF("INSERT INTO rep_robj_xrev_quest (id, timestamp) VALUES (%s, %s)",
+										 array("integer", "timestamp"),
+										 array($db_question["question_id"], $db_question["tstamp"]));
+				//TODO update reviews
+				break;
+			}
+		}
+	}
 }
 ?>

@@ -29,17 +29,23 @@
 
 class ilAspectListGUI extends ilCustomInputGUI {
 	
+	/**
+	* Constructor for vertical list GUI displaying all answers for a question
+	*
+	* @param	string	$title			title of the list
+	* @param	array		$captions		all answers to be displaye
+	*/
 	public function __construct($title, $answers) {
 		parent::__construct();
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_list.html", true, true, $path_to_il_tpl);
 		foreach ($answers as $answer) {
 			$lable = new ilNonEditableValueGUI("");
+			$lable->setValue($answer["answer"]);
 			if ($answer["correct"])
-				$answer_out = $answer["answer"] . " \<i>(korrekt)</i>";
+				$lable->setInfo("korrekt");
 			else
-				$answer_out = $answer["answer"] . " \<i>(falsch)</i>";
-			$lable->setValue($answer_out);
+				$lable->setInfo("falsch");
 			$lable->insert($custom_tpl);
 		}
 		$this->setTitle($title);

@@ -35,7 +35,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 	public function __construct($a_parent_obj, $a_parent_cmd) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn($lng->txt("title_quest"), "", "80%");
+		$this->addColumn($lng->txt("rep_robj_xrev_title_quest"), "", "80%");
       $this->addColumn($lng->txt("action"), "", "20%");
       $this->setEnableHeader(true);
       $this->setFormAction($ilCtrl->getFormAction($this->getParentObject(), 'showContent'));
@@ -45,7 +45,7 @@ class ilReviewTableGUI extends ilTable2GUI {
       
       $this->simulateData();
  
-      $this->setTitle($lng->txt("my_reviews"));
+      $this->setTitle($lng->txt("rep_robj_xrev_my_reviews"));
 	}
 	
 	private function simulateData() {
@@ -59,19 +59,20 @@ class ilReviewTableGUI extends ilTable2GUI {
 	
 	/*
 	* Fill a single data row
+	*
+	* @param	array		$a_set		Data record, displayed as one table row
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		if ($a_set["completed"]) {
-			$this->tpl->setVariable("TXT_ACTION", "Ansehen");
+			$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
 			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
 		}
 		else {
-			$this->tpl->setVariable("TXT_ACTION", "Erstellen");
+			$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_create"));
 			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "inputReview"));
 		}
 	}
 }
-
 ?>

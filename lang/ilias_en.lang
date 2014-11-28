@@ -54,3 +54,19 @@ answers#:#Answers
 correctness#:#Correctness
 relevance#:#Relevance
 expression#:#Expression
+create#:#Create Review
+view#:#View Reviews
+tax_and_know_dim#:#Taxonomiestufe und Wissensdimension
+taxonomy#:#Taxonomie
+knowledge_dim#:#Wissensdimension
+reviewer#:#Reviewer
+add_info#:#Weitere Informationen
+auth_quest#:#Autor der Frage
+rating#:#Urteil
+comment#:#Bemerkungen
+expertise#:#Expertise
+quest_accept#:#Frage akzeptiert
+quest_edit#:#Frage überarbeiten
+quest_refuse#:#Frage abgelehnt
+review_input#:#Review-Eingabeformular
+evaluation#:#Bewertung

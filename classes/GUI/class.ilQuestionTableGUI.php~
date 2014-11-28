@@ -45,7 +45,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
       
       $this->simulateData();
  
-      $this->setTitle("Meine Fragen");
+      $this->setTitle($lng->txt("my_questions"));
 	}
 	
 	private function simulateData() {
@@ -65,7 +65,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
-		$this->tpl->setVariable("TXT_ACTION", "Reviews einsehen");
+		$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
 		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
 	}
 }

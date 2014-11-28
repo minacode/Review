@@ -29,6 +29,14 @@
 
 class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	
+	/**
+	* Constructor for table-like display of ilSelectInputGUIs
+	*
+	* @param	string	$title			title of the aspect
+	* @param array		$select_ipnuts	associative array of all selects,
+	*											$_POST variable => array of all options, pre-selected option
+	* @param	bool		$disabled		true if selects are read-only
+	*/
 	public function __construct($title, $select_inputs, $disabled) {
 		parent::__construct();
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();

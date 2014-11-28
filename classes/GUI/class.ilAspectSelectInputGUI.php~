@@ -30,6 +30,7 @@
 class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	
 	public function __construct($title, $select_inputs, $disabled) {
+		parent::__construct();
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
 		foreach ($select_inputs as $postvar => $values) {

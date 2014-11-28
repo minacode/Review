@@ -48,7 +48,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->a_parent_obj = $a_parent_obj;
 		$this->a_parent_cmd = $a_parent_cmd;
 		
-		$this->setTitle("Review-Eingabeformular");
+		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
 		
 		$this->populateQuestionFormPart();
@@ -86,7 +86,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private function populateReviewFormPart() {
 		global $lng;
 		$head_r = new ilFormSectionHeaderGUI();
-		$head_r->setTitle($lng->txt("review"));
+		$head_r->setTitle($lng->txt("rep_robj_xrev_review"));
 		$this->addItem($head_r);
 		
 		$head = new ilAspectHeadGUI(array($lng->txt("rep_robj_xrev_correctness"),
@@ -125,23 +125,25 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private function populateTaxonomyFormPart() {
 		global $lng;
 		$head_t = new ilFormSectionHeaderGUI();
-		$head_t->setTitle("Taxonomiestufe und Wissensdimension");
+		$head_t->setTitle($lng->txt("rep_robj_xrev_tax_and_know_dim"));
 		$this->addItem($head_t);
 		
-		$head = new ilAspectHeadGUI(array("Taxonomiestufe", "Wissensdimension"));
+		$head = new ilAspectHeadGUI(array($lng->txt("rep_robj_xrev_taxonomy"), $lng->txt("rep_robj_xrev_knowledge_dim")));
 		$this->addItem($head);
 		
-		$auth = new ilAspectSelectInputGUI("Autor", array("cog_a" => array("options" => $this->cognitiveProcess(),
-																								 "selected" => $this->simulateData()["cog"]),
-																		  "kno_a" => array("options" => $this->knowledge(),
-																								 "selected" => $this->simulateData()["kno"])),
+		$auth = new ilAspectSelectInputGUI($lng->txt("author"),
+													  array("cog_a" => array("options" => $this->cognitiveProcess(),
+																					 "selected" => $this->simulateData()["cog"]),
+															  "kno_a" => array("options" => $this->knowledge(),
+																					 "selected" => $this->simulateData()["kno"])),
 													  true);
 		$this->addItem($auth);
 		
-		$revi = new ilAspectSelectInputGUI("Reviewer", array("cog_r" => array("options" => $this->cognitiveProcess(),
-																									 "selected" => 0),
-																		  	  "kno_r" => array("options" => $this->knowledge(),
-																									 "selected" => 0)),
+		$revi = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_reviewer"),
+													  array("cog_r" => array("options" => $this->cognitiveProcess(),
+																					 "selected" => 0),
+															  "kno_r" => array("options" => $this->knowledge(),
+																					 "selected" => 0)),
 													  false);
 		$this->addItem($revi);
 		
@@ -150,24 +152,24 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private function populateEvaluationFormPart() {
 		global $lng;
 		$head_e = new ilFormSectionHeaderGUI();
-		$head_e->setTitle("Bewertung");
+		$head_e->setTitle($lng->txt("rep_robj_xrev_evaluation"));
 		$this->addItem($head_e);
 
-		$group_e = new ilRadioGroupInputGUI("Urteil" ,"group_e");
-		$op_a = new ilRadioOption("Frage akzeptiert", "1", "");
+		$group_e = new ilRadioGroupInputGUI($lng->txt("rep_robj_xrev_rating"),"group_e");
+		$op_a = new ilRadioOption($lng->txt("rep_robj_xrev_quest_accept"), "1", "");
 		$group_e->addOption($op_a);
-		$op_e = new ilRadioOption("Frage überarbeiten", "2", "");
+		$op_e = new ilRadioOption($lng->txt("rep_robj_xrev_quest_edit"), "2", "");
 		$group_e->addOption($op_e);
-		$op_d = new ilRadioOption("Frage abgelehnt", "3", "");
+		$op_d = new ilRadioOption($lng->txt("rep_robj_xrev_quest_refuse"), "3", "");
 		$group_e->addOption($op_d);
 		$this->addItem($group_e);
 
-		$comment = new ilTextAreaInputGUI("Bemerkungen", "comment");
+		$comment = new ilTextAreaInputGUI($lng->txt("rep_robj_xrev_comment"), "comment");
 		$comment->setCols(70);
 		$comment->setRows(10);
 		$this->addItem($comment);
 		
-		$expertise = new ilSelectInputGUI("Expertise", "exp");
+		$expertise = new ilSelectInputGUI($lng->txt("rep_robj_xrev_expertise"), "exp");
 		$expertise->setValue(0);
 		$expertise->setOptions($this->expertise());
 		$this->addItem($expertise);
@@ -176,10 +178,10 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private function populateAdditionalData() {
 		global $lng;
 		$head_a = new ilFormSectionHeaderGUI();
-		$head_a->setTitle("Weitere Informationen");
+		$head_a->setTitle($lng->txt("rep_robj_xrev_add_info"));
 		$this->addItem($head_a);
 		
-		$author = new ilNonEditableValueGUI("Autor der Frage");
+		$author = new ilNonEditableValueGUI($lng->txt("rep_robj_xrev_auth_quest"));
 		$author->setValue($this->simulateData()["author"]);
 		$this->addItem($author);
 	}

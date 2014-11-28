@@ -40,7 +40,7 @@ class ilReviewOutputGUI extends ilTable2GUI {
       $this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("back"));
       $this->simulateData();
  
-      $this->setTitle($lng->txt("review_output"));
+      $this->setTitle($lng->txt("rep_robj_xrev_review_output"));
 	}
 	
 	private function simulateData() {
