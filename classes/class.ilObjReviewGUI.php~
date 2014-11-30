@@ -191,7 +191,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 							)
 		);
 		$this->alloc_form->addItem($q3);
-		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request");
+		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
 	}
 	
 	/**

@@ -32,7 +32,7 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 class ilQuestionTableGUI extends ilTable2GUI {
 
-	public function __construct($a_parent_obj, $a_parent_cmd) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		$this->addColumn($lng->txt("title"), "", "80%");
@@ -43,7 +43,8 @@ class ilQuestionTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       
-      $this->simulateData();
+      // $this->simulateData();
+      $this->setData($questions);
  
       $this->setTitle($lng->txt("rep_robj_xrev_my_questions"));
 	}

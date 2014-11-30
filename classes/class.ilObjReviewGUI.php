@@ -270,7 +270,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		
 		$ilTabs->activateTab("content");
 		
-		$table_q = new ilQuestionTableGUI($this, "showContent");
+		$table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
 		$table_r = new ilReviewTableGUI($this, "showContent");
 		$tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
 	}
