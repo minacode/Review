@@ -70,3 +70,20 @@ quest_edit#:#Frage überarbeiten
 quest_refuse#:#Frage abgelehnt
 review_input#:#Review-Eingabeformular
 evaluation#:#Bewertung
+eval_good#:#Gut
+eval_correct#:#Korrektur
+eval_refused#:#Ungeeignet
+taxon_remem#:#Remember
+taxon_underst#:#Understand
+taxon_apply#:#Apply
+taxon_anal#:#Analyze
+taxon_eval#:#Evaluate
+taxon_create#:#Create
+knowd_concp#:#Conceptual
+knowd_fact#:#Factual
+knowd_proc#:#Procedural
+knowd_meta#:#Metacognitive
+expert_no#:#No Familiarity
+expert_some#:#Some Familiarity
+expert_know#:#Knowledgeable
+expert_expert#:#Expert

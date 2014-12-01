@@ -69,3 +69,21 @@ quest_accept#:#Frage akzeptiert
 quest_edit#:#Frage überarbeiten
 quest_refuse#:#Frage abgelehnt
 review_input#:#Review-Eingabeformular
+evaluation#:#Bewertung
+eval_good#:#
+eval_correct#:#
+eval_refused#:#
+taxon_remem#:#
+taxon_underst#:#
+taxon_apply#:#
+taxon_anal#:#
+taxon_eval#:#
+taxon_create#:#
+knowd_concp#:#
+knowd_fact#:#
+knowd_proc#:#
+knowd_meta#:#
+expert_no#:#
+expert_some#:#
+expert_know#:#
+expert_expert#:#

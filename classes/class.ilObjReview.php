@@ -117,6 +117,9 @@ class ilObjReview extends ilObjectPlugin {
 			return 0;
 		}
 		
+		// uncomment as soos as needed
+		// $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
+		
 		$qpl = $ilDB->query("SELECT question_id AS id, tstamp FROM qpl_questions ".
 								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
@@ -132,12 +135,10 @@ class ilObjReview extends ilObjectPlugin {
 		foreach ($db_questions as $db_question) {
 			foreach ($pl_questions as $pl_question) {
 				if ($db_question["id"] == $pl_question["id"]) {
-					if ($db_question["tstamp"] > $pl_question["timestamp"]) {
+					if ($db_question["tstamp"] > $pl_question["timestamp"])
 						$ilDB->manipulateF("UPDATE rep_robj_xrev_quest SET timestamp=%s WHERE id=%s",
 												 array("integer", "integer"),
 												 array($db_question["tstamp"], $db_question["id"]));
-						// TODO update reviews
-					}
 					break;
 				}
 			}
@@ -158,8 +159,16 @@ class ilObjReview extends ilObjectPlugin {
 									 array($del_question["id"]));
 			//TODO update reviews
 		}
+		
+		//uncomment as soon as needed
+		// $ilDB->unlockTables();
 	}
 	
+	/*
+	* Load all questions created by the user in all of the groups´ question pools
+	*
+	* @return	array		$db_questions		the questions loaded by this function
+	*/ 
 	public function loadQuestionsByUser() {
 		global $ilDB, $ilUser;
 
