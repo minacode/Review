@@ -39,7 +39,7 @@ offline#:#Offline
 Review_plugin_configuration#:#Beispiel Plugin Konfiguration
 setting_1#:#Einstellung 1
 setting_2#:#Einstellung 2
-saving_invoked#:#Save procedure has been executed. Please note that this Review does not save anything to DB.
+saving_invoked#:#Speichern wurde ausgeführt. Bitte beachten Sie, dass von dem Review nichts in die Datenbank gespeichert wird.
 request#:#Reviews anfordern
 action#:#Aktion
 title_quest#:#Titel der Frage
