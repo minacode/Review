@@ -110,7 +110,7 @@ $fields = array(
 		'type' => 'integer',
 		'length' => 4,
 	),
-	'comment' => array(
+	'eval_comment' => array(
 		'type' => 'clob',
 	),
 	'expertise' => array(
@@ -230,4 +230,8 @@ foreach ($values as $key => $value)
 	$ilDB->insert("rep_robj_xrev_expert", array(
 		'id' => array('integer', $key),
 		'term' => array('text', $value)));
+?>
+<#8>
+<?php
+$ilDB->addTableColumn("rep_reobj_xrev_revi", "review_obj", array("type" => "integer", "length" => 4));
 ?>

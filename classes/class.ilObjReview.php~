@@ -38,7 +38,6 @@ class ilObjReview extends ilObjectPlugin {
 	*/
 	function __construct($a_ref_id = 0) {
 		parent::__construct($a_ref_id);
-		$this->syncQuestionDB();
 	}
 	
 
@@ -72,6 +71,8 @@ class ilObjReview extends ilObjectPlugin {
 			);
 		while ($rec = $ilDB->fetchAssoc($set)) {
 		}
+		
+		$this->syncQuestionDB();
 	}
 	
 	/**
@@ -107,7 +108,7 @@ class ilObjReview extends ilObjectPlugin {
 	* thus updating the plugin´s question db
 	*/
 	private function syncQuestionDB() {
-		global $ilDB;
+		global $ilDB, $ilUser;		
 		
 		function cmp_rec($a, $b) {
 			if ($a["id"] > $b["id"])
@@ -117,7 +118,8 @@ class ilObjReview extends ilObjectPlugin {
 			return 0;
 		}
 		
-		$ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
+		// uncomment as soos as needed
+		// $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
 		
 		$qpl = $ilDB->query("SELECT question_id AS id, tstamp FROM qpl_questions ".
 								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
@@ -134,11 +136,15 @@ class ilObjReview extends ilObjectPlugin {
 		foreach ($db_questions as $db_question) {
 			foreach ($pl_questions as $pl_question) {
 				if ($db_question["id"] == $pl_question["id"]) {
-					if ($db_question["tstamp"] > $pl_question["timestamp"])
+					if ($db_question["tstamp"] > $pl_question["timestamp"]) {
 						$ilDB->manipulateF("UPDATE rep_robj_xrev_quest SET timestamp=%s WHERE id=%s",
 												 array("integer", "integer"),
 												 array($db_question["tstamp"], $db_question["id"]));
+					$ilDB->manipulateF("UPDATE rep_robj_xrev_revi SET state=0 WHERE question_id=%s",
+											 array("integer"),
+											 array($db_question["id"]));
 					break;
+					}
 				}
 			}
 		}
@@ -148,7 +154,11 @@ class ilObjReview extends ilObjectPlugin {
 			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_quest (id, timestamp) VALUES (%s, %s)",
 									 array("integer", "integer"),
 									 array($new_question["id"], $new_question["tstamp"]));
-			//TODO update reviews
+			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_revi (id, timestamp, reviewer, question_id, state, desc_corr, desc_relv, desc_expr, quest_corr, quest_relv, quest_expr, answ_corr, answ_relv, answ_expr, taxonomy, knowledge_dimension, rating, eval_comment, expertise, review_obj) ".
+									 "VALUES (%s, %s, %s, %s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, %s)",
+									 array("integer", "integer", "integer", "integer", "integer"),
+									 array($ilDB->nextID("rep_robj_xrev_revi"), time(), $ilUser->getID(), $new_question["id"], $this->getId()));
+			
 		}
 		
 		$del_questions = array_udiff($pl_questions, $db_questions, "cmp_rec");
@@ -156,10 +166,13 @@ class ilObjReview extends ilObjectPlugin {
 			$ilDB->manipulateF("DELETE FROM rep_robj_xrev_quest WHERE id=%s",
 									 array("integer"),
 									 array($del_question["id"]));
-			//TODO update reviews
+			$ilDB->manipulateF("DELETE FROM rep_robj_xrev_revi WHERE question_id=%s",
+									 array("integer"),
+									 array($del_question["id"]));
 		}
 		
-		$ilDB->unlockTables();
+		//uncomment as soon as needed
+		// $ilDB->unlockTables();
 	}
 	
 	/*
@@ -180,6 +193,27 @@ class ilObjReview extends ilObjectPlugin {
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
 		return $db_questions;
+	}
+	
+	/*
+	* Load all reviews created by the user for all questions in the groups´ question pools
+	*
+	* @return	array		$reviews		the reviews loaded by this function
+	*/ 
+	public function loadReviewsByUser() {
+		global $ilDB, $ilUser;
+
+		$rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title AS title, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
+									"INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
+								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								   "WHERE crs_items.parent_id=66 AND rep_robj_xrev_revi.reviewer=%s",
+								   array("integer"),
+								   array($ilUser->getId()));
+		$reviews = array();
+		while ($review = $ilDB->fetchAssoc($rev))
+			$reviews[] = $review;
+		return $reviews;
 	}
 }
 ?>

@@ -271,7 +271,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilTabs->activateTab("content");
 		
 		$table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
-		$table_r = new ilReviewTableGUI($this, "showContent");
+		$table_r = new ilReviewTableGUI($this, "showContent", $this->object->loadReviewsByUser());
 		$tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
 	}
 
@@ -283,6 +283,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilTabs->activateTab("content");
 		$form = new ilReviewInputGUI($this, "showContent");
 		$tpl->setContent($form->getHTML());
+		echo $_GET["r_id"];
 	}
 
 	/**

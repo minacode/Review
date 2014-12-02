@@ -43,7 +43,6 @@ class ilQuestionTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       
-      // $this->simulateData();
       $this->setData($questions);
  
       $this->setTitle($lng->txt("rep_robj_xrev_my_questions"));

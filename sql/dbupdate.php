@@ -231,3 +231,7 @@ foreach ($values as $key => $value)
 		'id' => array('integer', $key),
 		'term' => array('text', $value)));
 ?>
+<#8>
+<?php
+$ilDB->addTableColumn("rep_robj_xrev_revi", "review_obj", array("type" => "integer", "length" => 4));
+?>
