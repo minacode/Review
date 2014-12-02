@@ -5,45 +5,45 @@
 <!-- language file start -->
 obj_xrev#:#Review
 objs_xrev#:#Reviews
-obj_xrev_duplicate#:#Copy
-objs_xrev_duplicate#:#Copy Review
-obj_xrev_select#:#Select Review
-xrev_add#:#Add Review
-xrev_new#:#Add New Review
-xrev_read#:#Read access to Review
-xrev_write#:#Edit Review
-xrev_delete#:#Delete Review
-xrev_visible#:#Review is visible
-xrev_edit_permission#:#Change permission settings
-crs_create_xrev#:#Create Review
-grp_create_xrev#:#Create Review
-fold_create_xrev#:#Create Review
-root_create_xrev#:#Create Review
-cat_create_xrev#:#Create Review
-content#:#Content
-properties#:#Properties
-edit_properties#:#Edit Properties
-title#:#Title
-description#:#Description
+obj_xrev_duplicate#:#Kopieren
+objs_xrev_duplicate#:#Kopiere Review
+obj_xrev_select#:#Review auswählen
+xrev_add#:#Review hinzufügen
+xrev_new#:#Neues Review hinzufügen
+xrev_read#:#Lese-Berechtigung zu Review
+xrev_write#:#Review bearbeiten
+xrev_delete#:#Review löschen
+xrev_visible#:#Review ist sichtbar
+xrev_edit_permission#:#Berechtigungen bearbeiten
+crs_create_xrev#:#Erstelle Review
+grp_create_xrev#:#Erstelle Review
+fold_create_xrev#:#Erstelle Review
+root_create_xrev#:#Erstelle Review
+cat_create_xrev#:#Erstelle Review
+content#:#Inhalt
+properties#:#Eigenschaften
+edit_properties#:#Eigenschaften bearbeiten
+title#:#Titel
+description#:#Beschreibung
 reviewer_allocation#:#Reviewer Zuordnung
 q1#:#Frage 1
 q2#:#Frage 2
 q3#:#Frage 3
-option_one#:#Option One
-option_two#:#Option Two
-save#:#Save
-cancel#:#Cancel
-edit#:#Edit
+option_one#:#Option Eins
+option_two#:#Option Zwei
+save#:#Speichern
+cancel#:#Abbrechen
+edit#:#Bearbeiten
 status#:#Status
 offline#:#Offline
-Review_plugin_configuration#:#Exampl Plugin Configuration
-setting_1#:#Setting 1
-setting_2#:#Setting 2
+Review_plugin_configuration#:#Beispiel Plugin Konfiguration
+setting_1#:#Einstellung 1
+setting_2#:#Einstellung 2
 saving_invoked#:#Save procedure has been executed. Please note that this Review does not save anything to DB.
 request#:#Reviews anfordern
 action#:#Aktion
 title_quest#:#Titel der Frage
-my_reviews#:#Meinse Reviews
+my_reviews#:#Meine Reviews
 my_questions#:#Meine Fragen
 review_output#:#Aktuelle Reviews zu dieser Frage
 reviews#:#Reviews
@@ -73,17 +73,17 @@ evaluation#:#Bewertung
 eval_good#:#Gut
 eval_correct#:#Korrektur
 eval_refused#:#Ungeeignet
-taxon_remem#:#Remember
-taxon_underst#:#Understand
-taxon_apply#:#Apply
-taxon_anal#:#Analyze
-taxon_eval#:#Evaluate
-taxon_create#:#Create
-knowd_concp#:#Conceptual
-knowd_fact#:#Factual
-knowd_proc#:#Procedural
-knowd_meta#:#Metacognitive
-expert_no#:#No Familiarity
-expert_some#:#Some Familiarity
-expert_know#:#Knowledgeable
-expert_expert#:#Expert
+taxon_remem#:#Erinnern
+taxon_underst#:#Verstehen
+taxon_apply#:#Anwenden
+taxon_anal#:#Analysieren
+taxon_eval#:#Bewerten
+taxon_create#:#Erschaffen
+knowd_concp#:#konzeptuell
+knowd_fact#:#sachlich
+knowd_proc#:#Prozedural
+knowd_meta#:#Metacognitiv
+expert_no#:#Keine Vertrautheit
+expert_some#:#Etwas Vertrautheit
+expert_know#:#Bewandert
+expert_expert#:#Experte
