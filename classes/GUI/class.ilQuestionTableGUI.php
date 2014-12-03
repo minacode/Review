@@ -64,6 +64,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
+		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["id"]);
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
 		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));

@@ -27,7 +27,12 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 
 class ilReviewOutputGUI extends ilTable2GUI {
 	
-	public function __construct($a_parent_obj, $a_parent_cmd) {
+	/*
+	* constructor
+	*
+	* @param		array		$reviews		reviews to display
+	*/
+	public function __construct($a_parent_obj, $a_parent_cmd, $reviews) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		$this->addColumn($lng->txt("reviews"), "", "100%");
@@ -38,8 +43,9 @@ class ilReviewOutputGUI extends ilTable2GUI {
       $this->setDefaultOrderDirection("asc");
       $this->setTopCommands(false);
       $this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("back"));
-      $this->simulateData();
- 
+
+		$this->setUpData($reviews);
+
       $this->setTitle($lng->txt("rep_robj_xrev_review_output"));
 	}
 	
@@ -51,6 +57,20 @@ class ilReviewOutputGUI extends ilTable2GUI {
 		$rev2 = new ilReviewInputGUI($this, "");
 		$rev2->setReadOnly();
 		$data[] = array("id" => 1, "review" => $rev2->getHTML());
+		$this->setData($data);
+	}
+
+	/*
+	* @param		array		$reviews		reviews to display
+	*/	
+	private function setUpData($reviews) {
+		$data = array();
+		foreach ($reviews as $review) {
+			$input_form = new ilReviewInputGUI($this, "", $review);
+			$input_form->setReadOnly();
+			$data[] = array("id" => $review["id"],
+						  		 "review" => $input_form->getHtml());
+		}
 		$this->setData($data);
 	}
 	

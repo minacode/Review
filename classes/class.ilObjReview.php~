@@ -205,6 +205,7 @@ class ilObjReview extends ilObjectPlugin {
 
 		$rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title AS title, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
 									"INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
+									"INNER JOIN rep_robj_xrev_revobj ON rep_robj_xrev_revobj.id=rep_robj_xrev_revi.review_obj ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "WHERE crs_items.parent_id=66 AND rep_robj_xrev_revi.reviewer=%s",
@@ -213,6 +214,74 @@ class ilObjReview extends ilObjectPlugin {
 		$reviews = array();
 		while ($review = $ilDB->fetchAssoc($rev))
 			$reviews[] = $review;
+		return $reviews;
+	}
+
+	/*
+	* Load a review with a certain ID from the Review Database
+	*
+	* @param		int		$a_id		ID of the review to load
+	*
+	* @return	array		$reviews	all reviews with the given ID (exactly one or none)
+	*/ 
+	public function loadReviewById($a_id) {
+		global $ilDB;
+		
+		$rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE id=%s",
+									array("integer"),
+									array($a_id));
+		
+		$reviews = array();
+		while ($review = $ilDB->fetchAssoc($rev))
+			$reviews[] = $review;
+		return $reviews[0];
+	}
+	
+	/*
+	* Update data of an existing review by form input
+	*
+	* @param		$id			ID of the review to be updated
+	* @param		$form_data	user inputed to be stored
+	*/
+	public function storeReviewByID($id, $form_data) {
+		global $ilDB;
+		
+		$ilDB->update("rep_robj_xrev_revi", array("timestamp" => array("integer", time()),
+																"state" => array("integer", 1),
+																"desc_corr" => array("integer", $form_data["dc"]),
+																"desc_relv" => array("integer", $form_data["dr"]),
+																"desc_expr" => array("integer", $form_data["de"]),
+																"quest_corr" => array("integer", $form_data["qc"]),
+																"quest_relv" => array("integer", $form_data["qr"]),
+																"quest_expr" => array("integer", $form_data["qe"]),
+																"answ_corr" => array("integer", $form_data["ac"]),
+																"answ_relv" => array("integer", $form_data["ar"]),
+																"answ_expr" => array("integer", $form_data["ae"]),
+																"taxonomy" => array("integer", $form_data["cog_r"]),
+																"knowledge_dimension" => array("integer", $form_data["kno_r"]),
+																"rating" => array("integer", $form_data["group_e"]),
+																"eval_comment" => array("clob", $form_data["comment"]),
+																"expertise" => array("integer", $form_data["exp"])),
+						  array("id" => array("integer", $id)));
+	}
+	
+	/*
+	* Load a review with a certain ID from the Review Database
+	*
+	* @param		int		$a_id		ID of the review to load
+	*
+	* @return	array		$reviews	all reviews with the given ID (exactly one or none)
+	*/ 
+	public function loadReviewsByQuestion($q_id) {
+		global $ilDB;
+		
+		$rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE question_id=%s",
+									array("integer"),
+									array($q_id));
+		$reviews = array();
+		while ($review = $ilDB->fetchAssoc($rev))
+			$reviews[] = $review;
+			
 		return $reviews;
 	}
 }

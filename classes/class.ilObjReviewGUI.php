@@ -90,6 +90,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 				
 			case "inputReview":
 			case "showReviews":
+			case "saveReview":
 			//Write Access für User prüfen
 			 	$this->$cmd();
 				break;
@@ -232,7 +233,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function updateProperties() {
 		global $tpl, $lng, $ilCtrl;
 		$submit = false;
-	
+
 		$this->initPropertiesForm();
 		if ($this->form->checkInput()) {
 			$this->object->setTitle($this->form->getInput("title"));
@@ -279,11 +280,31 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Display review input form
 	*/
 	public function inputReview() {
-		global $tpl, $ilTabs;		
+		global $tpl, $ilTabs, $ilCtrl;		
 		$ilTabs->activateTab("content");
-		$form = new ilReviewInputGUI($this, "showContent");
-		$tpl->setContent($form->getHTML());
-		echo $_GET["r_id"];
+		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]));
+		$tpl->setContent($input->getHTML());
+	}
+	
+	/*
+	* Save review input
+	*/
+	public function saveReview() {
+	global $tpl, $lng, $ilCtrl;
+		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]));;
+		if ($input->checkInput()) {
+			$form_data = array();
+			$post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
+			foreach ($post_vars as $post_var)
+				$form_data[$post_var] = $input->getInput($post_var);
+			$this->object->storeReviewById($_GET["r_id"], $form_data);
+			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "showContent");
+		}
+		$input->setValuesByPost();
+
+		$tpl->setContent($input->getHtml());
 	}
 
 	/**
@@ -292,7 +313,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function showReviews() {
 		global $tpl, $ilTabs;		
 		$ilTabs->activateTab("content");
-		$tbl = new ilReviewOutputGUI($this, "showReviews");
+		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]));
 		$tpl->setContent($tbl->getHtml());
 	}
 }

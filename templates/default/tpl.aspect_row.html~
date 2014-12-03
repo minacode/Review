@@ -2,7 +2,7 @@
 	<tr>
 <!-- BEGIN prop_generic -->
 
-		{PROP_GENERIC}		
+		<td style="text-align:center;width:130px;height:16px">{PROP_GENERIC}</td>		
 		
 <!-- END prop_generic -->
 	</tr>

@@ -41,15 +41,16 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
-	public function __construct($a_parent_obj, $a_parent_cmd) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $review) {
 		global $ilCtrl, $lng;
 		parent::__construct();
 		
 		$this->a_parent_obj = $a_parent_obj;
 		$this->a_parent_cmd = $a_parent_cmd;
+		$this->review = $review;
 		
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
-		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
+		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
 		
 		$this->populateQuestionFormPart();
 		$this->populateReviewFormPart();
@@ -57,8 +58,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateEvaluationFormPart();
 		$this->populateAdditionalData();		
 		
-		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("cancel"));
-		//$this->addCommandButton($ilCtrl->getLinkTargetByClass($a_parent_obj, $a_parent_cmd), "Abbrechen");
+		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
 	}
 	
 	private function populateQuestionFormPart() {
@@ -95,29 +95,29 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($head);
 		
 		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->rating(),
-																													"selected" => 0),
+																													"selected" => $this->review["desc_corr"]),
 																								 "dr" => array("options" => $this->rating(),
-																												  "selected" => 0),
+																												   "selected" => $this->review["desc_relv"]),
 																								 "de" => array("options" => $this->rating(),
-																												  "selected" => 0)),
+																												   "selected" => $this->review["desc_expr"])),
 													  false);
 		$this->addItem($desc);
 		
 		$quest = new ilAspectSelectInputGUI($lng->txt("question"), array("qc" => array("options" => $this->rating(),
-																										 		 "selected" => 0),
+																										 		 "selected" => $this->review["quest_corr"]),
 																					 		  "qr" => array("options" => $this->rating(),
-																												 "selected" => 0),
+																												 "selected" => $this->review["quest_relv"]),
 																							  "qe" => array("options" => $this->rating(),
-																												 "selected" => 0)),
+																												 "selected" => $this->review["quest_expr"])),
 													  false);
 		$this->addItem($quest);
 		
 		$answ = new ilAspectSelectInputGUI($lng->txt("answers"), array("ac" => array("options" => $this->rating(),
-																											  "selected" => 0),
+																											  "selected" => $this->review["answ_corr"]),
 																							"ar" => array("options" => $this->rating(),
-																											  "selected" => 0),
+																											  "selected" => $this->review["answ_relv"]),
 																							"ae" => array("options" => $this->rating(),
-																											  "selected" => 0)),
+																											  "selected" => $this->review["answ_expr"])),
 													  false);
 		$this->addItem($answ);
 	}
@@ -141,9 +141,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		
 		$revi = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_reviewer"),
 													  array("cog_r" => array("options" => $this->cognitiveProcess(),
-																					 "selected" => 0),
+																					 "selected" => $this->review["taxonomy"]),
 															  "kno_r" => array("options" => $this->knowledge(),
-																					 "selected" => 0)),
+																					 "selected" => $this->review["knowledge_dimension"])),
 													  false);
 		$this->addItem($revi);
 		
@@ -167,10 +167,11 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$comment = new ilTextAreaInputGUI($lng->txt("rep_robj_xrev_comment"), "comment");
 		$comment->setCols(70);
 		$comment->setRows(10);
+		$comment->setValue($this->review["eval_comment"]);
 		$this->addItem($comment);
 		
 		$expertise = new ilSelectInputGUI($lng->txt("rep_robj_xrev_expertise"), "exp");
-		$expertise->setValue(0);
+		$expertise->setValue($this->review["expertise"]);
 		$expertise->setOptions($this->expertise());
 		$this->addItem($expertise);
 	}
