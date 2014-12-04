@@ -48,15 +48,6 @@ class ilQuestionTableGUI extends ilTable2GUI {
       $this->setTitle($lng->txt("rep_robj_xrev_my_questions"));
 	}
 	
-	private function simulateData() {
-		$data = array(
-			array("id" => 0, "title" => "Frage 1 [Neu erstellt]", "question" => "Ist dies eine Dummy-Frage?", "state" => 0),
-			array("id" => 1, "title" => "Frage 2 [Reviews angefordert]", "question" => "Handelt es sich hierbeit um eine Dummy-Frage?", "state" => 1),
-			array("id" => 2, "title" => "Frage 3 [Bearbeitet]", "question" => "Könnte es sein, das dies eine Dummy-Frage ist?", "state" => 0)				
-		);
-		$this->setData($data);
-	}
-	
 	/*
 	* Fill a single data row
 	*
