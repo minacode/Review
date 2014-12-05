@@ -28,8 +28,9 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilReviewInputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewTableGUI.php");
+include_once './Services/Form/classes/class.ilCustomInputGUI.php';
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilQuestionTableGUI.php");
+				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -153,6 +154,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	public function initReviewAllocForm() {
 		global $ilCtrl;
+		/*
 		$this->alloc_form = new ilPropertyFormGUI();
 		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
@@ -192,6 +194,22 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 							)
 		);
 		$this->alloc_form->addItem($q3);
+		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
+		 
+		 */
+		$this->alloc_form = new ilPropertyFormGUI();
+		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
+		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
+		
+		$reviewers = $this->object->loadReviewers();
+		$reviewer_head = new ilAspectHeadGUI($reviewers);
+		$this->alloc_form->addItem($reviewer_head);
+		
+		foreach ($this->object->getUnallocatedQuestions() as $question) {
+			$matrix = new ilCheckMatrixRowGUI($question, count($reviewers));
+			$this->alloc_form->addItem($matrix);
+		}
+		
 		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
 	}
 	
