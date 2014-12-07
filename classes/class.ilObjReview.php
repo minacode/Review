@@ -178,7 +178,7 @@ class ilObjReview extends ilObjectPlugin {
 	/*
 	* Load all questions created by the user in all of the groups´ question pools
 	*
-	* @return	array		$db_questions		the questions loaded by this function
+	* @return	array		$db_questions		the questions loaded by this function as an associative array
 	*/ 
 	public function loadQuestionsByUser() {
 		global $ilDB, $ilUser;
@@ -198,7 +198,7 @@ class ilObjReview extends ilObjectPlugin {
 	/*
 	* Load all reviews created by the user for all questions in the groups´ question pools
 	*
-	* @return	array		$reviews		the reviews loaded by this function
+	* @return	array		$reviews		the reviews loaded by this function as an associative array
 	*/ 
 	public function loadReviewsByUser() {
 		global $ilDB, $ilUser;
@@ -241,7 +241,7 @@ class ilObjReview extends ilObjectPlugin {
 	* Update data of an existing review by form input
 	*
 	* @param		$id			ID of the review to be updated
-	* @param		$form_data	user inputed to be stored
+	* @param		$form_data	user input to be stored
 	*/
 	public function storeReviewByID($id, $form_data) {
 		global $ilDB;
@@ -283,6 +283,44 @@ class ilObjReview extends ilObjectPlugin {
 			$reviews[] = $review;
 			
 		return $reviews;
+	}
+	
+	/*
+	* Load all members of a group
+	*
+	* @return	array		$reviewers	ids and names of the group members
+	*/ 
+	public function loadReviewers() {
+		global $ilDB;
+		
+		$res = $ilDB->queryF("SELECT usr_data.usr_id AS usr_id, firstname, lastname FROM usr_data ".
+									"INNER JOIN rbac_ua ON rbac_ua.usr_id=usr_data.usr_id ".
+								   "INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
+								   "WHERE object_data.title='il_grp_admin_%s' OR object_data.title='il_grp_member_%s'",
+								   array("integer", "integer"),
+								   /*array($_GET["ref_id"], $_GET["ref_id"])*/array(66, 66));
+		$reviewers = array();
+		while ($reviewer = $ilDB->fetchAssoc($res))
+			$reviewers[] = $reviewer;
+		return $reviewers;
+	}
+	
+	/*
+	* Load all questions that currently have no reviewer allocated to them
+	*
+	* @return	array		$questions		the question loaded by this function as an associative array
+	*/ 
+	public function  loadUnallocatedQuestions() {
+		global $ilDB, $ilUser;
+
+		$qpl = $ilDB->query("SELECT question_id AS id, title FROM qpl_questions ".
+								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL");
+		$questions = array();
+		while ($question = $ilDB->fetchAssoc($qpl))
+			$questions[] = $question;
+		return $questions;
 	}
 }
 ?>

@@ -28,6 +28,8 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilReviewInputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewTableGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilQuestionTableGUI.php");
 include_once './Services/Form/classes/class.ilCustomInputGUI.php';
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
@@ -202,10 +204,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
 		
 		$reviewers = $this->object->loadReviewers();
-		$reviewer_head = new ilAspectHeadGUI($reviewers);
+		$reviewer_names = array();
+		foreach ($reviewers as $reviewer)
+			$reviewer_names[] = $reviewer['firstname'] . ' ' . $reviewer['lastname'];
+		$reviewer_head = new ilAspectHeadGUI($reviewer_names);
 		$this->alloc_form->addItem($reviewer_head);
 		
-		foreach ($this->object->getUnallocatedQuestions() as $question) {
+		foreach ($this->object->loadUnallocatedQuestions() as $question) {
 			$matrix = new ilCheckMatrixRowGUI($question, count($reviewers));
 			$this->alloc_form->addItem($matrix);
 		}
