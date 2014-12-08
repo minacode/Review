@@ -54,9 +54,15 @@ class ilObjReview extends ilObjectPlugin {
 	function doCreate() {
 		global $ilDB;
 		
+		$group_res = $ilDB->queryF("SELECT parent FROM tree WHERE child=%s",
+											array("integer"),
+											$this->getId());
+											
+		while ($group_id = $ilDB->fetchAssoc($group_res)["parent"]);
+		
 		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
-			"(id) VALUES (".
-			$ilDB->quote($this->getId(), "integer").
+			"(id, group_id) VALUES (".
+			$ilDB->quote($this->getId(), "integer"). ", ". $ilDB->quote($group_id, "integer").
 			")");
 	}
 	
@@ -70,6 +76,8 @@ class ilObjReview extends ilObjectPlugin {
 			" WHERE id = ".$ilDB->quote($this->getId(), "integer")
 			);
 		while ($rec = $ilDB->fetchAssoc($set)) {
+			$this->obj_id = $rec["obj_id"];
+			$this->group_id = $rec["group_id"];
 		}
 		
 		$this->syncQuestionDB();
@@ -150,16 +158,10 @@ class ilObjReview extends ilObjectPlugin {
 		}
 		
 		$new_questions = array_udiff($db_questions, $pl_questions, "cmp_rec");
-		foreach ($new_questions as $new_question) {
+		foreach ($new_questions as $new_question)
 			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_quest (id, timestamp) VALUES (%s, %s)",
 									 array("integer", "integer"),
-									 array($new_question["id"], $new_question["tstamp"]));
-			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_revi (id, timestamp, reviewer, question_id, state, desc_corr, desc_relv, desc_expr, quest_corr, quest_relv, quest_expr, answ_corr, answ_relv, answ_expr, taxonomy, knowledge_dimension, rating, eval_comment, expertise, review_obj) ".
-									 "VALUES (%s, %s, %s, %s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, %s)",
-									 array("integer", "integer", "integer", "integer", "integer"),
-									 array($ilDB->nextID("rep_robj_xrev_revi"), time(), $ilUser->getID(), $new_question["id"], $this->getId()));
-			
-		}
+									 array($new_question["id"], $new_question["tstamp"]));			
 		
 		$del_questions = array_udiff($pl_questions, $db_questions, "cmp_rec");
 		foreach ($del_questions as $del_question) {
@@ -316,11 +318,56 @@ class ilObjReview extends ilObjectPlugin {
 		$qpl = $ilDB->query("SELECT question_id AS id, title FROM qpl_questions ".
 								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL");
+								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND qpl_questions.state=0");
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
 			$questions[] = $question;
 		return $questions;
+	}
+	
+	/*
+	* Save matrix input as review entities containing the allocated reviewer
+	*
+	* @param		array		$alloc_matrix		array of arrays of reviewers
+	*/
+	public function allocateReviews($alloc_matrix) {
+		global $ilDB;
+		
+		$entities = array();
+		foreach ($alloc_matrix as $row) {
+			foreach ($row["reviewers"] as $reviewer_id) {
+				if (!$reviewer_id)
+					continue;
+				$ilDB->manipulateF("INSERT INTO rep_robj_xrev_revi (id, ".
+																					 "timestamp, ".
+																					 "reviewer, ".
+																					 "question_id, ".
+																					 "state, ".
+																					 "desc_corr, ".
+																					 "desc_relv, ".
+																					 "desc_expr, ".
+																					 "quest_corr, ".
+																					 "quest_relv, ".
+																					 "quest_expr, ".
+																					 "answ_corr, ".
+																					 "answ_relv, ".
+																					 "answ_expr, ".
+																					 "taxonomy, ".
+																					 "knowledge_dimension, ".
+																					 "rating, ".
+																					 "eval_comment, ".
+																					 "expertise, ".
+																					 "review_obj) ".
+									 "VALUES (%s, %s, %s, %s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, %s)",
+									 array("integer", "integer", "integer", "integer", "integer"),
+									 array($ilDB->nextID("rep_robj_xrev_revi"),
+									 		 time(), 
+									 		 substr($reviewer_id, strpos($reviewer_id, "_")), 
+									 		 $row["q_id"], 
+									 		 $this->getId()));
+				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)), array("id" => array("integer", $row["q_id"])));
+			}
+		}
 	}
 }
 ?>

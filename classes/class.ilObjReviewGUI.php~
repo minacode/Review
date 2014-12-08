@@ -156,49 +156,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	public function initReviewAllocForm() {
 		global $ilCtrl;
-		/*
-		$this->alloc_form = new ilPropertyFormGUI();
-		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
-		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
 		
-		$q1 = new ilSelectInputGUI($this->txt("q1"), "q1");
-		$q1->setRequired(true);
-		$q1->setValue(0);
-		$q1->setOptions( array(
-								0=> "",
-								1=> "Dummy-Reviewer 1",
-								2=> "Dummy-Reviewer 2",
-								3=> "Dummy-Reviewer 3",
-							)
-		);
-		$this->alloc_form->addItem($q1);
-		
-		$q2 = new ilSelectInputGUI($this->txt("q2"), "q2");
-		$q2->setRequired(true);
-		$q2->setValue(0);
-		$q2->setOptions( array(
-								0=> "",
-								1=> "Dummy-Reviewer 1",
-								2=> "Dummy-Reviewer 2",
-								3=> "Dummy-Reviewer 3",
-							)
-		);
-		
-		$this->alloc_form->addItem($q2);
-		$q3 = new ilSelectInputGUI($this->txt("q3"), "q3");
-		$q3->setRequired(true);
-		$q3->setValue(0);
-		$q3->setOptions( array(
-								0=> "",
-								1=> "Dummy-Reviewer 1",
-								2=> "Dummy-Reviewer 2",
-								3=> "Dummy-Reviewer 3",
-							)
-		);
-		$this->alloc_form->addItem($q3);
-		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
-		 
-		 */
 		$this->alloc_form = new ilPropertyFormGUI();
 		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
@@ -206,13 +164,17 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$reviewers = $this->object->loadReviewers();
 		$reviewer_names = array();
 		foreach ($reviewers as $reviewer)
-			$reviewer_names[] = $reviewers['firstname'] . ' ' . $reviewers['lastname'];
+			$reviewer_names[] = $reviewer['firstname'] . ' ' . $reviewer['lastname'];
+		$reviewer_ids = array();
+		foreach ($reviewers as $reviewer)
+			$reviewer_ids[] = $reviewer["id"];
+			
 		$reviewer_head = new ilAspectHeadGUI($reviewer_names);
 		$this->alloc_form->addItem($reviewer_head);
 		
 		foreach ($this->object->loadUnallocatedQuestions() as $question) {
-			$matrix = new ilCheckMatrixRowGUI($question, count($reviewers));
-			$this->alloc_form->addItem($matrix);
+			$matrix_row = new ilCheckMatrixRowGUI($question, $reviewer_ids);
+			$this->alloc_form->addItem($matrix_row);
 		}
 		
 		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
@@ -255,35 +217,39 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	public function updateProperties() {
 		global $tpl, $lng, $ilCtrl;
-		$submit = false;
 
 		$this->initPropertiesForm();
 		if ($this->form->checkInput()) {
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->update();
-			$submit = true;
+			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "editProperties");
 		}
 		$this->form->setValuesByPost();
 		
 		$this->initReviewAllocForm();
 		if ($this->alloc_form->checkInput()) {
-			if (!($_POST["q1"] || $_POST["q2"] || $_POST["q3"])) die();
-			/*
-			/ Wir haben nur Dummy-Daten, nichts wird gespeichert
-			$this->object->setValue($this->alloc_form->getValue("q1"));
-			$this->object->setValue($this->alloc_form->getValue("q2"));
-			$this->object->setValue($this->alloc_form->getValue("q3"));
-			$this->object->update();
-			*/
-			$submit = true;
-		}
-		$this->alloc_form->setValuesByPost();
-		if ($submit) {
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "editProperties");
 		}
-		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());
+		
+		$this->initReviewAllocForm();
+		if (true) {
+			$rows = array();
+			foreach ($this->alloc_form->getItems() as $item) {
+				if (!method_exists($item, "getPostVars"))
+					continue;
+				$row_postvars = $item->getPostVars();
+				$row_values = array();
+				foreach ($row_postvars as $row_postvar)
+					$row_values[] = $this->alloc_form->getInput($row_postvar);
+				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
+			}
+			$this->object->allocateReviews($rows);
+		}
+				
+		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());*/
 	}
 
 	/**

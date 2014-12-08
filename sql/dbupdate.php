@@ -235,3 +235,11 @@ foreach ($values as $key => $value)
 <?php
 $ilDB->addTableColumn("rep_robj_xrev_revi", "review_obj", array("type" => "integer", "length" => 4));
 ?>
+<#9>
+<?php
+$ilDB->addTableColumn("rep_robj_xrev_quest", "state", array("type" => "integer", "length" => 4));
+?>
+<#10>
+<?php
+$ilDB->addTableColumn("rep_robj_xrev_revobj", "group_id", array("type" => "integer", "length" => 4));
+?>
