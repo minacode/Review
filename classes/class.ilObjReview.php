@@ -56,7 +56,7 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$group_res = $ilDB->queryF("SELECT parent FROM tree WHERE child=%s",
 											array("integer"),
-											$this->getId());
+											array($this->getId()));
 											
 		while ($group_id = $ilDB->fetchAssoc($group_res)["parent"]);
 		
