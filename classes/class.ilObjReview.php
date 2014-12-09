@@ -129,10 +129,12 @@ class ilObjReview extends ilObjectPlugin {
 		// uncomment as soos as needed
 		// $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
 		
-		$qpl = $ilDB->query("SELECT question_id AS id, tstamp FROM qpl_questions ".
-								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL");
+		$qpl = $ilDB->queryF("SELECT question_id AS id, tstamp FROM qpl_questions ".
+								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL",
+								   array("integer"),
+								   $this->getId());
 		$db_questions = array();
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
@@ -188,9 +190,9 @@ class ilObjReview extends ilObjectPlugin {
 		$qpl = $ilDB->queryF("SELECT question_id AS id, title FROM qpl_questions ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								   "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND qpl_questions.owner=%s",
-								   array("integer"),
-								   array($ilUser->getId()));
+								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL AND qpl_questions.owner=%s",
+								   array("integer", "integer"),
+								   array($this->getId(), $ilUser->getId()));
 		$db_questions = array();
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
@@ -210,9 +212,9 @@ class ilObjReview extends ilObjectPlugin {
 									"INNER JOIN rep_robj_xrev_revobj ON rep_robj_xrev_revobj.id=rep_robj_xrev_revi.review_obj ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								   "WHERE crs_items.parent_id=66 AND rep_robj_xrev_revi.reviewer=%s",
-								   array("integer"),
-								   array($ilUser->getId()));
+								   "WHERE crs_items.parent_id=%s AND rep_robj_xrev_revi.reviewer=%s",
+								   array("integer", "integer"),
+								   array($this->getId(), $ilUser->getId()));
 		$reviews = array();
 		while ($review = $ilDB->fetchAssoc($rev))
 			$reviews[] = $review;
@@ -315,11 +317,13 @@ class ilObjReview extends ilObjectPlugin {
 	public function  loadUnallocatedQuestions() {
 		global $ilDB, $ilUser;
 
-		$qpl = $ilDB->query("SELECT question_id AS id, title FROM qpl_questions ".
-								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								  "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.id=qpl_questions.question_id ".
-								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND rep_robj_xrev_quest.state=0");
+		$qpl = $ilDB->queryF("SELECT question_id AS id, title FROM qpl_questions ".
+								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.id=qpl_questions.question_id ".
+								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL AND rep_robj_xrev_quest.state=0",
+								   array("integer"),
+								   $this->getId()));
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
 			$questions[] = $question;
