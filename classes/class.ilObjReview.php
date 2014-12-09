@@ -318,7 +318,7 @@ class ilObjReview extends ilObjectPlugin {
 		$qpl = $ilDB->query("SELECT question_id AS id, title FROM qpl_questions ".
 								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								  "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_qust.id=qpl_questions.question_id ".
+								  "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.id=qpl_questions.question_id ".
 								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND rep_robj_xrev_quest.state=0");
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
@@ -336,8 +336,8 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$entities = array();
 		foreach ($alloc_matrix as $row) {
-			foreach ($row["reviewers"] as $reviewer_id) {
-				if (!$reviewer_id)
+			foreach ($row["reviewers"] as $reviewer_id => $checked) {
+				if (!$checked)
 					continue;
 				$ilDB->manipulateF("INSERT INTO rep_robj_xrev_revi (id, ".
 																					 "timestamp, ".
@@ -363,7 +363,7 @@ class ilObjReview extends ilObjectPlugin {
 									 array("integer", "integer", "integer", "integer", "integer"),
 									 array($ilDB->nextID("rep_robj_xrev_revi"),
 									 		 time(), 
-									 		 substr($reviewer_id, strpos($reviewer_id, "_")), 
+									 		 explode("_", $reviewer_id)[2], 
 									 		 $row["q_id"], 
 									 		 $this->getId()));
 				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)), array("id" => array("integer", $row["q_id"])));

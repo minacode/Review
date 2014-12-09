@@ -229,13 +229,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->form->setValuesByPost();
 		
 		$this->initReviewAllocForm();
-		if ($this->alloc_form->checkInput()) {
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "editProperties");
-		}
-		
-		$this->initReviewAllocForm();
-		if (true) {
+		if ($this->alloc_form->checkInput() && true) {
 			$rows = array();
 			foreach ($this->alloc_form->getItems() as $item) {
 				if (!method_exists($item, "getPostVars"))
@@ -243,13 +237,22 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 				$row_postvars = $item->getPostVars();
 				$row_values = array();
 				foreach ($row_postvars as $row_postvar)
-					$row_values[] = $this->alloc_form->getInput($row_postvar);
+					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
 				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
 			}
+			foreach ($rows as $row) {
+				echo $row["q_id"] . " | ";
+				foreach ($row["reviewers"] as $id => $checked)
+					echo $id . " : " . $checked;
+				echo "<br>";
+			}
 			$this->object->allocateReviews($rows);
+			/*ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "editProperties");*/
 		}
+		$this->alloc_form->setValuesByPost();
 				
-		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());*/
+		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());
 	}
 
 	/**
