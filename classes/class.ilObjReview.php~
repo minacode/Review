@@ -365,7 +365,7 @@ class ilObjReview extends ilObjectPlugin {
 									 		 substr($reviewer_id, strpos($reviewer_id, "_")), 
 									 		 $row["q_id"], 
 									 		 $this->getId()));
-				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)), array("id" => array("integer", /*ID*/)));
+				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)), array("id" => array("integer", $row["q_id"])));
 			}
 		}
 	}

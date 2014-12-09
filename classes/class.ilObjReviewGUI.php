@@ -249,7 +249,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$this->object->allocateReviews($rows);
 		}
 				
-		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());*/
+		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());
 	}
 
 	/**

@@ -167,7 +167,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$reviewer_names[] = $reviewer['firstname'] . ' ' . $reviewer['lastname'];
 		$reviewer_ids = array();
 		foreach ($reviewers as $reviewer)
-			$reviewer_ids[] = $reviewer["id"];
+			$reviewer_ids[] = $reviewer["usr_id"];
 			
 		$reviewer_head = new ilAspectHeadGUI($reviewer_names);
 		$this->alloc_form->addItem($reviewer_head);
