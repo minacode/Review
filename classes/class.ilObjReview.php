@@ -54,15 +54,9 @@ class ilObjReview extends ilObjectPlugin {
 	function doCreate() {
 		global $ilDB;
 		
-		$group_res = $ilDB->queryF("SELECT parent FROM tree WHERE child=%s",
-											array("integer"),
-											array($this->getId()));
-											
-		while ($group_id = $ilDB->fetchAssoc($group_res)["parent"]);
-		
 		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
 			"(id, group_id) VALUES (".
-			$ilDB->quote($this->getId(), "integer"). ", ". $ilDB->quote($group_id, "integer").
+			$ilDB->quote($this->getId(), "integer"). ", ". $ilDB->quote($_GET["ref_id"], "integer").
 			")");
 	}
 	
