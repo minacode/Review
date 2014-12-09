@@ -318,7 +318,8 @@ class ilObjReview extends ilObjectPlugin {
 		$qpl = $ilDB->query("SELECT question_id AS id, title FROM qpl_questions ".
 								  "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								  "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND qpl_questions.state=0");
+								  "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_qust.id=qpl_questions.question_id ".
+								  "WHERE crs_items.parent_id=66 AND qpl_questions.original_id IS NULL AND rep_robj_xrev_quest.state=0");
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
 			$questions[] = $question;
