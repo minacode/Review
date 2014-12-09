@@ -110,6 +110,10 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$new_obj->update();
 	}
+	
+	public function getGroupId() {
+		return $this->group_id;
+	}
 		
 	/**
 	* Load all questions from the groups´ Question Pools,
@@ -134,7 +138,7 @@ class ilObjReview extends ilObjectPlugin {
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL",
 								   array("integer"),
-								   $this->getId());
+								   array($this->getGroupId()));
 		$db_questions = array();
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
@@ -192,7 +196,7 @@ class ilObjReview extends ilObjectPlugin {
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL AND qpl_questions.owner=%s",
 								   array("integer", "integer"),
-								   array($this->getId(), $ilUser->getId()));
+								   array($this->getGroupId(), $ilUser->getId()));
 		$db_questions = array();
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
@@ -214,7 +218,7 @@ class ilObjReview extends ilObjectPlugin {
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "WHERE crs_items.parent_id=%s AND rep_robj_xrev_revi.reviewer=%s",
 								   array("integer", "integer"),
-								   array($this->getId(), $ilUser->getId()));
+								   array($this->getGroupId(), $ilUser->getId()));
 		$reviews = array();
 		while ($review = $ilDB->fetchAssoc($rev))
 			$reviews[] = $review;
@@ -302,7 +306,7 @@ class ilObjReview extends ilObjectPlugin {
 								   "INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
 								   "WHERE object_data.title='il_grp_admin_%s' OR object_data.title='il_grp_member_%s'",
 								   array("integer", "integer"),
-								   /*array($_GET["ref_id"], $_GET["ref_id"])*/array(66, 66));
+								   array($this->getGroupId(), $this->getGroupId()));
 		$reviewers = array();
 		while ($reviewer = $ilDB->fetchAssoc($res))
 			$reviewers[] = $reviewer;
@@ -323,7 +327,7 @@ class ilObjReview extends ilObjectPlugin {
 								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.id=qpl_questions.question_id ".
 								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL AND rep_robj_xrev_quest.state=0",
 								   array("integer"),
-								   $this->getId()));
+								   array($this->getGroupId()));
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
 			$questions[] = $question;
