@@ -46,7 +46,7 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 			$this->postvars[$reviewer_id] = sprintf("id_%s_%s", $this->question_id, $reviewer_id);
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.matrix_row.html", true, true, $path_to_il_tpl);
-		$custom_tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/css/Review.css');
+		$custom_tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 		foreach ($this->postvars as $postvar) {
 			$chbox = new ilCheckboxInputGUI("", $postvar);
 			$chbox->insert($custom_tpl);
