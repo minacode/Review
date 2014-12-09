@@ -243,3 +243,20 @@ $ilDB->addTableColumn("rep_robj_xrev_quest", "state", array("type" => "integer",
 <?php
 $ilDB->addTableColumn("rep_robj_xrev_revobj", "group_id", array("type" => "integer", "length" => 4));
 ?>
+<#11>
+<?php
+$ilDB->addTableColumn("rep_robj_xrev_quest", "review_obj", array("type" => "integer", "length" => 4));
+?>
+<#12>
+<?php
+$ilDB->dropPrimaryKey("rep_robj_xrev_quest");
+?>
+<#13>
+<?php
+$ilDB->addTableColumn("rep_robj_xrev_quest", "question_id", array("type" => "integer", "length" => 4));
+$ilDB->addPrimaryKey("rep_robj_xrev_quest", array("id"));
+?>
+<#14>
+<?php
+$ilDB->createSequence("rep_robj_xrev_quest");
+?>
