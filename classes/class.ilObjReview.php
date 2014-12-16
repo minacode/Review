@@ -213,7 +213,9 @@ class ilObjReview extends ilObjectPlugin {
 									"INNER JOIN rep_robj_xrev_revobj ON rep_robj_xrev_revobj.id=rep_robj_xrev_revi.review_obj ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								   "WHERE crs_items.parent_id=%s AND rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s",
+								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
+								   "WHERE crs_items.parent_id=%s AND rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s ".
+								   "AND rep_robj_xrev_quest.state=1",
 								   array("integer", "integer", "integer"),
 								   array($this->getGroupId(), $ilUser->getId(), $this->getId()));
 		$reviews = array();
@@ -375,6 +377,49 @@ class ilObjReview extends ilObjectPlugin {
 				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)),
 								  array("question_id" => array("integer", $row["q_id"]), "review_obj" => array("integer", $this->getId())));
 			}
+		}
+	}
+	
+	/**
+	* Load all questions for which all reviews have been completed
+	*
+	* @return	array		$questions		array of associative arrays of questions
+	*/
+	public function loadReviewedQuestions() {
+		global $ilDB;
+		
+		$req = $ilDB->queryF("SELECT qpl_questions.question_id, qpl_questions.title, qpl_questions.author ".
+									"FROM qpl_questions ".
+									"INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
+									"WHERE rep_robj_xrev_quest.review_obj=%s AND rep_robj_xrev_quest.state=1",
+									array("integer"),
+									array($this->getId()));
+		$questions = array();							
+		while ($question = $ilDB->fetchAssoc($req)) {
+			$rev = $ilDB->queryF("SELECT id FROM rep_robj_xrev_revi ".
+										"WHERE state=0 AND question_id=%s AND review_obj=%s",
+										array("integer", "integer"),
+										array($question["question_id"], $this->getId()));
+			if ($ilDB->fetchAssoc($rev) == 0)
+				$questions[] = $question;
+		}
+		return $questions;
+	}
+	
+	/**
+	* Remove questions from the review cycle by marking them as finished
+	*
+	* @param		array		$questions		array of question_ids
+	*/
+	public function finishQuestions($questions) {
+		global $ilDB;
+		foreach ($questions as $question_id) {
+			$ilDB->update("rep_robj_xrev_quest",
+							  array("state" => array("integer", 2)),
+							  array("question_id" => array("integer", $question_id),
+							  		  "review_obj" => array("integer", $this->getId())
+							  )
+			);
 		}
 	}
 }

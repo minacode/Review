@@ -48,17 +48,6 @@ class ilReviewOutputGUI extends ilTable2GUI {
 
       $this->setTitle($lng->txt("rep_robj_xrev_review_output"));
 	}
-	
-	private function simulateData() {
-		$data = array();
-		$rev1 = new ilReviewInputGUI($this, "");
-		$rev1->setReadOnly();
-		$data[] = array("id" => 0, "review" => $rev1->getHTML());
-		$rev2 = new ilReviewInputGUI($this, "");
-		$rev2->setReadOnly();
-		$data[] = array("id" => 1, "review" => $rev2->getHTML());
-		$this->setData($data);
-	}
 
 	/*
 	* @param		array		$reviews		reviews to display

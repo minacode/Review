@@ -21,60 +21,49 @@
 	+-----------------------------------------------------------------------------+
 */
 
+
+include_once 'Services/Table/classes/class.ilTable2GUI.php';
+
 /**
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$
 */
 
-class ilAspectSelectInputGUI extends ilCustomInputGUI {
-	
-	private $select_inputs;
-	private $disabled;
-	
-	/**
-	* Constructor for table-like display of ilSelectInputGUIs
-	*
-	* @param	string	$title			title of the aspect
-	* @param array		$select_ipnuts	associative array of all selects,
-	*											$_POST variable => array of all options, pre-selected option
-	* @param	bool		$disabled		true if selects are read-only
-	*/
-	public function __construct($title, $select_inputs, $disabled) {
-		parent::__construct();
-		$this->setTitle($title);
-		$this->select_inputs = $select_inputs;
-		/*
-		foreach ($select_inputs as $postvar => $values)
-			$this->select_inputs[$postvar] = array_merge($values, array());
-			*/
-		$this->disabled = $disabled;
-		$this->fillTemplate();
+class ilQuestionFinishTableGUI extends ilTable2GUI {
+
+	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
+		global $ilCtrl, $lng;
+		parent::__construct($a_parent_obj, $a_parent_cmd);
+		$this->addColumn("", "", "1%");
+		$this->addColumn($lng->txt("title"), "", "65%");
+		$this->addColumn($lng->txt("author"), "", "30%");
+      $this->setEnableHeader(true);
+      // $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+      $this->setFormAction($ilCtrl->getFormAction($a_parent_obj, $a_parent_cmd));
+     	$this->setRowTemplate("tpl.question_finish_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
+      $this->setDefaultOrderField("id");
+      $this->setDefaultOrderDirection("asc");
+      $this->setSelectAllCheckbox('q_id');
+      $this->addCommandButton('updateProperties', $this->lng->txt('rep_robj_xrev_finish'));
+      
+      $this->setData($questions);
+ 
+      $this->setTitle($lng->txt("rep_robj_xrev_finished_questions"));
 	}
 	
-	/**
-	* fill the template with the given selects
-	*/
-	private function fillTemplate() {
-		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
-		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
-		foreach ((array) $this->select_inputs as $postvar => $values) {
-			$select = new ilSelectInputGUI("", $postvar);
-			$select->setValue($values["selected"]);
-			$select->setOptions($values["options"]);
-			$select->setDisabled($this->disabled);
-			$select->insert($custom_tpl);
-		}
-		$this->setHTML($custom_tpl->get());
-	}
-	
-	/**
-	* determine if the GUI components shall be disabled
+	/*
+	* Fill a single data row
 	*
-	* @param		bool		$disabled		true, if the GUI components shall be disabled
+	* @param	array		$a_set		Data record, displayed as one table row
 	*/
-	public function setDisabled($disabled) {
-		$this->disabled = $disabled;
-		$this->fillTemplate();
+	protected function fillRow($a_set) {
+		global $ilCtrl, $lng;
+		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["question_id"]);
+		$this->tpl->setVariable("CB_QUESTION_ID", $a_set["question_id"]);
+		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
+		$this->tpl->setVariable("TXT_AUTHOR", $a_set["author"]);
+		// $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "updateProperties"));
 	}
 }
+?>
