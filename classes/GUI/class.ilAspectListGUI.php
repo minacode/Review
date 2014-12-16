@@ -36,6 +36,8 @@ class ilAspectListGUI extends ilCustomInputGUI {
 	* @param	array		$captions		all answers to be displaye
 	*/
 	public function __construct($title, $answers) {
+		global $tpl;
+		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 		parent::__construct();
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_list.html", true, true, $path_to_il_tpl);

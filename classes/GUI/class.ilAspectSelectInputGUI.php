@@ -52,6 +52,8 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	* fill the template with the given selects
 	*/
 	private function fillTemplate() {
+		global $tpl;
+		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
 		foreach ((array) $this->select_inputs as $postvar => $values) {

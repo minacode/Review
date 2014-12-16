@@ -4,10 +4,15 @@
     Author     : Josephine Rehak
 */
 
-.iosCheckboxMatrix{
+.iosCheckboxMatrix, .iosAspectRow{
 	text-align:center;
-	width:130px;
+	width:100px;
 	height:16px
+}
+
+.iosCheckboxMatrix div input{
+	margin: 0px auto !important;
+	float: none;
 }
 
 .iosNoBorder{
