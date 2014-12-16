@@ -42,13 +42,14 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
-	public function __construct($a_parent_obj, $a_parent_cmd, $review) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $review, $taxonomy) {
 		global $ilCtrl, $lng;
 		parent::__construct();
 		
 		$this->a_parent_obj = $a_parent_obj;
 		$this->a_parent_cmd = $a_parent_cmd;
 		$this->review = $review;
+		$this->taxonomy = $taxonomy;
 		
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
@@ -136,7 +137,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($head);
 		
 		$auth = new ilAspectSelectInputGUI($lng->txt("author"),
-													  array("cog_a" => array("options" => $this->cognitiveProcess(),
+													  array("cog_a" => array("options" => $this->taxonomy,
 																					 "selected" => $this->simulateData()["cog"]),
 															  "kno_a" => array("options" => $this->knowledge(),
 																					 "selected" => $this->simulateData()["kno"])),
@@ -144,7 +145,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($auth);
 
 		$revi = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_reviewer"),
-													  array("cog_r" => array("options" => $this->cognitiveProcess(),
+													  array("cog_r" => array("options" => $this->taxonomy,
 																					 "selected" => $this->review["taxonomy"]),
 															  "kno_r" => array("options" => $this->knowledge(),
 																					 "selected" => $this->review["knowledge_dimension"])),
@@ -206,17 +207,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 						  "kno" => 3
 						 );
 		return $data;
-	}
-	
-	private function cognitiveProcess() {
-		return array(0 => "",
-						 1 => "Remember",
-						 2 => "Understand",
-						 3 => "Apply",
-						 4 => "Analyze",
-						 5 => "Evaluate",
-						 6 => "Create",
-						);
 	}
 	
 	private function knowledge() {

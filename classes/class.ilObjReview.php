@@ -422,5 +422,75 @@ class ilObjReview extends ilObjectPlugin {
 			);
 		}
 	}
+	
+	/*
+	* Get taxonomy data from DB
+	*
+	* @return		array			$taxonomies		associative array of taxonomy value id => term
+	*/
+	public static function taxonomy() {
+		global $ilDB, $lng;
+		$res = $ilDB->query("SELECT * FROM rep_robj_xrev_taxon");
+		$taxonomies = array();
+		while ($taxonomy = $ilDB->fetchAssoc($res))
+			$taxonomies[$taxonomy["id"]] = $lng->txt("rep_robj_xrev_".$taxonomy["term"]);
+		return $taxonomies;
+	}
+		
+	/*
+	* Get knowledge dimension data from DB
+	*
+	* @return		array			$know_dims		associative array of knowledge dimension value id => term
+	*/
+	public static function knowledgeDimension() {
+		global $ilDB, $lng;
+		$res = $ilDB->query("SELECT * FROM rep_robj_xrev_knowd");
+		$know_dims = array();
+		while ($know_dim = $ilDB->fetchAssoc($res))
+			$know_dims[$know_dim["id"]] = $lng->txt("rep_robj_xrev_".$know_dim["term"]);
+		return $know_dims;
+	}
+		
+	/*
+	* Get expertise data from DB
+	*
+	* @return		array			$expertises		associative array of expertise value id => term
+	*/
+	public static function expertise() {
+		global $ilDB, $lng;
+		$res = $ilDB->query("SELECT * FROM rep_robj_xrev_expert");
+		$expertises = array();
+		while ($expertise = $ilDB->fetchAssoc($res))
+			$expertises[$expertise["id"]] = $lng->txt("rep_robj_xrev_".$expertise["term"]);
+		return $expertises;
+	}	
+	
+	/*
+	* Get rating data from DB
+	*
+	* @return		array			$ratings		associative array of rating value id => term
+	*/
+	public static function rating() {
+		global $ilDB, $lng;
+		$res = $ilDB->query("SELECT * FROM rep_robj_xrev_rate");
+		$ratings = array();
+		while ($rating = $ilDB->fetchAssoc($res))
+			$ratings[$rating["id"]] = $lng->txt("rep_robj_xrev_".$rating["term"]);
+		return $ratings;
+	}
+		
+	/*
+	* Get evaluation data from DB
+	*
+	* @return		array			$evaluations		associative array of evaluation value id => term
+	*/
+	public static function evaluation() {
+		global $ilDB, $lng;
+		$res = $ilDB->query("SELECT * FROM rep_robj_xrev_eval");
+		$evaluations = array();
+		while ($evaluation = $ilDB->fetchAssoc($res))
+			$evaluations[$evaluation["id"]] = $lng->txt("rep_robj_xrev_".$evaluation["term"]);
+		return $evaluations;
+	}
 }
 ?>

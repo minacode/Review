@@ -298,7 +298,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		//$q_gui = new ilTestExpressPageObjectGUI($this->review["question_id"]);
 		//$q_gui->preview();
-		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]));
+		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+												$this->object->taxonomy()
+						 );
 		$tpl->setContent(/*$q_gui->getHtml() .*/ $input->getHTML());
 	}
 	
@@ -309,7 +311,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]));;
+		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+												$this->object->taxonomy()
+						 );
 		if ($input->checkInput()) {
 			$form_data = array();
 			$post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
@@ -335,7 +339,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function showReviews() {
 		global $tpl, $ilTabs;		
 		$ilTabs->activateTab("content");
-		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]));
+		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
+					  						  $this->object->taxonomy()
+					  );
 		$tpl->setContent($tbl->getHtml());
 	}
 }

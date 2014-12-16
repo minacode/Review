@@ -42,13 +42,14 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
-	public function __construct($a_parent_obj, $a_parent_cmd, $review) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $review, $taxonomy) {
 		global $ilCtrl, $lng;
 		parent::__construct();
 		
 		$this->a_parent_obj = $a_parent_obj;
 		$this->a_parent_cmd = $a_parent_cmd;
 		$this->review = $review;
+		$this->taxonomy = $taxonomy;
 		
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
@@ -264,6 +265,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	* @return		bool		$valid		true, if input in custom input GUIs is valid
 	*/
 	public function checkInput() {
+		global $lng;
 		$valid = true;
 		if (!parent::checkInput())
 			$valid = false;

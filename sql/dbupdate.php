@@ -260,3 +260,11 @@ $ilDB->addPrimaryKey("rep_robj_xrev_quest", array("id"));
 <?php
 $ilDB->createSequence("rep_robj_xrev_quest");
 ?>
+<#15>
+<?php
+$ilDB->update("rep_robj_xrev_eval", array("term" => array("text", "select")), array("id" => array("integer", 0)));
+$ilDB->update("rep_robj_xrev_expert", array("term" => array("text", "select")), array("id" => array("integer", 0)));
+$ilDB->update("rep_robj_xrev_knowd", array("term" => array("text", "select")), array("id" => array("integer", 0)));
+$ilDB->update("rep_robj_xrev_rate", array("term" => array("text", "select")), array("id" => array("integer", 0)));
+$ilDB->update("rep_robj_xrev_taxon", array("term" => array("text", "select")), array("id" => array("integer", 0)));
+?>

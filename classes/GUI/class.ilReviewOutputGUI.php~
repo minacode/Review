@@ -32,9 +32,12 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	*
 	* @param		array		$reviews		reviews to display
 	*/
-	public function __construct($a_parent_obj, $a_parent_cmd, $reviews) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $taxonomy) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
+		
+		$this->taxonomy = $taxonomy;
+		
 		$this->addColumn($lng->txt("reviews"), "", "100%");
       $this->setEnableHeader(false);
       $this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjreviewGUI", "showContent"));
@@ -47,17 +50,6 @@ class ilReviewOutputGUI extends ilTable2GUI {
 		$this->setUpData($reviews);
 
       $this->setTitle($lng->txt("rep_robj_xrev_review_output"));
-	}
-	
-	private function simulateData() {
-		$data = array();
-		$rev1 = new ilReviewInputGUI($this, "");
-		$rev1->setReadOnly();
-		$data[] = array("id" => 0, "review" => $rev1->getHTML());
-		$rev2 = new ilReviewInputGUI($this, "");
-		$rev2->setReadOnly();
-		$data[] = array("id" => 1, "review" => $rev2->getHTML());
-		$this->setData($data);
 	}
 
 	/*
