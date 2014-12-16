@@ -17,5 +17,7 @@
 
 .iosNoBorder{
 	border: 0px;
+	display: block;
+	height: 13px;
 }
 
