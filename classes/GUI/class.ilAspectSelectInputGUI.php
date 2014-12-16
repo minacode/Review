@@ -29,6 +29,9 @@
 
 class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	
+	private $select_inputs;
+	private $disabled;
+	
 	/**
 	* Constructor for table-like display of ilSelectInputGUIs
 	*
@@ -39,16 +42,35 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	*/
 	public function __construct($title, $select_inputs, $disabled) {
 		parent::__construct();
+		$this->setTitle($title);
+		$this->select_inputs = $select_inputs;
+		$this->disabled = $disabled;
+		$this->fillTemplate();
+	}
+	
+	/**
+	* fill the template with the given selects
+	*/
+	private function fillTemplate() {
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
-		foreach ($select_inputs as $postvar => $values) {
+		foreach ((array) $this->select_inputs as $postvar => $values) {
 			$select = new ilSelectInputGUI("", $postvar);
 			$select->setValue($values["selected"]);
 			$select->setOptions($values["options"]);
-			$select->setDisabled($disabled);
+			$select->setDisabled($this->disabled);
 			$select->insert($custom_tpl);
 		}
-		$this->setTitle($title);
-		$this->setHTML($custom_tpl->get());	
+		$this->setHTML($custom_tpl->get());
+	}
+	
+	/**
+	* determine if the GUI components shall be disabled
+	*
+	* @param		bool		$disabled		true, if the GUI components shall be disabled
+	*/
+	public function setDisabled($disabled) {
+		$this->disabled = $disabled;
+		$this->fillTemplate();
 	}
 }

@@ -42,10 +42,6 @@ class ilAspectListGUI extends ilCustomInputGUI {
 		foreach ($answers as $answer) {
 			$lable = new ilNonEditableValueGUI("");
 			$lable->setValue($answer["answer"]);
-			if ($answer["correct"])
-				$lable->setInfo("korrekt");
-			else
-				$lable->setInfo("falsch");
 			$lable->insert($custom_tpl);
 		}
 		$this->setTitle($title);

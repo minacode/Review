@@ -24,6 +24,7 @@
 
 include_once 'Services/Form/classes/class.ilPropertyFormGUI.php';
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
+include_once 'Modules/Test/classes/class.ilTestExpressPageObjectGUI.php';
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilAspectSelectInputGUI.php";
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
@@ -59,7 +60,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateAdditionalData();		
 		
 		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
-		$this->addCommandButton($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showContent"), $lng->txt("cancel"));
 	}
 	
 	private function populateQuestionFormPart() {
@@ -68,6 +68,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$head_q->setTitle($lng->txt("question"));
 		$this->addItem($head_q);
 		
+		/*
 		$title = new ilNonEditableValueGUI($lng->txt("title"));
 		$title->setValue($this->simulateData()["title"]);
 		$this->addItem($title);
@@ -81,7 +82,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($question);
 
 		$answers = new ilAspectListGUI($lng->txt("answers"), $this->simulateData()["answers"]);
-		$this->addItem($answers);
+		$this->addItem($answers);*/
+		
+		//$this->addItem($q_gui);
 	}
 	
 	private function populateReviewFormPart() {
@@ -94,7 +97,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 													 $lng->txt("rep_robj_xrev_relevance"),
 													 $lng->txt("rep_robj_xrev_expression")));
 		$this->addItem($head);
-		
+
 		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->rating(),
 																													"selected" => $this->review["desc_corr"]),
 																								 "dr" => array("options" => $this->rating(),
@@ -103,7 +106,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 																												   "selected" => $this->review["desc_expr"])),
 													  false);
 		$this->addItem($desc);
-		
+
 		$quest = new ilAspectSelectInputGUI($lng->txt("question"), array("qc" => array("options" => $this->rating(),
 																										 		 "selected" => $this->review["quest_corr"]),
 																					 		  "qr" => array("options" => $this->rating(),
@@ -112,7 +115,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 																												 "selected" => $this->review["quest_expr"])),
 													  false);
 		$this->addItem($quest);
-		
+
 		$answ = new ilAspectSelectInputGUI($lng->txt("answers"), array("ac" => array("options" => $this->rating(),
 																											  "selected" => $this->review["answ_corr"]),
 																							"ar" => array("options" => $this->rating(),
@@ -139,7 +142,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 																					 "selected" => $this->simulateData()["kno"])),
 													  true);
 		$this->addItem($auth);
-		
+
 		$revi = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_reviewer"),
 													  array("cog_r" => array("options" => $this->cognitiveProcess(),
 																					 "selected" => $this->review["taxonomy"]),
@@ -147,7 +150,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 																					 "selected" => $this->review["knowledge_dimension"])),
 													  false);
 		$this->addItem($revi);
-		
 	}
 		
 	private function populateEvaluationFormPart() {
@@ -163,6 +165,8 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$group_e->addOption($op_e);
 		$op_d = new ilRadioOption($lng->txt("rep_robj_xrev_quest_refuse"), "3", "");
 		$group_e->addOption($op_d);
+		$group_e->setValue($this->review["group_e"]);
+		$group_e->setRequired(true);
 		$this->addItem($group_e);
 
 		$comment = new ilTextAreaInputGUI($lng->txt("rep_robj_xrev_comment"), "comment");
@@ -241,11 +245,38 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 						);
 	}
 	
+	/**
+	* disable all input GUIs and buttons the form contains
+	*/
 	public function setReadOnly() {
-		foreach ($this->getItems() as $item)
+		foreach ($this->getItems() as $item) {
 			if (method_exists($item, "setDisabled"))
 				$item->setDisabled(true);
+			if (method_exists($item, "setRequired"))
+				$item->setRequired(false);
+			}
 		$this->clearCommandButtons();
+	}
+	
+	/**
+	* check, if input in custom input GUIs is valid
+	*
+	* @return		bool		$valid		true, if input in custom input GUIs is valid
+	*/
+	public function checkInput() {
+		$valid = true;
+		if (!parent::checkInput())
+			$valid = false;
+		$to_check = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r");
+		foreach ($to_check as $input)
+			if ($this->getInput($input) == 0)
+				$valid = false;
+		// because not using setRequired(true) on normal input GUIs
+		if ($this->getInput("exp" == 0) or $this->getInput("comment" == ""))
+			$valid = false; 
+		if (!$valid)
+			ilUtil::sendFailure($lng->txt("form_input_not_valid"));
+		return $valid;	
 	}
 } 
 

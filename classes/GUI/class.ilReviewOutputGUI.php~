@@ -70,7 +70,6 @@ class ilReviewOutputGUI extends ilTable2GUI {
 			$input_form->setReadOnly();
 			$data[] = array("id" => $review["id"],
 						  		 "review" => $input_form->getHtml());
-			$data[]["review"]->setReadOnly();
 		}
 		$this->setData($data);
 	}

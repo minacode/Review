@@ -56,17 +56,35 @@ relevance#:#Relevance
 expression#:#Expression
 create#:#Create Review
 view#:#View Reviews
-tax_and_know_dim#:#Taxonomiestufe und Wissensdimension
-taxonomy#:#Taxonomie
-knowledge_dim#:#Wissensdimension
+tax_and_know_dim#:#Taxonomy and knowledge dimension
+taxonomy#:#Taxonomy
+knowledge_dim#:#Knowledge dimension
 reviewer#:#Reviewer
-add_info#:#Weitere Informationen
-auth_quest#:#Autor der Frage
-rating#:#Urteil
-comment#:#Bemerkungen
+add_info#:#Further Informations
+auth_quest#:#Author of Question
+rating#:#Judgement
+comment#:#Comment
 expertise#:#Expertise
-quest_accept#:#Frage akzeptiert
-quest_edit#:#Frage überarbeiten
-quest_refuse#:#Frage abgelehnt
-review_input#:#Review-Eingabeformular
-evaluation#:#Bewertung
+quest_accept#:#Question acceptet
+quest_edit#:#Rework Question
+quest_refuse#:#Question refused
+review_input#:#Review input form
+evaluation#:#Evaluation
+eval_good#:#Good
+eval_correct#:#Correct
+eval_refused#:#Refused
+taxon_remem#:#Remember
+taxon_underst#:#Understand
+taxon_apply#:#Apply
+taxon_anal#:#Analyze
+taxon_eval#:#Evaluate
+taxon_create#:#Create
+knowd_concp#:#Conceptual
+knowd_fact#:#Factual
+knowd_proc#:#Procedural
+knowd_meta#:#Metacognitive
+expert_no#:#No Familiarity
+expert_some#:#Some Familiarity
+expert_know#:#Knowledgeable
+expert_expert#:#Expert
+finished_questions#:#Completely reviewed questions
