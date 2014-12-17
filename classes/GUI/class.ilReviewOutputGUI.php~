@@ -32,11 +32,15 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	*
 	* @param		array		$reviews		reviews to display
 	*/
-	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $taxonomy) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		
 		$this->taxonomy = $taxonomy;
+		$this->knowledge_dimension = $knowledge_dimension;
+		$this->expertise = $expertise;
+		$this->rating = $rating;
+		$this->evaluation = $evaluation;
 		
 		$this->addColumn($lng->txt("reviews"), "", "100%");
       $this->setEnableHeader(false);
@@ -58,7 +62,11 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	private function setUpData($reviews) {
 		$data = array();
 		foreach ($reviews as $review) {
-			$input_form = new ilReviewInputGUI($this, "", $review);
+			$input_form = new ilReviewInputGUI($this, "", $review, $this->taxonomy(),
+												$this->object->knowledgeDimension(),
+												$this->object->expertise(),
+												$this->object->rating(),
+												$this->object->evalutaion());
 			$input_form->setReadOnly();
 			$data[] = array("id" => $review["id"],
 						  		 "review" => $input_form->getHtml());

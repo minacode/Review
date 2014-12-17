@@ -42,7 +42,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
-	public function __construct($a_parent_obj, $a_parent_cmd, $review, $taxonomy) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $review, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
 		parent::__construct();
 		
@@ -50,6 +50,10 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->a_parent_cmd = $a_parent_cmd;
 		$this->review = $review;
 		$this->taxonomy = $taxonomy;
+		$this->knowledge_dimension = $knowledge_dimension;
+		$this->expertise = $expertise;
+		$this->rating = $rating;
+		$this->evaluation = $evaluation;
 		
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
@@ -99,29 +103,29 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 													 $lng->txt("rep_robj_xrev_expression")));
 		$this->addItem($head);
 
-		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->rating(),
+		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->evaluation,
 																													"selected" => $this->review["desc_corr"]),
-																								 "dr" => array("options" => $this->rating(),
+																								 "dr" => array("options" => $this->evaluation,
 																												   "selected" => $this->review["desc_relv"]),
-																								 "de" => array("options" => $this->rating(),
+																								 "de" => array("options" => $this->evaluation,
 																												   "selected" => $this->review["desc_expr"])),
 													  false);
 		$this->addItem($desc);
 
-		$quest = new ilAspectSelectInputGUI($lng->txt("question"), array("qc" => array("options" => $this->rating(),
+		$quest = new ilAspectSelectInputGUI($lng->txt("question"), array("qc" => array("options" => $this->evaluation,
 																										 		 "selected" => $this->review["quest_corr"]),
-																					 		  "qr" => array("options" => $this->rating(),
+																					 		  "qr" => array("options" => $this->evaluation,
 																												 "selected" => $this->review["quest_relv"]),
-																							  "qe" => array("options" => $this->rating(),
+																							  "qe" => array("options" => $this->evaluation,
 																												 "selected" => $this->review["quest_expr"])),
 													  false);
 		$this->addItem($quest);
 
-		$answ = new ilAspectSelectInputGUI($lng->txt("answers"), array("ac" => array("options" => $this->rating(),
+		$answ = new ilAspectSelectInputGUI($lng->txt("answers"), array("ac" => array("options" => $this->evaluation,
 																											  "selected" => $this->review["answ_corr"]),
-																							"ar" => array("options" => $this->rating(),
+																							"ar" => array("options" => $this->evaluation,
 																											  "selected" => $this->review["answ_relv"]),
-																							"ae" => array("options" => $this->rating(),
+																							"ae" => array("options" => $this->evaluation,
 																											  "selected" => $this->review["answ_expr"])),
 													  false);
 		$this->addItem($answ);
@@ -137,17 +141,17 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($head);
 		
 		$auth = new ilAspectSelectInputGUI($lng->txt("author"),
-													  array("cog_a" => array("options" => $this->cognitiveProcess(),
+													  array("cog_a" => array("options" => $this->taxonomy,
 																					 "selected" => $this->simulateData()["cog"]),
-															  "kno_a" => array("options" => $this->knowledge(),
+															  "kno_a" => array("options" => $this->knowledge_dimension,
 																					 "selected" => $this->simulateData()["kno"])),
 													  true);
 		$this->addItem($auth);
 
 		$revi = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_reviewer"),
-													  array("cog_r" => array("options" => $this->cognitiveProcess(),
+													  array("cog_r" => array("options" => $this->taxonomy,
 																					 "selected" => $this->review["taxonomy"]),
-															  "kno_r" => array("options" => $this->knowledge(),
+															  "kno_r" => array("options" => $this->knowledge_dimension,
 																					 "selected" => $this->review["knowledge_dimension"])),
 													  false);
 		$this->addItem($revi);
@@ -178,7 +182,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		
 		$expertise = new ilSelectInputGUI($lng->txt("rep_robj_xrev_expertise"), "exp");
 		$expertise->setValue($this->review["expertise"]);
-		$expertise->setOptions($this->expertise());
+		$expertise->setOptions($this->expertise);
 		$this->addItem($expertise);
 	}
 		
@@ -207,43 +211,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 						  "kno" => 3
 						 );
 		return $data;
-	}
-	
-	private function cognitiveProcess() {
-		return array(0 => "",
-						 1 => "Remember",
-						 2 => "Understand",
-						 3 => "Apply",
-						 4 => "Analyze",
-						 5 => "Evaluate",
-						 6 => "Create",
-						);
-	}
-	
-	private function knowledge() {
-		return array(0 => "",
-						 1 => "Conceptual",
-						 2 => "Factual",
-						 3 => "Procedural",
-						 4 => "Metacognitive",
-						);
-	}
-	
-	private function rating() {
-		return array(0 => "",
-						 1 => "gut",
-						 2 => "Korrektur",
-						 3 => "ungeeignet",
-						);
-	}
-	
-	private function expertise() {
-		return array(0 => "",
-						 1 => "No familiarity",
-						 2 => "Some familiarity",
-						 3 => "Knowledgeable",
-						 4 => "Expert"
-						);
 	}
 	
 	/**

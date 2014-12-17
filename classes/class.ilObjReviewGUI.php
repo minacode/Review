@@ -299,7 +299,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		//$q_gui = new ilTestExpressPageObjectGUI($this->review["question_id"]);
 		//$q_gui->preview();
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-												$this->object->taxonomy()
+												$this->object->taxonomy(),
+												$this->object->knowledgeDimension(),
+												$this->object->expertise(),
+												$this->object->rating(),
+												$this->object->evaluation()
 						 );
 		$tpl->setContent(/*$q_gui->getHtml() .*/ $input->getHTML());
 	}
@@ -312,7 +316,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-												$this->object->taxonomy()
+												$this->object->taxonomy(),
+												$this->object->knowledgeDimension(),
+												$this->object->expertise(),
+												$this->object->rating(),
+												$this->object->evaluation()
 						 );
 		if ($input->checkInput()) {
 			$form_data = array();
@@ -340,7 +348,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs;		
 		$ilTabs->activateTab("content");
 		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
-					  						  $this->object->taxonomy()
+					  						  $this->object->taxonomy(),
+												$this->object->knowledgeDimension(),
+												$this->object->expertise(),
+												$this->object->rating(),
+												$this->object->evaluation()
 					  );
 		$tpl->setContent($tbl->getHtml());
 	}
