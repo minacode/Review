@@ -90,9 +90,22 @@ class ilObjReview extends ilObjectPlugin {
 	function doDelete() {
 		global $ilDB;
 		
+		$res = $ilDB->queryF("SELECT rep_robj_xrev_revobj.id FROM rep_robj_xrev_revobj ".
+									"INNER JOIN object_reference ON object_reference.obj_id=rep_robj_xrev_revobj.id ".
+									"WHERE object_reference.ref_id=%s",
+									$_GET["item_ref_id"]);
+		
+		if ($id = $ilDB->fetchAssoc($res));		
+		
 		$ilDB->manipulate("DELETE FROM rep_robj_xrev_revobj WHERE ".
-			" id = ".$ilDB->quote($this->getId(), "integer")
+			" id = ".$ilDB->quote($id, "integer")
 			);
+			
+		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
+			"(id, group_id) VALUES (0, 'Hello World')");	
+		
+		$ilDB->delete("rep_robj_xrev_revi", array("review_obj" => array("integer", $id)));
+		$ilDB->delete("rep_robj_xrev_quest", array("review_obj" => array("integer", $id)));
 		
 	}
 	
@@ -491,6 +504,25 @@ class ilObjReview extends ilObjectPlugin {
 		while ($evaluation = $ilDB->fetchAssoc($res))
 			$evaluations[$evaluation["id"]] = $lng->txt("rep_robj_xrev_".$evaluation["term"]);
 		return $evaluations;
+	}
+	
+	/**
+	* Load metadata of a question
+	*
+	* @param		int		$q_id			question id
+	*
+	* @return	array		$question	$question metadata as an associative array
+	*/
+	public function loadQuestionMetaData($q_id) {
+		global $ilDB;
+		$req = $ilDB->queryF("SELECT qpl_questions.title, qpl_questions.description, usr_data.firstname, usr_data.lastname ".
+									"FROM qpl_questions ".
+									"INNER JOIN usr_data ON usr_data.usr_id=qpl_questions.owner ".
+									"WHERE qpl_questions.question_id=%s",
+									array("integer"),
+									array($q_id)
+						  );
+		return $ilDB->fetchAssoc($req);
 	}
 }
 ?>

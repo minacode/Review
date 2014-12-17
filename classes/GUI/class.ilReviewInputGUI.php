@@ -58,37 +58,11 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
 		
-		$this->populateQuestionFormPart();
 		$this->populateReviewFormPart();
 		$this->populateTaxonomyFormPart();
 		$this->populateEvaluationFormPart();
 		
 		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
-	}
-	
-	private function populateQuestionFormPart() {
-		global $lng;
-		$head_q = new ilFormSectionHeaderGUI();
-		$head_q->setTitle($lng->txt("question"));
-		$this->addItem($head_q);
-		
-		/*
-		$title = new ilNonEditableValueGUI($lng->txt("title"));
-		$title->setValue($this->simulateData()["title"]);
-		$this->addItem($title);
-		
-		$description = new ilNonEditableValueGUI($lng->txt("description"));
-		$description->setValue($this->simulateData()["description"]);
-		$this->addItem($description);
-		
-		$question = new ilNonEditableValueGUI($lng->txt("question"));
-		$question->setValue($this->simulateData()["question"]);
-		$this->addItem($question);
-
-		$answers = new ilAspectListGUI($lng->txt("answers"), $this->simulateData()["answers"]);
-		$this->addItem($answers);*/
-		
-		//$this->addItem($q_gui);
 	}
 	
 	private function populateReviewFormPart() {

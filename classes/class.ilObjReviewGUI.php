@@ -21,7 +21,7 @@
 	+-----------------------------------------------------------------------------+
 */
 
-include_once 'Modules/Test/classes/class.ilTestExpressPageObjectGUI.php';
+include_once 'Modules/TestQuestionPool/classes/class.assQuestionGUI.php';
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewOutputGUI.php");
@@ -36,6 +36,8 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionFinishTableGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -53,7 +55,7 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, ilTestExpressPageObjectGUI
+* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI
 *
 */
 class ilObjReviewGUI extends ilObjectPluginGUI {
@@ -80,25 +82,18 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	function performCommand($cmd) {
 		switch ($cmd) {
-			case "editProperties":		// list all commands that need write permission here
+			case "editProperties":
 			case "updateProperties":
-			//case "...":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
 			
-			case "showContent":			// list all commands that need read permission here
-			//case "...":
-			//case "...":
-				$this->checkPermission("read");
-				$this->$cmd();
-				break;
-				
+			case "showContent":
 			case "inputReview":
 			case "showReviews":
 			case "saveReview":
-			//Write Access für User prüfen
-			 	$this->$cmd();
+				$this->checkPermission("read");
+				$this->$cmd();
 				break;
 		}
 	}
@@ -296,8 +291,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs, $ilCtrl;		
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-		//$q_gui = new ilTestExpressPageObjectGUI($this->review["question_id"]);
-		//$q_gui->preview();
+		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
+		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
 												$this->object->taxonomy(),
 												$this->object->knowledgeDimension(),
@@ -305,7 +300,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 												$this->object->rating(),
 												$this->object->evaluation()
 						 );
-		$tpl->setContent(/*$q_gui->getHtml() .*/ $input->getHTML());
+		$tpl->setContent($quest->getHTML() . $input->getHTML());
 	}
 	
 	/*
@@ -315,6 +310,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
+		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
 												$this->object->taxonomy(),
 												$this->object->knowledgeDimension(),
@@ -338,7 +335,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			// $ilCtrl->redirect($this, "inputReview");
 		}
 		$input->setValuesByPost();
-		$tpl->setContent($input->getHtml());
+		$tpl->setContent($quest->getHTML() . $input->getHtml());
 	}
 
 	/**
@@ -347,6 +344,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function showReviews() {
 		global $tpl, $ilTabs;		
 		$ilTabs->activateTab("content");
+		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
+		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
 					  						  $this->object->taxonomy(),
 												$this->object->knowledgeDimension(),
@@ -354,7 +353,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 												$this->object->rating(),
 												$this->object->evaluation()
 					  );
-		$tpl->setContent($tbl->getHtml());
+		$tpl->setContent($quest->getHTML().$tbl->getHtml());
 	}
 }
 ?>

@@ -62,7 +62,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->populateReviewFormPart();
 		$this->populateTaxonomyFormPart();
 		$this->populateEvaluationFormPart();
-		$this->populateAdditionalData();		
 		
 		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
 	}
@@ -186,17 +185,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($expertise);
 	}
 		
-	private function populateAdditionalData() {
-		global $lng;
-		$head_a = new ilFormSectionHeaderGUI();
-		$head_a->setTitle($lng->txt("rep_robj_xrev_add_info"));
-		$this->addItem($head_a);
-		
-		$author = new ilNonEditableValueGUI($lng->txt("rep_robj_xrev_auth_quest"));
-		$author->setValue($this->simulateData()["author"]);
-		$this->addItem($author);
-	}
-
 	private function simulateData() {
 		$data = array("answers" => array(
 													array("id" => 0, "answer" => "42", "correct" => 1),
