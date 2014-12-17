@@ -294,6 +294,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
 												$this->object->taxonomy(),
 												$this->object->knowledgeDimension(),
 												$this->object->expertise(),
@@ -313,6 +314,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
 												$this->object->taxonomy(),
 												$this->object->knowledgeDimension(),
 												$this->object->expertise(),
@@ -347,11 +349,12 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
+											  $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
 					  						  $this->object->taxonomy(),
-												$this->object->knowledgeDimension(),
-												$this->object->expertise(),
-												$this->object->rating(),
-												$this->object->evaluation()
+											  $this->object->knowledgeDimension(),
+											  $this->object->expertise(),
+											  $this->object->rating(),
+											  $this->object->evaluation()
 					  );
 		$tpl->setContent($quest->getHTML().$tbl->getHtml());
 	}

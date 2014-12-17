@@ -42,7 +42,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
-	public function __construct($a_parent_obj, $a_parent_cmd, $review, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $review, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
 		parent::__construct();
 		
@@ -54,6 +54,8 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->expertise = $expertise;
 		$this->rating = $rating;
 		$this->evaluation = $evaluation;
+		
+		$this->quest_tax = $quest_tax;
 		
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
@@ -115,9 +117,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		
 		$auth = new ilAspectSelectInputGUI($lng->txt("author"),
 													  array("cog_a" => array("options" => $this->taxonomy,
-																					 "selected" => $this->simulateData()["cog"]),
+																					 "selected" => $this->quest_tax["taxonomy"]),
 															  "kno_a" => array("options" => $this->knowledge_dimension,
-																					 "selected" => $this->simulateData()["kno"])),
+																					 "selected" => $this->quest_tax["knowledge_dimension"])),
 													  true);
 		$this->addItem($auth);
 
@@ -157,22 +159,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$expertise->setValue($this->review["expertise"]);
 		$expertise->setOptions($this->expertise);
 		$this->addItem($expertise);
-	}
-		
-	private function simulateData() {
-		$data = array("answers" => array(
-													array("id" => 0, "answer" => "42", "correct" => 1),
-													array("id" => 1, "answer" => "zweiundvierzig", "correct" => 0),
-													array("id" => 2, "answer" => "forty two", "correct" => 0)
-												  ),
-						  "title" => "Dummy-Titel",
-						  "question" => "Ist diese Dummy-Frage eine Dummy-Frage?",
-						  "description" => "Dummy-Beschreibung der zu diesem Dummy-Review gehörigen Dummy-Frage",
-						  "author" => "Dummy Autor",
-						  "cog" => 2,
-						  "kno" => 3
-						 );
-		return $data;
 	}
 	
 	/**

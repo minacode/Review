@@ -523,5 +523,25 @@ class ilObjReview extends ilObjectPlugin {
 									array($q_id)
 						  );
 		return $ilDB->fetchAssoc($req);
+	}
+	
+	/**
+	* Load taxonomy and knowledge dimension of a question
+	*
+	* @param		int		$q_id			question id
+	*
+	* @return	array		$question	$question taxonomy data as an associative array
+	*/
+	public function loadQuestionTaxonomyData($q_id) {
+		global $ilDB;
+		$req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
+									"FROM qpl_questions ".
+									"INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
+									"WHERE qpl_questions.question_id=%s",
+									array("integer"),
+									array($q_id)
+						  );
+		return $ilDB->fetchAssoc($req);
+	}
 }
 ?>
