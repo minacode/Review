@@ -43,7 +43,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_cmd;
 	
 	public function __construct($a_parent_obj, $a_parent_cmd, $review, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
-		global $ilCtrl, $lng;
+		global $ilCtrl, $lng, $ilAccess;
 		parent::__construct();
 		
 		$this->a_parent_obj = $a_parent_obj;
@@ -60,11 +60,21 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->setTitle($lng->txt("rep_robj_xrev_review_input"));
 		$this->setFormAction($ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "saveReview"));
 		
+		if ($this->review["lastname"] and $ilAccess->checkAccess("write", "", $a_parent_obj->a_parent_obj->object->getRefId()))
+			$this->populateReviewerData();
 		$this->populateReviewFormPart();
 		$this->populateTaxonomyFormPart();
 		$this->populateEvaluationFormPart();
 		
 		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
+	}
+	
+	private function populateReviewerData() {
+		global $lng;
+		$reviewer = new ilNonEditableValueGUI("");
+		$reviewer->setTitle($lng->txt("rep_robj_xrev_reviewer"));
+		$reviewer->setValue($this->review["firstname"]." ".$this->review["lastname"]);
+		$this->addItem($reviewer);
 	}
 	
 	private function populateReviewFormPart() {
@@ -153,11 +163,13 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$comment->setCols(70);
 		$comment->setRows(10);
 		$comment->setValue($this->review["eval_comment"]);
+		$comment->setRequired(true);
 		$this->addItem($comment);
 		
 		$expertise = new ilSelectInputGUI($lng->txt("rep_robj_xrev_expertise"), "exp");
 		$expertise->setValue($this->review["expertise"]);
 		$expertise->setOptions($this->expertise);
+		$expertise->setRequired(true);
 		$this->addItem($expertise);
 	}
 	

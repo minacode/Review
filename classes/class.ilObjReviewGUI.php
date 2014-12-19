@@ -291,6 +291,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs, $ilCtrl;		
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
@@ -311,6 +312,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
 		$ilTabs->activateTab("content");
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
@@ -326,7 +328,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
 			foreach ($post_vars as $post_var)
 				$form_data[$post_var] = $input->getInput($post_var);
-			if (!isset($_GET["r_id"])) die;
 			$this->object->storeReviewById($_GET["r_id"], $form_data);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "showContent");

@@ -26,7 +26,7 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilReviewInputGUI.php";
 
 class ilReviewOutputGUI extends ilTable2GUI {
-	
+	public $a_parent_obj;
 	/*
 	* constructor
 	*
@@ -35,6 +35,8 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
+		
+		$this->a_parent_obj = $a_parent_obj;
 		
 		$this->taxonomy = $taxonomy;
 		$this->knowledge_dimension = $knowledge_dimension;
@@ -64,11 +66,13 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	private function setUpData($reviews) {
 		$data = array();
 		foreach ($reviews as $review) {
-			$input_form = new ilReviewInputGUI($this, "", $review, $this->quest_tax, $this->taxonomy,
+			$input_form = new ilReviewInputGUI($this, "", $review,
+												$this->quest_tax,
+												$this->taxonomy,
 												$this->knowledge_dimension,
 												$this->expertise,
 												$this->rating,
-												$this->evalutaion);
+												$this->evaluation);
 			$input_form->setReadOnly();
 			$data[] = array("id" => $review["id"],
 						  		 "review" => $input_form->getHtml());

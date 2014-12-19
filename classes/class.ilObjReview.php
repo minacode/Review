@@ -295,7 +295,9 @@ class ilObjReview extends ilObjectPlugin {
 	public function loadReviewsByQuestion($q_id) {
 		global $ilDB;
 		
-		$rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE question_id=%s AND review_obj=%s",
+		$rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi ".
+									"INNER JOIN usr_data ON usr_data.usr_id=rep_robj_xrev_revi.reviewer ".
+									"WHERE question_id=%s AND review_obj=%s",
 									array("integer", "integer"),
 									array($q_id, $this->getId()));
 		$reviews = array();

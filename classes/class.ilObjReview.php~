@@ -535,9 +535,8 @@ class ilObjReview extends ilObjectPlugin {
 	public function loadQuestionTaxonomyData($q_id) {
 		global $ilDB;
 		$req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
-									"FROM qpl_questions ".
-									"INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
-									"WHERE qpl_questions.question_id=%s",
+									"FROM qpl_rev_qst ".
+									"WHERE qpl_rev_qst.question_id=%s",
 									array("integer"),
 									array($q_id)
 						  );

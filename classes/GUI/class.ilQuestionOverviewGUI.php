@@ -34,9 +34,9 @@ class ilQuestionOverviewGUI {
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$template = new ilTemplate("tpl.question_overview.html", true, true, $path_to_il_tpl);
 		$template->setVariable("TXT_TITLE", $metadata["title"]);
-		$template->setVariable("TXT_AUTHOR", $metadata["firstname"]." ".$metadata["lastname"]);
 		if ($ilAccess->checkAccess("write", "", $parent->object->getRefId()))
-			$template->setVariable("TXT_DESCRIPTION", $metadata["description"]);
+				$template->setVariable("TXT_AUTHOR", $metadata["firstname"]." ".$metadata["lastname"]);
+		$template->setVariable("TXT_DESCRIPTION", $metadata["description"]);
 		$template->setVariable("TXT_INNER_PART", $inner_part);
 		$this->html = $template->get();
 	}
