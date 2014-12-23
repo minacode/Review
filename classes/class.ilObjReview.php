@@ -162,23 +162,26 @@ class ilObjReview extends ilObjectPlugin {
 						$ilDB->manipulateF("UPDATE rep_robj_xrev_quest SET timestamp=%s WHERE question_id=%s AND review_obj=%s",
 												 array("integer", "integer", "integer"),
 												 array($db_question["tstamp"], $db_question["question_id"], $this->getId()));
-					$ilDB->manipulateF("UPDATE rep_robj_xrev_revi SET state=0 WHERE question_id=%s AND review_obj=%s",
-											 array("integer", "integer"),
-											 array($db_question["question_id"], $this->getId()));
-					break;
+						$ilDB->manipulateF("UPDATE rep_robj_xrev_revi SET state=0 WHERE question_id=%s AND review_obj=%s",
+												 array("integer", "integer"),
+												 array($db_question["question_id"], $this->getId()));
+						$this->notifyReviewersAboutChange($db_question);
+						break;
 					}
 				}
 			}
 		}
 		
 		$new_questions = array_udiff($db_questions, $pl_questions, "cmp_rec");
-		foreach ($new_questions as $new_question)
+		foreach ($new_questions as $new_question) {
 			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_quest (id, question_id, timestamp, state, review_obj) VALUES (%s, %s, %s, %s, %s)",
 									 array("integer", "integer", "integer", "integer", "integer"),
 									 array($ilDB->nextId("rep_robj_xrev_quest"), $new_question["question_id"], $new_question["tstamp"], 0, $this->getId()));			
-		
+			$this->notifyAdminsAboutNewQuestion($new_question);
+		}
 		$del_questions = array_udiff($pl_questions, $db_questions, "cmp_rec");
 		foreach ($del_questions as $del_question) {
+			$this->notifyReviewersAboutDeletion($del_question);
 			$ilDB->manipulateF("DELETE FROM rep_robj_xrev_quest WHERE question_id=%s AND review_obj=%s",
 									 array("integer", "integer"),
 									 array($del_question["question_id"], $this->getId()));
@@ -543,6 +546,135 @@ class ilObjReview extends ilObjectPlugin {
 									array($q_id)
 						  );
 		return $ilDB->fetchAssoc($req);
+	}
+	
+	/**
+	* Prepare message output to inform reviewers about
+	* their allocation to a certain question
+	*
+	* @param		array			$alloc_matrix			array of arrays of reviewers
+	*/
+	public function notifyReviewersAboutAllocation($alloc_matrix) {
+		$receivers = array();
+		foreach ($alloc_matrix as $row)
+			foreach ($row["reviewers"] as $reviewer_id => $checked)
+				if ($checked)
+					$receivers[] = explode("_", $reviewer_id)[2];
+		$this->performNotification($receivers, "msg_review_requested");
+	}
+	
+	/**
+	* Prepare message output to inform authors about
+	* the acceptance of a certain question by the group´s admin
+	*
+	* @param		array			$question_ids			array of the ids of the accepted question
+	*/
+	public function notifyAuthorsAboutAcceptance($question_ids) {
+		global $ilDB;
+		$receivers = array();
+		foreach ($question_ids as $id)
+			$receivers[] = $ilDB->fetchAssoc($ilDB->queryF("SELECT owner FROM qpl_questions WHERE question_id=%s",
+																		  array("integer"),
+																		  array($id)
+																 )
+										 )["owner"];
+		$this->performNotification($receivers, "msg_question_accepted");
+	}
+	
+	/**
+	* Prepare message output to inform an author about
+	* the completion of a review on a certain question
+	*
+	* @param		integer			$review_id			id of the completed review
+	*/
+	public function notifyAuthorAboutCompletion($review_id) {
+		global $ilDB;
+		$rev = $ilDB->queryF("SELECT reviewer FROM rep_robj_xrev_revi WHERE id=%s",
+									array("integer"),
+									array($review_id)
+						  );
+		$receivers = array();
+		while ($receiver = $ilDB->fetchAssoc($rev))
+			$receivers[] = $receiver["reviewer"];
+		$this->performNotification($receivers, "msg_review_completed");
+	}
+	
+	/**
+	* Prepare message output to inform reviewers about
+	* a change of a certain question they have to review
+	*
+	* @param		array			$question			question data as an associative array
+	*/
+	public function notifyReviewersAboutChange($question) {
+		global $ilDB;
+		$res = $ilDB->queryF("SELECT reviewer FROM rep_robj_xrev_revi ".
+									"WHERE review_obj=%s AND question_id=%s",
+									array("integer", "integer"),
+									array($this->getId(), $question["question_id"])
+						  );
+		$receivers = array();
+		while ($receiver = $ilDB->fetchAssoc($res))
+			$receivers[] = $receiver["reviewer"];
+		$this->performNotification($receivers, "msg_question_edited");
+	}
+	
+	/**
+	* Prepare message output to inform the group´s admins about
+	* the creation of a new question
+	*
+	* @param		array			$question			question data as an associative array
+	*/
+	public function notifyAdminsAboutNewQuestion($question) {
+		global $ilDB;
+		$res = $ilDB->queryF("SELECT usr_id FROM rbac_ua ".
+									"INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
+								   "WHERE object_data.title='il_grp_admin_%s'",
+								   array("integer"),
+								   array($this->getGroupId())
+						  );
+		$receivers = array();
+		while ($receiver = $ilDB->fetchAssoc($res))
+			$receivers[] = $receiver["usr_id"];
+		$this->performNotification($receivers, "msg_question_created");
+	}
+	
+	/**
+	* Prepare message output to inform reviewers about
+	* the deletion of a question they had to review
+	*
+	* @param		array			$question			question data as an associative array
+	*/
+	public function notifyReviewersAboutDeletion($question) {
+		global $ilDB;
+		$res = $ilDB->queryF("SELECT reviewer FROM rep_robj_xrev_revi ".
+									"WHERE review_obj=%s AND question_id=%s",
+									array("integer", "integer"),
+									array($this->getId(), $question["question_id"])
+						  );
+		$receivers = array();
+		while ($receiver = $ilDB->fetchAssoc($res))
+			$receivers[] = $receiver["reviewer"];
+		$this->performNotification($receivers, "msg_question_deleted");
+	}
+	
+	/**
+	* Created and send an ILIAS message based on data prepared by this object´s notify... methods
+	*
+	* @param		array			$receivers			array of user ids corresponding to the receivers of the message
+	* @param		string		$message_type		the kind of information to be sent
+	*/
+	private function performNotification($receivers, $message_type) {
+		include_once "./Services/Notification/classes/class.ilSystemNotification.php";
+		$ntf = new ilSystemNotification();
+		$ntf->setObjId($this->getId());
+		$ntf->setLangModules(array("rep_robj_xrev"));
+		$ntf->setSubjectLangId("rep_robj_xrev_".$message_type."_subj");
+		$ntf->setIntroductionLangId("rep_robj_xrev_".$message_type."_intr");
+		// $ntf->addAdditionalInfo("exc_assignment", $ass->getTitle());
+		// $ntf->setGotoLangId("exc_feedback_notification_link");                
+		// $ntf->setReasonLangId("exc_feedback_notification_reason");                
+ 
+		$ntf->sendMail($receivers);
 	}
 }
 ?>

@@ -89,3 +89,16 @@ expert_know#:#Bewandert
 expert_expert#:#Experte
 finished_questions#:#Vollständig gereviewte Fragen
 accept#:#Akzeptieren
+select#:#--wählen--
+msg_review_requested_subj#:#Review angefordert
+msg_review_requested_intr#:#Sie wurden ausgewählt, um ein Review zu einer Frage zu erstellen.
+msg_question_accepted_subj#:#Frage akzeptiert
+msg_question_accepted_intr#:#eine von Ihnen erstellte Frage wurde im Zuge der Review-Phase akzetiert.
+msg_review_completed_subj#:#Review fertiggestellt
+msg_review_completed_intr#:#ein Reviewer hat ein neues Review zu einer von Ihnen erstellten Frage fertiggestellt.
+msg_question_edited_subj#:#Frage bearbeitet
+msg_question_edited_intr#:#eine Frage, der Sie als Reviewer zugeordnet sind, wurde bearbeitet. Bitte erstellen Sie ein neues Review.
+msg_question_created_subj#:#Frage erstellt
+msg_question_created_intr#:#in einem Fragepool in Ihrer Gruppe wurde eine neue Frage angelegt. Sie sollten ihr Reviewer zuordnen.
+msg_question_deleted_subj#:#Frage gelöscht
+msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und sie sind nicht mehr als Reviewer festgelegt.

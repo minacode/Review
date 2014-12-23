@@ -1,5 +1,5 @@
 // 
-// German Language File for ReviewObject Plugin
+// English Language File for ReviewObject Plugin
 //
 
 <!-- language file start -->
@@ -89,3 +89,16 @@ expert_know#:#Knowledgeable
 expert_expert#:#Expert
 finished_questions#:#Completely reviewed questions
 accept#:#Accept
+select#:#--select--
+msg_review_requested_subj#:#Review requested
+msg_review_requested_intr#:#You have been chosen to review a question.
+msg_question_accepted_subj#:#Question accepted
+msg_question_accepted_intr#:#A question created by you has been accepted during the review cycle.
+msg_review_completed_subj#:#Review completed
+msg_review_completed_intr#:#A reviewer has reviewed a question you have created.
+msg_question_edited_subj#:#Question edited
+msg_question_edited_intr#:#A question you are allocated to as a reviewer has been edited. Please create a new review.
+msg_question_created_subj#:#Question created
+msg_question_created_intr#:#A new question has been created in a question pool belonging to your group. You should allocate reviewers to it.
+msg_question_deleted_subj#:#Question deleted
+msg_question_deleted_intr#:#A question you were asked to review has been deleted and reviews on it are not necessary any longer.

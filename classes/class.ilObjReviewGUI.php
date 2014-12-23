@@ -252,6 +252,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
 			}
 			$this->object->allocateReviews($rows);
+			$this->object->notifyReviewersAboutAllocation($rows);
 			$performed = true;
 			
 		}
@@ -260,6 +261,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->initQuestionFinishForm();
 		if (count($_POST["q_id"] > 0)) {
 			$this->object->finishQuestions($_POST["q_id"]);
+			$this->object->notifyAuthorsAboutAcceptance($_POST["q_id"]);
 			$performed = true;
 		}
 		
@@ -329,6 +331,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			foreach ($post_vars as $post_var)
 				$form_data[$post_var] = $input->getInput($post_var);
 			$this->object->storeReviewById($_GET["r_id"], $form_data);
+			$this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "showContent");
 		}
