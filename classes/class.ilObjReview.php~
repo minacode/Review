@@ -33,10 +33,8 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 class ilObjReview extends ilObjectPlugin {
 	/**
 	* Constructor
-	*
-	* @access	public
 	*/
-	function __construct($a_ref_id = 0) {
+	public function __construct($a_ref_id = 0) {
 		parent::__construct($a_ref_id);
 	}
 	
@@ -54,10 +52,10 @@ class ilObjReview extends ilObjectPlugin {
 	function doCreate() {
 		global $ilDB;
 		
-		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
-			"(id, group_id) VALUES (".
-			$ilDB->quote($this->getId(), "integer"). ", ". $ilDB->quote($_GET["ref_id"], "integer").
-			")");
+		$ilDB->insert("rep_robj_xrev_revobj", array("id" => array("integer", $this->getId()),
+																  "group_id" => array("integer", $this->$_GET["ref_id"])
+														  )
+		);
 	}
 	
 	/**
@@ -66,9 +64,10 @@ class ilObjReview extends ilObjectPlugin {
 	function doRead() {
 		global $ilDB;
 		
-		$set = $ilDB->query("SELECT * FROM rep_robj_xrev_revobj ".
-			" WHERE id = ".$ilDB->quote($this->getId(), "integer")
-			);
+		$set = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
+									array("integer"),
+									array($this->getId())
+				 );
 		while ($rec = $ilDB->fetchAssoc($set)) {
 			$this->obj_id = $rec["obj_id"];
 			$this->group_id = $rec["group_id"];
@@ -81,38 +80,19 @@ class ilObjReview extends ilObjectPlugin {
 	* Update data
 	*/
 	function doUpdate() {
-		global $ilDB;
 	}
 	
 	/**
 	* Delete data from db
 	*/
 	function doDelete() {
-		global $ilDB;
-		
-		$res = $ilDB->queryF("SELECT rep_robj_xrev_revobj.id FROM rep_robj_xrev_revobj ".
-									"INNER JOIN object_reference ON object_reference.obj_id=rep_robj_xrev_revobj.id ".
-									"WHERE object_reference.ref_id=%s",
-									$_GET["item_ref_id"]);
-		
-		if ($id = $ilDB->fetchAssoc($res));		
-		
-		$ilDB->manipulate("DELETE FROM rep_robj_xrev_revobj WHERE ".
-			" id = ".$ilDB->quote($id, "integer")
-			);
-			
-		$ilDB->manipulate("INSERT INTO rep_robj_xrev_revobj ".
-			"(id, group_id) VALUES (0, 'Hello World')");	
-		
-		$ilDB->delete("rep_robj_xrev_revi", array("review_obj" => array("integer", $id)));
-		$ilDB->delete("rep_robj_xrev_quest", array("review_obj" => array("integer", $id)));
-		
+		// pointless, since this function is not called by ILIAS
 	}
 	
 	/**
 	* Do Cloning
 	*/
-	function doClone($a_target_id,$a_copy_id,$new_obj) {
+	function doClone($a_target_id, $a_copy_id, $new_obj) {
 		global $ilDB;
 		
 		$new_obj->update();
@@ -159,12 +139,18 @@ class ilObjReview extends ilObjectPlugin {
 			foreach ($pl_questions as $pl_question) {
 				if ($db_question["question_id"] == $pl_question["question_id"]) {
 					if ($db_question["tstamp"] > $pl_question["timestamp"]) {
-						$ilDB->manipulateF("UPDATE rep_robj_xrev_quest SET timestamp=%s WHERE question_id=%s AND review_obj=%s",
-												 array("integer", "integer", "integer"),
-												 array($db_question["tstamp"], $db_question["question_id"], $this->getId()));
-						$ilDB->manipulateF("UPDATE rep_robj_xrev_revi SET state=0 WHERE question_id=%s AND review_obj=%s",
-												 array("integer", "integer"),
-												 array($db_question["question_id"], $this->getId()));
+						$ilDB->update("rep_robj_xrev_quest",
+										  array("timestamp" => array("integer", $db_question["tstamp"])),
+										  array("question_id" => array("integer", $db_question["question_id"]),
+										  		  "review_obj" => array("integer", $this->getId())
+										  )
+						);
+						$ilDB->update("rep_robj_xrev_revi",
+										  array("state" => array("integer", 0)),
+										  array("question_id" => array("integer", $db_question["question_id"]),
+										  		  "review_obj" => array("integer", $this->getId())
+										  )
+						);
 						$this->notifyReviewersAboutChange($db_question);
 						break;
 					}
@@ -172,22 +158,25 @@ class ilObjReview extends ilObjectPlugin {
 			}
 		}
 		
-		$new_questions = array_udiff($db_questions, $pl_questions, "cmp_rec");
-		foreach ($new_questions as $new_question) {
-			$ilDB->manipulateF("INSERT INTO rep_robj_xrev_quest (id, question_id, timestamp, state, review_obj) VALUES (%s, %s, %s, %s, %s)",
-									 array("integer", "integer", "integer", "integer", "integer"),
-									 array($ilDB->nextId("rep_robj_xrev_quest"), $new_question["question_id"], $new_question["tstamp"], 0, $this->getId()));			
+		foreach (array_udiff($db_questions, $pl_questions, "cmp_rec") as $new_question) {
+			$ilDB->insert("rep_robj_xrev_quest", array("id" => array("integer", $ilDB->nextId("rep_robj_xrev_quest")),
+															 		 "question_id" => array("integer", $new_question["question_id"]),
+															 		 "timestamp" => array("integer", $new_question["tstamp"]),
+															 		 "state" => array("integer", 0),
+															  		 "review_obj" => array("integer", $this->getId())
+															 )
+			);
 			$this->notifyAdminsAboutNewQuestion($new_question);
 		}
-		$del_questions = array_udiff($pl_questions, $db_questions, "cmp_rec");
-		foreach ($del_questions as $del_question) {
+
+		foreach (array_udiff($pl_questions, $db_questions, "cmp_rec") as $del_question) {
+			$this->notifyReviewersAboutDeletion($del_question);
 			$ilDB->manipulateF("DELETE FROM rep_robj_xrev_quest WHERE question_id=%s AND review_obj=%s",
 									 array("integer", "integer"),
 									 array($del_question["question_id"], $this->getId()));
 			$ilDB->manipulateF("DELETE FROM rep_robj_xrev_revi WHERE question_id=%s AND review_obj=%s",
 									 array("integer", "integer"),
 									 array($del_question["question_id"], $this->getId()));
-			$this->notifyReviewersAboutDeletion($del_question);
 		}
 		
 		//uncomment as soon as needed
@@ -365,33 +354,28 @@ class ilObjReview extends ilObjectPlugin {
 			foreach ($row["reviewers"] as $reviewer_id => $checked) {
 				if (!$checked)
 					continue;
-				$ilDB->manipulateF("INSERT INTO rep_robj_xrev_revi (id, ".
-																					 "timestamp, ".
-																					 "reviewer, ".
-																					 "question_id, ".
-																					 "state, ".
-																					 "desc_corr, ".
-																					 "desc_relv, ".
-																					 "desc_expr, ".
-																					 "quest_corr, ".
-																					 "quest_relv, ".
-																					 "quest_expr, ".
-																					 "answ_corr, ".
-																					 "answ_relv, ".
-																					 "answ_expr, ".
-																					 "taxonomy, ".
-																					 "knowledge_dimension, ".
-																					 "rating, ".
-																					 "eval_comment, ".
-																					 "expertise, ".
-																					 "review_obj) ".
-									 "VALUES (%s, %s, %s, %s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, %s)",
-									 array("integer", "integer", "integer", "integer", "integer"),
-									 array($ilDB->nextID("rep_robj_xrev_revi"),
-									 		 time(), 
-									 		 explode("_", $reviewer_id)[2], 
-									 		 $row["q_id"], 
-									 		 $this->getId()));
+				$ilDB->insert("rep_robj_xrev_revi", array("id" => array("integer", $ilDB->nextID("rep_robj_xrev_revi")),
+																		"timestamp" => array("integer", time()),
+																		"reviewer" => array("integer", explode("_", $reviewer_id)[2]),
+																		"question_id" => array("integer", $row["q_id"]),
+																		"state" => array("integer", 0),
+																		"desc_corr" => array("integer", 0),
+																		"desc_relv" => array("integer", 0),
+																		"desc_expr" => array("integer", 0),
+																		"quest_corr" => array("integer", 0),
+																		"quest_relv" => array("integer", 0),
+																		"quest_expr" => array("integer", 0),
+																		"answ_corr" => array("integer", 0),
+																		"answ_relv" => array("integer", 0),
+																		"answ_expr" => array("integer", 0),
+																		"taxonomy" => array("integer", 0),
+																		"knowledge_dimension" => array("integer", 0),
+																		"rating" => array("integer", 0),
+																		"eval_comment" => array("integer", ''),
+																		"expertise" => array("integer", 0),
+																		"review_obj" => array("integer", $this->getId())
+								  								)
+				);
 				$ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)),
 								  array("question_id" => array("integer", $row["q_id"]), "review_obj" => array("integer", $this->getId())));
 			}

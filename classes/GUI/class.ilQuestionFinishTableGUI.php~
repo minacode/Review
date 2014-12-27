@@ -63,7 +63,6 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
 		$this->tpl->setVariable("CB_QUESTION_ID", $a_set["question_id"]);
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		$this->tpl->setVariable("TXT_AUTHOR", $a_set["author"]);
-		// $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "updateProperties"));
 	}
 }
 ?>

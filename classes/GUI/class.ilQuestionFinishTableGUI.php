@@ -45,7 +45,7 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       $this->setSelectAllCheckbox('q_id');
-      $this->addCommandButton('updateProperties', $this->lng->txt('rep_robj_xrev_accept'));
+      $this->addCommandButton('saveFinishQuestions', $this->lng->txt('rep_robj_xrev_accept'));
       
       $this->setData($questions);
  

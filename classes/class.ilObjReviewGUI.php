@@ -84,6 +84,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		switch ($cmd) {
 			case "editProperties":
 			case "updateProperties":
+			case "allocateReviews":
+			case "saveAllocateReviews":
+			case "finishQuestions":
+			case "saveFinishQuestions":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -126,9 +130,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		// standard info screen tab
 		$this->addInfoTab();
 
-		// a "properties" tab
+		// tabs to edit properties and run the review cycle
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
 			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
+			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviews"));
+			$ilTabs->addTab("finish", $this->txt("finished_questions"), $ilCtrl->getLinkTarget($this, "finishQuestions"));
 		}
 
 		// standard epermission tab
@@ -136,7 +142,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	}
 
 	/**
-	* Edit plugin object properties and reviewer allocation
+	* Edit plugin object properties
 	*/
 	function editProperties() {
 		global $tpl, $ilTabs;
@@ -144,11 +150,77 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilTabs->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
+		
+		$this->initQuestionFinishForm();
+		$tpl->setContent($this->form->getHTML());
+	}
+	
+	/**
+	* Input reviewer allocation
+	*/
+	function allocateReviews() {
+		global $tpl, $ilTabs;
+		
+		$ilTabs->activateTab("allocation");
 		$this->initReviewAllocForm();
 		$this->alloc_form->setValuesByPost();
+		$tpl->setContent($this->alloc_form->getHTML());
+	}
+	
+	/**
+	* Check and save reviewer allocation
+	*/
+	function saveAllocateReviews() {
+		global $tpl, $ilTabs, $lng, $ilCtrl;
+		
+		$ilTabs->activateTab("allocation");
+		$this->initReviewAllocForm();
+		if ($this->alloc_form->checkInput()) {
+			$rows = array();
+			foreach ($this->alloc_form->getItems() as $item) {
+				if (!method_exists($item, "getPostVars"))
+					continue;
+				$row_postvars = $item->getPostVars();
+				$row_values = array();
+				foreach ($row_postvars as $row_postvar)
+					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
+				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
+			}
+			$this->object->allocateReviews($rows);
+			$this->object->notifyReviewersAboutAllocation($rows);
+			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "allocateReviews");
+		}
+		$this->alloc_form->setValuesByPost();
+		$tpl->setContent($this->alloc_form->getHTML());
+	}
+	
+	/**
+	* Accept allocation
+	*/
+	public function finishQuestions() {
+		global $tpl, $ilTabs;
+		
+		$ilTabs->activateTab("finish");
 		$this->initQuestionFinishForm();
-		$tpl->setContent($this->form->getHTML()."<br><hr><br>".$this->alloc_form->getHTML().
-							  "<br><hr><br>".$this->finish_form->getHTML());
+		$tpl->setContent($this->finish_form->getHTML());
+	}
+	
+	/**
+	* Check and perform finishing of questions
+	*/
+	public function saveFinishQuestions() {
+		global $tpl, $ilTabs, $lng, $ilCtrl;
+		
+		$ilTabs->activateTab("finish");
+		$this->initQuestionFinishForm();
+		if (count($_POST["q_id"] > 0)) {
+			$this->object->finishQuestions($_POST["q_id"]);
+			$this->object->notifyAuthorsAboutAcceptance($_POST["q_id"]);
+			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$ilCtrl->redirect($this, "finishQuestions");
+		}
+		$tpl->setContent($this->finish_form->getHTML());
 	}
 
 	/**
@@ -177,7 +249,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$this->alloc_form->addItem($matrix_row);
 		}
 		
-		$this->alloc_form->addCommandButton("updateProperties", $this->txt("request"));
+		$this->alloc_form->addCommandButton("saveAllocateReviews", $this->txt("request"));
 	}
 	
 	/**
@@ -186,7 +258,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function initQuestionFinishForm() {
 		global $ilCtrl;
 		
-		$this->finish_form = new ilQuestionFinishTableGUI($this, "updateProperties", $this->object->loadReviewedQuestions());
+		$this->finish_form = new ilQuestionFinishTableGUI($this, "saveFinishQuestions", $this->object->loadReviewedQuestions());
 	}
 	
 	/**
@@ -236,41 +308,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$ilCtrl->redirect($this, "editProperties");
 		}
 		$this->form->setValuesByPost();
-		
-		$performed = false;
-		
-		$this->initReviewAllocForm();
-		if ($this->alloc_form->checkInput()) {
-			$rows = array();
-			foreach ($this->alloc_form->getItems() as $item) {
-				if (!method_exists($item, "getPostVars"))
-					continue;
-				$row_postvars = $item->getPostVars();
-				$row_values = array();
-				foreach ($row_postvars as $row_postvar)
-					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
-				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
-			}
-			$this->object->allocateReviews($rows);
-			$this->object->notifyReviewersAboutAllocation($rows);
-			$performed = true;
-			
-		}
-		$this->alloc_form->setValuesByPost();
-		
-		$this->initQuestionFinishForm();
-		if (count($_POST["q_id"] > 0)) {
-			$this->object->finishQuestions($_POST["q_id"]);
-			$this->object->notifyAuthorsAboutAcceptance($_POST["q_id"]);
-			$performed = true;
-		}
-		
-		if ($performed) {
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "editProperties");
-		}
-				
-		$tpl->setContent($this->form->getHtml() . "<br><hr><br>" . $this->alloc_form->getHTML());
+		$tpl->setContent($this->form->getHtml());
 	}
 
 	/**
