@@ -80,26 +80,35 @@ class ilObjReview extends ilObjectPlugin {
 	* Update data
 	*/
 	function doUpdate() {
+		global $ilDB;
+		
+		$ilDB->update("rep_robj_xrev_revobj",
+						  array("group_id" => array("integer", $this->getGroupId())),
+						  array("id" => array("integer", $this->getId())),
+		);
 	}
 	
 	/**
 	* Delete data from db
 	*/
 	function doDelete() {
-		// pointless, since this function is not called by ILIAS
+		// pointless, it seems this function is not called by ILIAS
 	}
 	
 	/**
 	* Do Cloning
 	*/
 	function doClone($a_target_id, $a_copy_id, $new_obj) {
-		global $ilDB;
-		
+		$new_obj->setGroupId($this->getGroupId());
 		$new_obj->update();
 	}
 	
 	public function getGroupId() {
 		return $this->group_id;
+	}
+	
+	public function setGroupId($group_id) {
+		$this->group_id = $group_id;
 	}
 		
 	/**
@@ -371,7 +380,7 @@ class ilObjReview extends ilObjectPlugin {
 																		"taxonomy" => array("integer", 0),
 																		"knowledge_dimension" => array("integer", 0),
 																		"rating" => array("integer", 0),
-																		"eval_comment" => array("integer", ''),
+																		"eval_comment" => array("clob", ''),
 																		"expertise" => array("integer", 0),
 																		"review_obj" => array("integer", $this->getId())
 								  								)

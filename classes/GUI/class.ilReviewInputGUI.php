@@ -29,8 +29,6 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilAspectSelectInputGUI.php";
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilAspectHeadGUI.php";
-include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilAspectListGUI.php";
 
 /**
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>

@@ -163,11 +163,13 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$comment->setCols(70);
 		$comment->setRows(10);
 		$comment->setValue($this->review["eval_comment"]);
+		$comment->setRequired(true);
 		$this->addItem($comment);
 		
 		$expertise = new ilSelectInputGUI($lng->txt("rep_robj_xrev_expertise"), "exp");
 		$expertise->setValue($this->review["expertise"]);
 		$expertise->setOptions($this->expertise);
+		$expertise->setRequired(true);
 		$this->addItem($expertise);
 	}
 	
