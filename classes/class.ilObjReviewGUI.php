@@ -23,6 +23,7 @@
 
 include_once 'Modules/TestQuestionPool/classes/class.assQuestionGUI.php';
 include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
+include_once './Services/Form/classes/class.ilCustomInputGUI.php';
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewOutputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
@@ -31,7 +32,6 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilReviewTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionTableGUI.php");
-include_once './Services/Form/classes/class.ilCustomInputGUI.php';
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
@@ -328,8 +328,12 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Display review input form
 	*/
 	public function inputReview() {
-		global $tpl, $ilTabs, $ilCtrl;		
+		global $tpl, $ilTabs, $ilCtrl, $lng;		
 		$ilTabs->activateTab("content");
+		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "inputReview", "review")) {
+			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+			$ilCtrl->redirect($this, "showContent");
+		}
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
@@ -351,6 +355,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function saveReview() {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
 		$ilTabs->activateTab("content");
+		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "saveReview", "review")) {
+			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+			$ilCtrl->redirect($this, "showContent");
+		}
 		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
@@ -373,11 +381,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "showContent");
 		}
-		else {
-			// ilUtil::sendFailure($lng->txt("form_input_not_valid"));
-			$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);			
-			// $ilCtrl->redirect($this, "inputReview");
-		}
+		else
+			$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		$input->setValuesByPost();
 		$tpl->setContent($quest->getHTML() . $input->getHtml());
 	}
@@ -386,7 +391,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Output reviews
 	*/
 	public function showReviews() {
-		global $tpl, $ilTabs;		
+		global $tpl, $ilTabs, $ilCtrl, $lng;
+		if (!ilObjReviewAccess::checkAccessToObject($_GET[substr($_GET["origin"], 0, 1)."_id"], "", "showReviews", $_GET["origin"])) {
+			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+			$ilCtrl->redirect($this, "showContent");
+		}		
 		$ilTabs->activateTab("content");
 		$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 		$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));

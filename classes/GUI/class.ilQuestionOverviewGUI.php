@@ -29,6 +29,13 @@
 class ilQuestionOverviewGUI {
 	private $html;	
 	
+	/**
+	* Constructor, configures GUI output
+	*
+	* @param		object		$parent			GUI object that contains this object
+	* @param		string		$inner_part		HTML string of the actual question and the answers
+	* @param		array			$metadata		associative array of the question´s title, description and author => corresponding value
+	*/
 	public function __construct($parent, $inner_part, $metadata) {
 		global $tpl, $ilAccess;
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
@@ -41,6 +48,11 @@ class ilQuestionOverviewGUI {
 		$this->html = $template->get();
 	}
 	
+	/**
+	* Get the HTML string describing the look of this object
+	*
+	* @return		$this->html		rendered HTML string
+	*/
 	public function getHTML() {
 		return $this->html;
 	}

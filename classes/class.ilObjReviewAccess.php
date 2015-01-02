@@ -26,9 +26,6 @@ include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
 /**
 * Access/Condition checking for Review object
 *
-* Please do not create instances of large application classes (like ilObjReview)
-* Write small methods within this class to determin the status.
-*
 * @author 		Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 * @version $Id$
 */
@@ -37,9 +34,6 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 	/**
 	* Checks wether a user may invoke a command or not
 	* (this method is called by ilAccessHandler::checkAccess)
-	*
-	* Please do not check any preconditions handled by
-	* ilConditionHandler here. Also don't do usual RBAC checks.
 	*
 	* @param	string		$a_cmd			command (not permission!)
  	* @param	string		$a_permission	permission
@@ -59,9 +53,8 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 		switch ($a_permission) {
 			case "read":
 				if (!ilObjReviewAccess::checkOnline($a_obj_id) &&
-					!$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id)) {
+					!$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id))
 					return false;
-				}
 				break;
 		}
 
@@ -69,20 +62,57 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 	}
 	
 	/**
-	* Not needed in that early state
+	* Check, if user is allowed to edit a certain review or to view certain reviews
 	*
-	* @return	boolean 		true, if user is online
+	* @return	boolean 		true, if user gets access
+	*
+	* @param	int			$a_obj_id		object id
+	* @param	int			$a_user_id		user id
+	* @param	string		$a_cmd			command
+	* @param string		$a_obj_type		type of requested object (review or question)
 	*/
-	static function checkOnline($a_id) {	
-		/*
-		global $ilDB;
+	static function checkAccessToObject($a_obj_id, $a_user_id, $a_cmd, $a_obj_type) {	
+		global $ilDB, $ilUser;
 		
-		$set = $ilDB->query("SELECT is_online FROM rep_robj_xexo_data ".
-			" WHERE id = ".$ilDB->quote($a_id, "integer")
-			);
-		$rec  = $ilDB->fetchAssoc($set);
-		return (boolean) $rec["is_online"];
-		*/
+		if ($a_user_id == "") {
+			$a_user_id = $ilUser->getId();
+		}
+		
+		switch ($a_cmd) {
+			case "inputReview":
+			case "saveReview":
+				$res = $ilDB->queryF("SELECT COUNT(id) FROM rep_robj_xrev_revi WHERE id=%s AND reviewer=%s",
+										   array("integer", "integer"),
+										   array($a_obj_id, $a_user_id)
+						 );
+				if ($ilDB->fetchAssoc($res)["count(id)"] == 1)
+					return true;
+				break;
+			case "showReviews":
+				if ($a_obj_type == "review") {
+					$res = $ilDB->queryF("SELECT COUNT(id) FROM rep_robj_xrev_revi WHERE id=%s AND reviewer=%s",
+										   array("integer", "integer"),
+										   array($a_obj_id, $a_user_id)
+						 );
+					if ($ilDB->fetchAssoc($res)["count(id)"] == 1)
+						return true;
+				}
+				if ($a_obj_type == "question") {
+					$res = $ilDB->queryF("SELECT COUNT(question_id) FROM qpl_questions WHERE question_id=%s AND owner=%s",
+										   array("integer", "integer"),
+										   array($a_obj_id, $a_user_id)
+						 );
+					if ($ilDB->fetchAssoc($res)["count(question_id)"] == 1)
+						return true;
+				}
+				break;
+		}
+		return false;
+	}
+	/**
+	* Is called by ILIAS and needs to return true for the plugin to work
+	*/
+	public static function checkOnline($foo) {
 		return true;
 	}
 }

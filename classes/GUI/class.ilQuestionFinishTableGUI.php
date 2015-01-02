@@ -32,6 +32,13 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 class ilQuestionFinishTableGUI extends ilTable2GUI {
 
+	/**
+	* Constructor, configures GUI output
+	*
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$questions			associative arrays of displayed data (column => value)
+	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
@@ -39,13 +46,15 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
 		$this->addColumn($lng->txt("title"), "", "65%");
 		$this->addColumn($lng->txt("author"), "", "30%");
       $this->setEnableHeader(true);
-      // $this->setFormAction($ilCtrl->getFormAction($a_parent_obj));
+
       $this->setFormAction($ilCtrl->getFormAction($a_parent_obj, $a_parent_cmd));
      	$this->setRowTemplate("tpl.question_finish_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       $this->setSelectAllCheckbox('q_id');
       $this->addCommandButton('saveFinishQuestions', $this->lng->txt('rep_robj_xrev_accept'));
+      
+		$ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id"));      
       
       $this->setData($questions);
  
@@ -59,6 +68,7 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
+		$ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id")); 
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["question_id"]);
 		$this->tpl->setVariable("CB_QUESTION_ID", $a_set["question_id"]);
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);

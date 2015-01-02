@@ -26,11 +26,20 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilReviewInputGUI.php";
 
 class ilReviewOutputGUI extends ilTable2GUI {
+	public $a_parent_obj;
 	
-	/*
-	* constructor
+	/**
+	* constructor, sets up the table
 	*
-	* @param		array		$reviews		reviews to display
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$reviews				associative arrays of displayed reviews (column => value)
+	* @param		array			$quest_tax			the question´s taxonomy and knowledge dimension
+	* @param		array			$taxonomy			taxonomy options to choose from
+	* @param		array			$knowledge_dimension		knowlege_dimension options to choose from
+	* @param		array			$expertise			expertise options to choose from
+	* @param		array			$rating				rating options to choose from
+	* @param		array			$evaluation			evaluation options to choose from 
 	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
@@ -60,12 +69,14 @@ class ilReviewOutputGUI extends ilTable2GUI {
       $this->setTitle($lng->txt("rep_robj_xrev_review_output"));
 	}
 
-	/*
+	/**
 	* @param		array		$reviews		reviews to display
 	*/	
 	private function setUpData($reviews) {
 		$data = array();
 		foreach ($reviews as $review) {
+			if ($review["state"] != 1)
+				continue;
 			$input_form = new ilReviewInputGUI($this, "", $review,
 												$this->quest_tax,
 												$this->taxonomy,
@@ -80,7 +91,7 @@ class ilReviewOutputGUI extends ilTable2GUI {
 		$this->setData($data);
 	}
 	
-	/*
+	/**
 	* Fill a single data row
 	*
 	* @param	array		$a_set		Data record (1 review), displayed as one table row

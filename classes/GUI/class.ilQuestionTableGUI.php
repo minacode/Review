@@ -32,6 +32,13 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 class ilQuestionTableGUI extends ilTable2GUI {
 
+	/**
+	* Constructor, configures GUI output
+	*
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$questions			associative arrays of displayed data (column => value)
+	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
@@ -42,6 +49,8 @@ class ilQuestionTableGUI extends ilTable2GUI {
      	$this->setRowTemplate("tpl.question_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
+      
+      $ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id", "origin"));
       
       $this->setData($questions);
  
@@ -54,8 +63,9 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	* @param	array		$a_set		Data record, displayed as one table row
 	*/
 	protected function fillRow($a_set) {
-		global $ilCtrl, $lng;
+		global $ilCtrl, $lng; 
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["id"]);
+		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "question");
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
 		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));

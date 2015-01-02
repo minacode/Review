@@ -24,12 +24,7 @@
 include_once "./Services/Repository/classes/class.ilObjectPluginListGUI.php";
 
 /**
-* ListGUI implementation for Review object plugin. This one
-* handles the presentation in container items (categories, courses, ...)
-* together with the corresponding ...Access class.
-*
-* PLEASE do not create instances of larger classes here. Use the
-* ...Access class to get DB data and keep it small.
+* ListGUI implementation for Review object plugin.
 *
 * @author 		Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 */
@@ -44,6 +39,7 @@ class ilObjReviewListGUI extends ilObjectPluginListGUI {
 	
 	/**
 	* Get name of gui class handling the commands
+	* @return	string		$_			name of the GUI class
 	*/
 	function getGuiClass() {
 		return "ilObjReviewGUI";
@@ -51,6 +47,8 @@ class ilObjReviewListGUI extends ilObjectPluginListGUI {
 	
 	/**
 	* Get commands
+	*
+	* @return	array		$_			associative arrays of commands
 	*/
 	function initCommands() {
 		return array(

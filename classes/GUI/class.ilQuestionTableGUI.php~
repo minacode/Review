@@ -43,18 +43,11 @@ class ilQuestionTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       
+      $ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id", "origin"));
+      
       $this->setData($questions);
  
       $this->setTitle($lng->txt("rep_robj_xrev_my_questions"));
-	}
-	
-	private function simulateData() {
-		$data = array(
-			array("id" => 0, "title" => "Frage 1 [Neu erstellt]", "question" => "Ist dies eine Dummy-Frage?", "state" => 0),
-			array("id" => 1, "title" => "Frage 2 [Reviews angefordert]", "question" => "Handelt es sich hierbeit um eine Dummy-Frage?", "state" => 1),
-			array("id" => 2, "title" => "Frage 3 [Bearbeitet]", "question" => "Könnte es sein, das dies eine Dummy-Frage ist?", "state" => 0)				
-		);
-		$this->setData($data);
 	}
 	
 	/*
@@ -63,8 +56,9 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	* @param	array		$a_set		Data record, displayed as one table row
 	*/
 	protected function fillRow($a_set) {
-		global $ilCtrl, $lng;
+		global $ilCtrl, $lng; 
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["id"]);
+		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "question");
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
 		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));

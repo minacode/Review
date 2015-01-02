@@ -33,10 +33,10 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 	private $question_id;
 	
 	/**
-	* Constructor for table-like display of ilSelectInputGUIs
+	* Constructor for a line in a table-like display of ilSelectInputGUIs
 	*
-	* @param	integer		$count		number of checkboxes per row
-	* @param	array		$question	associative array = question record
+	* @param	array		$question		associative array = question record
+	* @param	array		$reviewer_ids	ids of the reviewers belonging to each select input
 	*/
 	public function __construct($question, $reviewer_ids) {
 		parent::__construct();
@@ -57,9 +57,19 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 	}
 	
 	public function getPostVars() {
+	/**
+	* Get the $_POST keys of this object´s input
+	*
+	* @return	array		$this->postvars		(reviewer id => $_POST key in the shape of "id_[question id]_[reviewer id])
+	*/	
 		return $this->postvars;
 	}
 	
+	/**
+	* Get the question id belonging to this line of the matrix
+	*
+	* @return	integer	$this->question_id	question id
+	*/
 	public function getQuestionId() {
 		return $this->question_id;
 	}

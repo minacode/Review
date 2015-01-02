@@ -50,11 +50,12 @@ class ilObjReview extends ilObjectPlugin {
 	* Create object
 	*/
 	function doCreate() {
-		global $ilDB;
+		global $ilDB, $ilCtrl;
 		
-		$ilDB->insert("rep_robj_xrev_revobj", array("id" => array("integer", $this->getId()),
-																  "group_id" => array("integer", $this->$_GET["ref_id"])
-														  )
+		$ilDB->insert("rep_robj_xrev_revobj",
+						  array("id" => array("integer", $this->getId()),
+								  "group_id" => array("integer", $ilCtrl->getParameterArrayByClass("ilrepositorygui")["ref_id"])
+						  )
 		);
 	}
 	
@@ -103,10 +104,17 @@ class ilObjReview extends ilObjectPlugin {
 		$new_obj->update();
 	}
 	
+	
+	/**
+	* Get the id of the group this object belongs to
+	*/
 	public function getGroupId() {
 		return $this->group_id;
 	}
 	
+	/**
+	* Set the id of the group this object belongs to
+	*/
 	public function setGroupId($group_id) {
 		$this->group_id = $group_id;
 	}
@@ -261,8 +269,8 @@ class ilObjReview extends ilObjectPlugin {
 	/*
 	* Update data of an existing review by form input
 	*
-	* @param		$id			ID of the review to be updated
-	* @param		$form_data	user input to be stored
+	* @param		int		$id			ID of the review to be updated
+	* @param		array		$form_data	user input to be stored
 	*/
 	public function storeReviewByID($id, $form_data) {
 		global $ilDB;

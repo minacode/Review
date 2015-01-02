@@ -29,8 +29,6 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilAspectSelectInputGUI.php";
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilAspectHeadGUI.php";
-include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilAspectListGUI.php";
 
 /**
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
@@ -42,6 +40,19 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	private $a_parent_obj;
 	private $a_parent_cmd;
 	
+	/**
+	* constructor, sets up the table
+	*
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$reviews				associative arrays of displayed reviews (column => value)
+	* @param		array			$quest_tax			the question´s taxonomy and knowledge dimension
+	* @param		array			$taxonomy			taxonomy options to choose from
+	* @param		array			$knowledge_dimension		knowlege_dimension options to choose from
+	* @param		array			$expertise			expertise options to choose from
+	* @param		array			$rating				rating options to choose from
+	* @param		array			$evaluation			evaluation options to choose from 
+	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $review, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng, $ilAccess;
 		parent::__construct();
@@ -69,6 +80,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addCommandButton($ilCtrl->getFormAction($this), $lng->txt("save"));
 	}
 	
+	/**
+	* create the output for the form part which shows the reviewer
+	*/
 	private function populateReviewerData() {
 		global $lng;
 		$reviewer = new ilNonEditableValueGUI("");
@@ -77,6 +91,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($reviewer);
 	}
 	
+	/**
+	* create the output for the form part which allows to review certain aspects of the question
+	*/
 	private function populateReviewFormPart() {
 		global $lng;
 		$head_r = new ilFormSectionHeaderGUI();
@@ -116,6 +133,9 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$this->addItem($answ);
 	}
 	
+	/**
+	* create the output for the form part which allows to input the opinion on taxonomy and knowledge dimension
+	*/
 	private function populateTaxonomyFormPart() {
 		global $lng;
 		$head_t = new ilFormSectionHeaderGUI();

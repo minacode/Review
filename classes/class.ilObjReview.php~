@@ -50,11 +50,12 @@ class ilObjReview extends ilObjectPlugin {
 	* Create object
 	*/
 	function doCreate() {
-		global $ilDB;
+		global $ilDB, $ilCtrl;
 		
-		$ilDB->insert("rep_robj_xrev_revobj", array("id" => array("integer", $this->getId()),
-																  "group_id" => array("integer", $this->$_GET["ref_id"])
-														  )
+		$ilDB->insert("rep_robj_xrev_revobj",
+						  array("id" => array("integer", $this->getId()),
+								  "group_id" => array("integer", $ilCtrl->getParameterArrayByClass("ilrepositorygui")["ref_id"])
+						  )
 		);
 	}
 	
@@ -84,7 +85,7 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$ilDB->update("rep_robj_xrev_revobj",
 						  array("group_id" => array("integer", $this->getGroupId())),
-						  array("id" => array("integer", $this->getId())),
+						  array("id" => array("integer", $this->getId()))
 		);
 	}
 	
@@ -103,10 +104,17 @@ class ilObjReview extends ilObjectPlugin {
 		$new_obj->update();
 	}
 	
+	
+	/**
+	* Get the id of the group this object belongs to
+	*/
 	public function getGroupId() {
 		return $this->group_id;
 	}
 	
+	/**
+	* Set the id of the group this object belongs to
+	*/
 	public function setGroupId($group_id) {
 		$this->group_id = $group_id;
 	}

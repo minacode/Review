@@ -101,4 +101,4 @@ msg_question_edited_intr#:#eine Frage, der Sie als Reviewer zugeordnet sind, wur
 msg_question_created_subj#:#Frage erstellt
 msg_question_created_intr#:#in einem Fragepool in Ihrer Gruppe wurde eine neue Frage angelegt. Sie sollten ihr Reviewer zuordnen.
 msg_question_deleted_subj#:#Frage gelöscht
-msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und sie sind nicht mehr als Reviewer festgelegt.
+msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und Sie sind nicht mehr als Reviewer festgelegt.

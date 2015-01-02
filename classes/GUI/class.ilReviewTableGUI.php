@@ -32,6 +32,13 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 class ilReviewTableGUI extends ilTable2GUI {
 
+	/**
+	* Constructor, configures GUI output
+	*
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$reviews				associative arrays of displayed data (column => value)
+	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $reviews) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
@@ -43,18 +50,11 @@ class ilReviewTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       
+      $ilCtrl->saveParameterByClass("ilObjReviewGUI", array("r_id", "q_id", "origin"));
+      
 		$this->setData($reviews);
  
       $this->setTitle($lng->txt("rep_robj_xrev_my_reviews"));
-	}
-	
-	private function simulateData() {
-		$data = array(
-			array("id" => 0, "title" => "Dummy 1 [neu]", "author" => "Hans Wurst", "state" => 0),
-			array("id" => 1, "title" => "Dummy 2 [auch unbearbeitet]", "author" => "Random Name", "state" => 0),
-			array("id" => 2, "title" => "Dummy 3 [fertiggestellt]", "author" => "Max Mustermann", "state" => 1)				
-		);
-		$this->setData($data);
 	}
 	
 	/*
@@ -66,6 +66,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 		global $ilCtrl, $lng;
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "r_id", $a_set["id"]);
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["question_id"]);
+		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "review");
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		if ($a_set["state"]) {
 			$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));

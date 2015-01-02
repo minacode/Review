@@ -45,7 +45,9 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
       $this->setSelectAllCheckbox('q_id');
-      $this->addCommandButton('updateProperties', $this->lng->txt('rep_robj_xrev_accept'));
+      $this->addCommandButton('saveFinishQuestions', $this->lng->txt('rep_robj_xrev_accept'));
+      
+		$ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id"));      
       
       $this->setData($questions);
  
@@ -59,6 +61,7 @@ class ilQuestionFinishTableGUI extends ilTable2GUI {
 	*/
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
+		$ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id")); 
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["question_id"]);
 		$this->tpl->setVariable("CB_QUESTION_ID", $a_set["question_id"]);
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
