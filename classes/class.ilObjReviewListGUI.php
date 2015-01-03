@@ -39,6 +39,7 @@ class ilObjReviewListGUI extends ilObjectPluginListGUI {
 	
 	/**
 	* Get name of gui class handling the commands
+	*
 	* @return	string		$_			name of the GUI class
 	*/
 	function getGuiClass() {

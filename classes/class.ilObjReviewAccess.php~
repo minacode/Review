@@ -109,7 +109,9 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 		}
 		return false;
 	}
-	
+	/**
+	* Is called by ILIAS and needs to return true for the plugin to work
+	*/
 	public static function checkOnline($foo) {
 		return true;
 	}

@@ -161,7 +161,10 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 													  false);
 		$this->addItem($revi);
 	}
-		
+	
+	/**
+	* create the output for the form part which allows to accept, reject or request editing of a question
+	*/	
 	private function populateEvaluationFormPart() {
 		global $lng;
 		$head_e = new ilFormSectionHeaderGUI();

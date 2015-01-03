@@ -111,8 +111,10 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 	}
 	/**
 	* Is called by ILIAS and needs to return true for the plugin to work
+	*
+	* @param		integer		$a_id			id
 	*/
-	public static function checkOnline($foo) {
+	public static function checkOnline($a_id) {
 		return true;
 	}
 }

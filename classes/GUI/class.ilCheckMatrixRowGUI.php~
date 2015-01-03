@@ -33,7 +33,7 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 	private $question_id;
 	
 	/**
-	* Constructor for table-like display of ilSelectInputGUIs
+	* Constructor for a line in a table-like display of ilSelectInputGUIs
 	*
 	* @param	array		$question		associative array = question record
 	* @param	array		$reviewer_ids	ids of the reviewers belonging to each select input

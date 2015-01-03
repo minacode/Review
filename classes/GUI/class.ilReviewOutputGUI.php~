@@ -45,8 +45,6 @@ class ilReviewOutputGUI extends ilTable2GUI {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		
-		$this->a_parent_obj = $a_parent_obj;
-		
 		$this->taxonomy = $taxonomy;
 		$this->knowledge_dimension = $knowledge_dimension;
 		$this->expertise = $expertise;
@@ -70,6 +68,8 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	}
 
 	/**
+	* Set the rows of this table
+	*
 	* @param		array		$reviews		reviews to display
 	*/	
 	private function setUpData($reviews) {

@@ -37,8 +37,6 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 */
 
 class ilReviewInputGUI extends ilPropertyFormGUI {
-	private $a_parent_obj;
-	private $a_parent_cmd;
 	
 	/**
 	* constructor, sets up the table
@@ -57,8 +55,6 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		global $ilCtrl, $lng, $ilAccess;
 		parent::__construct();
 		
-		$this->a_parent_obj = $a_parent_obj;
-		$this->a_parent_cmd = $a_parent_cmd;
 		$this->review = $review;
 		$this->taxonomy = $taxonomy;
 		$this->knowledge_dimension = $knowledge_dimension;

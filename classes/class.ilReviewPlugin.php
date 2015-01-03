@@ -11,6 +11,11 @@ include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php")
 */
 class ilReviewPlugin extends ilRepositoryObjectPlugin {
 	
+	/**
+	* get the plugin name
+	*
+	* @param		string		$_			name of the plugin
+	*/
 	function getPluginName() {
 		return "Review";
 	}
