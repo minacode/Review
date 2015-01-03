@@ -56,12 +56,12 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 		$this->setHTML($custom_tpl->get());	
 	}
 	
-	public function getPostVars() {
 	/**
 	* Get the $_POST keys of this object´s input
 	*
 	* @return	array		$this->postvars		(reviewer id => $_POST key in the shape of "id_[question id]_[reviewer id])
 	*/	
+	public function getPostVars() {
 		return $this->postvars;
 	}
 	

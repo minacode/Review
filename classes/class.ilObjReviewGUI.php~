@@ -391,7 +391,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Output reviews
 	*/
 	public function showReviews() {
-		global $tpl, $ilTabs, $ilCtrl;
+		global $tpl, $ilTabs, $ilCtrl, $lng;
 		if (!ilObjReviewAccess::checkAccessToObject($_GET[substr($_GET["origin"], 0, 1)."_id"], "", "showReviews", $_GET["origin"])) {
 			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
 			$ilCtrl->redirect($this, "showContent");

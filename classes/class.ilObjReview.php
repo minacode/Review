@@ -671,10 +671,7 @@ class ilObjReview extends ilObjectPlugin {
 		$ntf->setLangModules(array("rep_robj_xrev"));
 		$ntf->setSubjectLangId("rep_robj_xrev_".$message_type."_subj");
 		$ntf->setIntroductionLangId("rep_robj_xrev_".$message_type."_intr");
-		// $ntf->addAdditionalInfo("exc_assignment", $ass->getTitle());
-		// $ntf->setGotoLangId("exc_feedback_notification_link");                
-		// $ntf->setReasonLangId("exc_feedback_notification_reason");                
- 
+		
 		$ntf->sendMail($receivers);
 	}
 }

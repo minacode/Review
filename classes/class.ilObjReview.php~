@@ -269,8 +269,8 @@ class ilObjReview extends ilObjectPlugin {
 	/*
 	* Update data of an existing review by form input
 	*
-	* @param		$id			ID of the review to be updated
-	* @param		$form_data	user input to be stored
+	* @param		int		$id			ID of the review to be updated
+	* @param		array		$form_data	user input to be stored
 	*/
 	public function storeReviewByID($id, $form_data) {
 		global $ilDB;

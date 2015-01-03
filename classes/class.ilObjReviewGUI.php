@@ -78,7 +78,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	/**
 	* Handles all commmands of this class, centralizes permission checks
 	*
-	* @param string		command		command to be performed by this class
+	* @param string		$cmd		command to be performed by this class
 	*/
 	function performCommand($cmd) {
 		switch ($cmd) {

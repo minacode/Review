@@ -61,16 +61,6 @@ class ilObjReviewListGUI extends ilObjectPluginListGUI {
 				"cmd" => "editProperties",
 				"txt" => $this->txt("edit"),
 				"default" => false),
-			array(
-				"permission" => "write",
-				"cmd" => "allocateReviews",
-				"txt" => $this->txt("reviewer_allocation"),
-				"default" => false),
-			array(
-				"permission" => "write",
-				"cmd" => "finishQuestions",
-				"txt" => $this->txt("finished_questions"),
-				"default" => false)
 		);
 	}
 
