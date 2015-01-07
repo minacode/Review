@@ -43,7 +43,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 	*
 	* @param		object		$a_parent_obj		GUI object that contains this object
 	* @param		string		$a_parent_cmd		Command that causes construction of this object
-	* @param		array			$reviews				associative arrays of displayed reviews (column => value)
+	* @param		array			$review				associative arrays of displayed reviews (column => value)
 	* @param		array			$quest_tax			the question´s taxonomy and knowledge dimension
 	* @param		array			$taxonomy			taxonomy options to choose from
 	* @param		array			$knowledge_dimension		knowlege_dimension options to choose from

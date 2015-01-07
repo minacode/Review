@@ -124,7 +124,7 @@ class ilObjReview extends ilObjectPlugin {
 	* thus updating the plugin´s question db
 	*/
 	private function syncQuestionDB() {
-		global $ilDB, $ilUser;		
+		global $ilDB, $ilUser, $ilPluginAdmin;		
 		
 		function cmp_rec($a, $b) {
 			if ($a["question_id"] > $b["question_id"])
@@ -136,10 +136,12 @@ class ilObjReview extends ilObjectPlugin {
 		
 		// uncomment as soos as needed
 		// $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
-		
+		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qpl", "assReviewableMultipleChoice"))
+			return;
 		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
 								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+								   "INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
 								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL",
 								   array("integer"),
 								   array($this->getGroupId()));
@@ -539,7 +541,9 @@ class ilObjReview extends ilObjectPlugin {
 	* @return	array		$question	$question taxonomy data as an associative array
 	*/
 	public function loadQuestionTaxonomyData($q_id) {
-		global $ilDB;
+		global $ilDB, $ilPluginAdmin;
+		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qpl", "assReviewableMultipleChoice"))
+			return array();
 		$req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
 									"FROM qpl_rev_qst ".
 									"WHERE qpl_rev_qst.question_id=%s",
@@ -671,10 +675,7 @@ class ilObjReview extends ilObjectPlugin {
 		$ntf->setLangModules(array("rep_robj_xrev"));
 		$ntf->setSubjectLangId("rep_robj_xrev_".$message_type."_subj");
 		$ntf->setIntroductionLangId("rep_robj_xrev_".$message_type."_intr");
-		// $ntf->addAdditionalInfo("exc_assignment", $ass->getTitle());
-		// $ntf->setGotoLangId("exc_feedback_notification_link");                
-		// $ntf->setReasonLangId("exc_feedback_notification_reason");                
- 
+		
 		$ntf->sendMail($receivers);
 	}
 }
