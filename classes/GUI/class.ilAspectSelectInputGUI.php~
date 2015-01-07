@@ -44,10 +44,6 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 		parent::__construct();
 		$this->setTitle($title);
 		$this->select_inputs = $select_inputs;
-		/*
-		foreach ($select_inputs as $postvar => $values)
-			$this->select_inputs[$postvar] = array_merge($values, array());
-			*/
 		$this->disabled = $disabled;
 		$this->fillTemplate();
 	}
@@ -56,6 +52,8 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	* fill the template with the given selects
 	*/
 	private function fillTemplate() {
+		global $tpl;
+		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
 		foreach ((array) $this->select_inputs as $postvar => $values) {
@@ -64,6 +62,7 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 			$select->setOptions($values["options"]);
 			$select->setDisabled($this->disabled);
 			$select->insert($custom_tpl);
+			echo $postvar.": ".$values["selected"];
 		}
 		$this->setHTML($custom_tpl->get());
 	}
@@ -75,6 +74,17 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 	*/
 	public function setDisabled($disabled) {
 		$this->disabled = $disabled;
+		$this->fillTemplate();
+	}
+	
+	/**
+	* set the value of the select inputs by a given array
+	* 
+	* @param 	array		$a_values		associative array of ($postvar => $value)
+	*/
+	public function setValueByArray($a_value) {
+		foreach ((array) $this->select_inputs as $postvar => $values)
+			$this->select_inputs[$postvar]["selected"] = $a_value[$postvar];
 		$this->fillTemplate();
 	}
 }

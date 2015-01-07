@@ -75,4 +75,15 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
 		$this->disabled = $disabled;
 		$this->fillTemplate();
 	}
+	
+	/**
+	* set the value of the select inputs by a given array
+	* 
+	* @param 	array		$a_values		associative array of ($postvar => $value)
+	*/
+	public function setValueByArray($a_value) {
+		foreach ((array) $this->select_inputs as $postvar => $values)
+			$this->select_inputs[$postvar]["selected"] = $a_value[$postvar];
+		$this->fillTemplate();
+	}
 }
