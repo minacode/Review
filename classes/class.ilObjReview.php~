@@ -136,7 +136,7 @@ class ilObjReview extends ilObjectPlugin {
 		
 		// uncomment as soos as needed
 		// $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
-		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qpl", "assReviewableMultipleChoice"))
+		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
 			return;
 		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
 								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
@@ -542,7 +542,7 @@ class ilObjReview extends ilObjectPlugin {
 	*/
 	public function loadQuestionTaxonomyData($q_id) {
 		global $ilDB, $ilPluginAdmin;
-		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qpl", "assReviewableMultipleChoice"))
+		if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
 			return array();
 		$req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
 									"FROM qpl_rev_qst ".
@@ -594,7 +594,9 @@ class ilObjReview extends ilObjectPlugin {
 	*/
 	public function notifyAuthorAboutCompletion($review_id) {
 		global $ilDB;
-		$rev = $ilDB->queryF("SELECT reviewer FROM rep_robj_xrev_revi WHERE id=%s",
+		$rev = $ilDB->queryF("SELECT owner FROM qpl_questions ".
+									"INNER JOIN rep_robj_xrev_revi ON rep_robj_xrev_revi.question_id=qpl_questions.question_id ".
+									"WHERE rep_robj_xrev_revi.id=%s",
 									array("integer"),
 									array($review_id)
 						  );

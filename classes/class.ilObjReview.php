@@ -594,13 +594,15 @@ class ilObjReview extends ilObjectPlugin {
 	*/
 	public function notifyAuthorAboutCompletion($review_id) {
 		global $ilDB;
-		$rev = $ilDB->queryF("SELECT reviewer FROM rep_robj_xrev_revi WHERE id=%s",
+		$rev = $ilDB->queryF("SELECT owner FROM qpl_questions ".
+									"INNER JOIN rep_robj_xrev_revi ON rep_robj_xrev_revi.question_id=qpl_questions.question_id ".
+									"WHERE rep_robj_xrev_revi.id=%s",
 									array("integer"),
 									array($review_id)
 						  );
 		$receivers = array();
 		while ($receiver = $ilDB->fetchAssoc($rev))
-			$receivers[] = $receiver["reviewer"];
+			$receivers[] = $receiver["owner"];
 		$this->performNotification($receivers, "msg_review_completed");
 	}
 	
