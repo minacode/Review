@@ -26,11 +26,15 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 /**
 * Application class for Review repository object.
 *
+* @var	integer		$group_id		id of the group the plugin object belongs to
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$
 */
 class ilObjReview extends ilObjectPlugin {
+	private $group_id;	
+	
 	/**
 	* Constructor
 	*/

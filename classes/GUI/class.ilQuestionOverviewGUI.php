@@ -22,6 +22,10 @@
 */
 
 /**
+* GUI to display question data
+*
+* @var		string		$html		rendered HTML equivalent to this object
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$

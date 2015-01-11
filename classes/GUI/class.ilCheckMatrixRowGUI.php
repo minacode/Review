@@ -22,6 +22,11 @@
 */
 
 /**
+* GUI, a row of checkboxes in the question-reviewer allocation matrix
+*
+* @var		array		$postvars		$_POST variables of each checkbox
+* @var		integer	$question_id	id of the question corresponding to the matrix row
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$

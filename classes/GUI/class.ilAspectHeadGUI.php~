@@ -45,4 +45,13 @@ class ilAspectHeadGUI extends ilCustomInputGUI {
 		}
 		$this->setHTML($custom_tpl->get());	
 	}
+	
+	/**
+	* determine if the GUI components shall be disabled
+	*
+	* @param		bool		$disabled		true, if the GUI components shall be disabled
+	*/	
+	public function setDisabled($disabled) {
+		// this is a NOP to avoid the call of method_exists
+	}
 }

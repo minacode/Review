@@ -32,6 +32,13 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 class ilQuestionTableGUI extends ilTable2GUI {
 
+	/**
+	* Constructor, configures GUI output
+	*
+	* @param		object		$a_parent_obj		GUI object that contains this object
+	* @param		string		$a_parent_cmd		Command that causes construction of this object
+	* @param		array			$questions			associative arrays of displayed data (column => value)
+	*/
 	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);

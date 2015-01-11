@@ -22,6 +22,8 @@
 */
 
 /**
+* GUI showing multiple captions in a single line
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$

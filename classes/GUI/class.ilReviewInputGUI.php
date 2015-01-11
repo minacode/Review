@@ -31,12 +31,29 @@ include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilAspectHeadGUI.php";
 
 /**
+* Form to input review data
+*
+* @var 	array		$review					associative arrays of displayed reviews (column => value)
+* @var 	array		$taxonomy				taxonomy options to choose from
+* @var 	array		$konwledge_dimension knowlege_dimension options to choose from
+* @var 	array		$expertise				expertise options to choose from
+* @var 	array		$rating					rating options to choose from
+* @var	array		$evaluation				evaluation options to choose from
+* @var 	array		$quest_tax				the question´s taxonomy and knowledge dimension
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$
 */
 
 class ilReviewInputGUI extends ilPropertyFormGUI {
+	private $review;
+	private $taxonomy;
+	private $konwledge_dimension;
+	private $expertise;
+	private $rating;
+	private $evaluation;
+	private $quest_tax;
 	
 	/**
 	* constructor, sets up the table

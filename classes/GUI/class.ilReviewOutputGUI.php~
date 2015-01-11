@@ -24,9 +24,29 @@
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
 include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewInputGUI.php";
-
+/**
+* Table GUI for review forms
+*
+* @var 	array		$review					associative arrays of displayed reviews (column => value)
+* @var 	array		$taxonomy				taxonomy options to choose from
+* @var 	array		$konwledge_dimension knowlege_dimension options to choose from
+* @var 	array		$expertise				expertise options to choose from
+* @var 	array		$rating					rating options to choose from
+* @var	array		$evaluation				evaluation options to choose from
+* @var 	array		$quest_tax				the question´s taxonomy and knowledge dimension
+*
+* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+*
+* $Id$
+*/
 class ilReviewOutputGUI extends ilTable2GUI {
 	public $a_parent_obj;
+	private $taxonomy;
+	private $konwledge_dimension;
+	private $expertise;
+	private $rating;
+	private $evaluation;
+	private $quest_tax;
 	
 	/**
 	* constructor, sets up the table
@@ -44,6 +64,8 @@ class ilReviewOutputGUI extends ilTable2GUI {
 	public function __construct($a_parent_obj, $a_parent_cmd, $reviews, $quest_tax, $taxonomy, $knowledge_dimension, $expertise, $rating, $evaluation) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
+		
+		$this->a_parent_obj = $a_parent_obj;
 		
 		$this->taxonomy = $taxonomy;
 		$this->knowledge_dimension = $knowledge_dimension;

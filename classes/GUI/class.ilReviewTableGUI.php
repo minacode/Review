@@ -25,6 +25,8 @@
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
 /**
+* Table GUI for reviews
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$

@@ -22,6 +22,12 @@
 */
 
 /**
+* GUI showing multiple ilSelectInputGUIs in a single line
+*
+* @var	array		$select_inputs		associative array of all selects,
+*												$_POST variable => array of all options, pre-selected option
+* @var	bool		$disabled			true, if user interaction with the object is disabled
+*
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
 *
 * $Id$

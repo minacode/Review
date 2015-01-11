@@ -48,6 +48,11 @@ class ilQuestionOverviewGUI {
 		$this->html = $template->get();
 	}
 	
+	/**
+	* Get the HTML string describing the look of this object
+	*
+	* @return		$this->html		rendered HTML string
+	*/
 	public function getHTML() {
 		return $this->html;
 	}
