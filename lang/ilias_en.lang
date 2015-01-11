@@ -103,4 +103,4 @@ msg_question_created_intr#:#a new question has been created in a question pool b
 msg_question_deleted_subj#:#Question deleted
 msg_question_deleted_intr#:#a question you were asked to review has been deleted and reviews on it are not necessary any longer.
 no_access#:#Access denied
-compl_answer#:#question and answers
+compl_question#:#question and answers

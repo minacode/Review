@@ -41,15 +41,26 @@ class ilQuestionOverviewGUI {
 	* @param		array			$metadata		associative array of the question´s title, description and author => corresponding value
 	*/
 	public function __construct($parent, $inner_part, $metadata) {
-		global $tpl, $ilAccess;
+		global $tpl, $ilAccess, $lng;
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$template = new ilTemplate("tpl.question_overview.html", true, true, $path_to_il_tpl);
 		$template->setVariable("TXT_TITLE", $metadata["title"]);
 		if ($ilAccess->checkAccess("write", "", $parent->object->getRefId()))
 				$template->setVariable("TXT_AUTHOR", $metadata["firstname"]." ".$metadata["lastname"]);
 		$template->setVariable("TXT_DESCRIPTION", $metadata["description"]);
+		
+		$template->setVariable("QUESTION", $lng->txt("rep_robj_xrev_question"));
+		$template->setVariable("TITLE", $lng->txt("rep_robj_xrev_title"));
+		$template->setVariable("AUTHOR", $lng->txt("rep_robj_xrev_auth_quest"));
+		$template->setVariable("DESCRIPTION", $lng->txt("rep_robj_xrev_description"));
+		$template->setVariable("COMPL_QUESTION", $lng->txt("rep_robj_xrev_compl_question"));
+		
+		
+		
 		$template->setVariable("TXT_INNER_PART", $inner_part);
 		$this->html = $template->get();
+		
+		
 	}
 	
 	/**
