@@ -103,3 +103,4 @@ msg_question_created_intr#:#in einem Fragepool in Ihrer Gruppe wurde eine neue F
 msg_question_deleted_subj#:#Frage gelöscht
 msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und Sie sind nicht mehr als Reviewer festgelegt.
 no_access#:#Zugriff verweigert
+compl_answer#:#Frage und Antworten
