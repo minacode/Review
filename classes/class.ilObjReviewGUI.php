@@ -162,9 +162,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $tpl, $ilTabs;
 		
 		$ilTabs->activateTab("allocation");
-		$this->initReviewAllocForm();
-		$this->alloc_form->setValuesByPost();
-		$tpl->setContent($this->alloc_form->getHTML());
+		if (count($this->object->loadUnallocatedQuestions()) > 0) {
+			$this->initReviewAllocForm();
+			$this->alloc_form->setValuesByPost();
+			$tpl->setContent($this->alloc_form->getHTML());
+		}
+		else 
+			$tpl->setContent($this->txt("no_alloc"));
 	}
 	
 	/**

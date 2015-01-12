@@ -3,8 +3,8 @@
 //
 
 <!-- language file start -->
-obj_xrev#:#Review
-objs_xrev#:#Reviews
+obj_xrev#:#Review-Objekt
+objs_xrev#:#Review-Objekte
 obj_xrev_duplicate#:#Kopieren
 objs_xrev_duplicate#:#Kopiere Review
 obj_xrev_select#:#Review auswählen
@@ -104,3 +104,4 @@ msg_question_deleted_subj#:#Frage gelöscht
 msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und Sie sind nicht mehr als Reviewer festgelegt.
 no_access#:#Zugriff verweigert
 compl_question#:#Frage und Antworten
+no_alloc#:#Keine neuen Fragen zum Zuordnen vorhanden.

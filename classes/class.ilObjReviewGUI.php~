@@ -159,12 +159,16 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Input reviewer allocation
 	*/
 	function allocateReviews() {
-		global $tpl, $ilTabs;
+		global $tpl, $ilTabs, $this;
 		
 		$ilTabs->activateTab("allocation");
-		$this->initReviewAllocForm();
-		$this->alloc_form->setValuesByPost();
-		$tpl->setContent($this->alloc_form->getHTML());
+		if (count($this->object->loadUnallocatedQuestions()) > 0) {
+			$this->initReviewAllocForm();
+			$this->alloc_form->setValuesByPost();
+			$tpl->setContent($this->alloc_form->getHTML());
+		}
+		else 
+			$tpl->setContent($this->txt("no_alloc"));
 	}
 	
 	/**
@@ -347,10 +351,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		if ($ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
 			$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 			$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
-			$tpl->setContent($quest->getHTML().$tbl->getHtml());
+			$tpl->setContent($quest->getHTML().$input->getHtml());
 		}
 		else 
-			$tpl->setContent($tbl->getHtml());
+			$tpl->setContent($input->getHtml());
 	}
 	
 	/*
@@ -389,10 +393,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		if ($ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
 			$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
 			$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
-			$tpl->setContent($quest->getHTML().$tbl->getHtml());
+			$tpl->setContent($quest->getHTML().$input->getHtml());
 		}
 		else 
-			$tpl->setContent($tbl->getHtml());
+			$tpl->setContent($input->getHtml());
 	}
 
 	/**

@@ -3,8 +3,8 @@
 //
 
 <!-- language file start -->
-obj_xrev#:#Review
-objs_xrev#:#Reviews
+obj_xrev#:#Review object
+objs_xrev#:#Review objects
 obj_xrev_duplicate#:#Copy
 objs_xrev_duplicate#:#Copy Review
 obj_xrev_select#:#Select Review
@@ -102,3 +102,6 @@ msg_question_created_subj#:#Question created
 msg_question_created_intr#:#a new question has been created in a question pool belonging to your group. You should allocate reviewers to it.
 msg_question_deleted_subj#:#Question deleted
 msg_question_deleted_intr#:#a question you were asked to review has been deleted and reviews on it are not necessary any longer.
+no_access#:#Access denied
+compl_question#:#question and answers
+no_alloc#:#No new questions to allocate.

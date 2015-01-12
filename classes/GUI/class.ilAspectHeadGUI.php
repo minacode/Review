@@ -37,7 +37,9 @@ class ilAspectHeadGUI extends ilCustomInputGUI {
 	* @param	array		$captions		all captions to be displayed as a table row
 	*/
 	public function __construct($captions) {
+		global $tpl;
 		parent::__construct();
+		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.aspect_row.html", true, true, $path_to_il_tpl);
 		foreach ($captions as $caption) {
