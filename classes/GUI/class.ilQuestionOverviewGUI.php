@@ -51,7 +51,8 @@ class ilQuestionOverviewGUI {
 		
 		$template->setVariable("QUESTION", $lng->txt("rep_robj_xrev_question"));
 		$template->setVariable("TITLE", $lng->txt("rep_robj_xrev_title"));
-		$template->setVariable("AUTHOR", $lng->txt("rep_robj_xrev_auth_quest"));
+		if ($ilAccess->checkAccess("write", "", $parent->object->getRefId()))
+			$template->setVariable("AUTHOR", $lng->txt("rep_robj_xrev_auth_quest"));
 		$template->setVariable("DESCRIPTION", $lng->txt("rep_robj_xrev_description"));
 		$template->setVariable("COMPL_QUESTION", $lng->txt("rep_robj_xrev_compl_question"));
 		
