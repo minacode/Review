@@ -58,7 +58,7 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$ilDB->insert("rep_robj_xrev_revobj",
 						  array("id" => array("integer", $this->getId()),
-								  "group_id" => array("integer", $ilCtrl->getParameterArrayByClass("ilrepositorygui")["ref_id"])
+								  "group_id" => array("integer", $_GET["ref_id"])
 						  )
 		);
 	}
@@ -215,13 +215,11 @@ class ilObjReview extends ilObjectPlugin {
 		global $ilDB, $ilUser;
 
 		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
-								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
-								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL ".
-								   "AND qpl_questions.owner=%s AND rep_robj_xrev_quest.state!=%s AND rep_robj_xrev_quest.review_obj=%s",
-								   array("integer", "integer", "integer", "integer"),
-								   array($this->getGroupId(), $ilUser->getId(), 2, $this->getId()));
+								   "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
+								   "AND rep_robj_xrev_quest.state!=%s AND rep_robj_xrev_quest.review_obj=%s",
+								   array("integer", "integer", "integer"),
+								   array($ilUser->getId(), 2, $this->getId()));
 		$db_questions = array();
 		while ($db_question = $ilDB->fetchAssoc($qpl))
 			$db_questions[] = $db_question;
@@ -238,14 +236,10 @@ class ilObjReview extends ilObjectPlugin {
 
 		$rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title, qpl_questions.question_id, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
 									"INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
-									"INNER JOIN rep_robj_xrev_revobj ON rep_robj_xrev_revobj.id=rep_robj_xrev_revi.review_obj ".
-								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
-								   "WHERE crs_items.parent_id=%s AND rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s ".
-								   "AND rep_robj_xrev_quest.state=1",
-								   array("integer", "integer", "integer"),
-								   array($this->getGroupId(), $ilUser->getId(), $this->getId()));
+									"INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=rep_robj_xrev_revi.question_id ".
+								   "WHERE rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s AND rep_robj_xrev_quest.state=1",
+								   array("integer", "integer"),
+								   array($ilUser->getId(), $this->getId()));
 		$reviews = array();
 		while ($review = $ilDB->fetchAssoc($rev))
 			$reviews[] = $review;
@@ -311,7 +305,6 @@ class ilObjReview extends ilObjectPlugin {
 		global $ilDB;
 		
 		$rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi ".
-									"INNER JOIN usr_data ON usr_data.usr_id=rep_robj_xrev_revi.reviewer ".
 									"WHERE question_id=%s AND review_obj=%s",
 									array("integer", "integer"),
 									array($q_id, $this->getId()));
@@ -351,13 +344,11 @@ class ilObjReview extends ilObjectPlugin {
 		global $ilDB, $ilUser;
 
 		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
-								   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-								   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
 								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
-								   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL AND ".
+								   "WHERE qpl_questions.original_id IS NULL AND ".
 								   "rep_robj_xrev_quest.state=0 AND rep_robj_xrev_quest.review_obj=%s",
-								   array("integer", "integer"),
-								   array($this->getGroupId(), $this->getId()));
+								   array("integer"),
+								   array($this->getId()));
 		$questions = array();
 		while ($question = $ilDB->fetchAssoc($qpl))
 			$questions[] = $question;
