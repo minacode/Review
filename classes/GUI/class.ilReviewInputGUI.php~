@@ -191,7 +191,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 		$group_e->addOption($op_e);
 		$op_d = new ilRadioOption($lng->txt("rep_robj_xrev_quest_refuse"), "3", "");
 		$group_e->addOption($op_d);
-		$group_e->setValue($this->review["rating"]);
+		$group_e->setValueByArray($this->review);
 		$group_e->setRequired(true);
 		$this->addItem($group_e);
 
