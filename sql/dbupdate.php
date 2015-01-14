@@ -268,3 +268,80 @@ $ilDB->update("rep_robj_xrev_knowd", array("term" => array("text", "select")), a
 $ilDB->update("rep_robj_xrev_rate", array("term" => array("text", "select")), array("id" => array("integer", 0)));
 $ilDB->update("rep_robj_xrev_taxon", array("term" => array("text", "select")), array("id" => array("integer", 0)));
 ?>
+<#16>
+<?php
+$fields = array(
+	'id' => array(
+		'type' => 'integer',
+		'length' => 4,
+		'notnull' => true
+	),
+	'timestamp' => array(
+		'type' => 'integer',
+		'length' => 4
+	),
+	'reviewer' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'question_id' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'desc_corr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'desc_relv' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'desc_expr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'quest_corr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'quest_relv' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'quest_expr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'answ_corr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'answ_relv' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'answ_expr' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'taxonomy' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'knowledge_dimension' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'rating' => array(
+		'type' => 'integer',
+		'length' => 4,
+	),
+	'eval_comment' => array(
+		'type' => 'clob',
+	),
+	'expertise' => array(
+		'type' => 'integer',
+		'length' => 4,
+	));
+$ilDB->createTable("rep_robj_xrev_hist", $fields);
+?>

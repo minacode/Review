@@ -168,6 +168,30 @@ class ilObjReview extends ilObjectPlugin {
 										  		  "review_obj" => array("integer", $this->getId())
 										  )
 						);
+						$hist_res = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE question_id=%s AND state=%s",
+														  array("integer", "integer"), array($db_question["question_id"], 1));
+						while ($review = $ilDB->fetchAssoc($hist_res)) {
+							$ilDB->insert("rep_robj_xrev_hist", array("timestamp" => array("integer", $review["timestamp"]),
+																					"desc_corr" => array("integer", $review["desc_corr"]),
+																					"desc_relv" => array("integer", $review["desc_relv"]),
+																					"desc_expr" => array("integer", $review["desc_expr"]),
+																					"quest_corr" => array("integer", $review["quest_corr"]),
+																					"quest_relv" => array("integer", $review["quest_relv"]),
+																					"quest_expr" => array("integer", $review["quest_expr"]),
+																					"answ_corr" => array("integer", $review["answ_corr"]),
+																					"answ_relv" => array("integer", $review["answ_relv"]),
+																					"answ_expr" => array("integer", $review["answ_expr"]),
+																					"taxonomy" => array("integer", $review["taxonomy"]),
+																					"knowledge_dimension" => array("integer", $review["knowledge_dimension"]),
+																					"rating" => array("integer", $review["rating"]),
+																					"eval_comment" => array("clob", $review["eval_comment"]),
+																					"expertise" => array("integer", $review["expertise"]),
+						  															"question_id" => array("integer", $review["question_id"]),
+						  															"id" => array("integer", $review["id"]),
+						  															"reviewer" => array("integer", $review["reviewer"])
+						  													)
+							);
+						}
 						$ilDB->update("rep_robj_xrev_revi",
 										  array("state" => array("integer", 0)),
 										  array("question_id" => array("integer", $db_question["question_id"]),
