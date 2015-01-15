@@ -367,7 +367,7 @@ class ilObjReview extends ilObjectPlugin {
 	public function  loadUnallocatedQuestions() {
 		global $ilDB, $ilUser;
 
-		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
+		$qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title, owner FROM qpl_questions ".
 								   "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
 								   "WHERE qpl_questions.original_id IS NULL AND ".
 								   "rep_robj_xrev_quest.state=0 AND rep_robj_xrev_quest.review_obj=%s",

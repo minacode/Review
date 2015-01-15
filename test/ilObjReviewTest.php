@@ -255,11 +255,13 @@ class ilObjReviewTest extends PHPUnit_Framework_TestCase {
 			$test_id1 = $ilDB->nextId("qpl_questions");
 			$test_id2 = $ilDB->nextId("rep_robj_xrev_quest");
 			$test_title = "Test Title";
+			$test_owner = 1337;
 			
 			$obj = new ilObjReview();
 			
 			$ilDB->insert("qpl_questions", array("question_id" => array("integer", $test_id1),
-															 "title" => array("text", $test_title)
+															 "title" => array("text", $test_title),
+															 "owner" => array("integer", $test_owner)
 													 )
 			);
 			$ilDB->insert("rep_robj_xrev_quest", array("id" => array("integer", $test_id2),
@@ -268,7 +270,7 @@ class ilObjReviewTest extends PHPUnit_Framework_TestCase {
 															 		 "review_obj" => array("integer", $obj->getId())
 													 		 )
 			);
-			$target = array("id" => $test_id1, "title" => $test_title);
+			$target = array("id" => $test_id1, "title" => $test_title, "owner" => $test_owner);
 			
 			$record = $obj->loadUnallocatedQuestions()[0];
 			
