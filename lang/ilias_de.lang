@@ -105,3 +105,7 @@ msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wu
 no_access#:#Zugriff verweigert
 compl_question#:#Frage und Antworten
 no_alloc#:#Keine neuen Fragen zum Zuordnen vorhanden.
+convert_questions#:#Fragen konvertieren
+nonrev_questions#:#Nichtreviewbare Fragen
+add_taxonomy#:#Fehlende Metadaten eintragen
+convert#:#Konvertieren

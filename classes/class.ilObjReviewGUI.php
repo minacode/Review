@@ -38,6 +38,8 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilQuestionFinishTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilConvertQuestionTableGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -67,14 +69,14 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		// - example: append my_id GET parameter to each request
 		//   $ilCtrl->saveParameter($this, array("my_id"));
 	}
-	
+
 	/**
 	* Get type.
 	*/
 	final function getType() {
 		return "xrev";
 	}
-	
+
 	/**
 	* Handles all commmands of this class, centralizes permission checks
 	*
@@ -88,10 +90,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			case "saveAllocateReviews":
 			case "finishQuestions":
 			case "saveFinishQuestions":
+            case "convertQuestion":
+            case "performConvertQuestion":
+            case "saveConvertQuestion":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
-			
+
 			case "showContent":
 			case "inputReview":
 			case "showReviews":
@@ -115,13 +120,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	function getStandardCmd() {
 		return "showContent";
 	}
-	
+
 	/**
 	* Set tabs
 	*/
 	function setTabs() {
 		global $ilTabs, $ilCtrl, $ilAccess;
-		
+
 		// tab for the "show content" command
 		if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
 			$ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"));
@@ -135,6 +140,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
 			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviews"));
 			$ilTabs->addTab("finish", $this->txt("finished_questions"), $ilCtrl->getLinkTarget($this, "finishQuestions"));
+            $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
 		}
 
 		// standard epermission tab
@@ -146,37 +152,37 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	function editProperties() {
 		global $tpl, $ilTabs;
-		
+
 		$ilTabs->activateTab("properties");
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
-		
+
 		$this->initQuestionFinishForm();
 		$tpl->setContent($this->form->getHTML());
 	}
-	
+
 	/**
 	* Input reviewer allocation
 	*/
 	function allocateReviews() {
 		global $tpl, $ilTabs;
-		
+
 		$ilTabs->activateTab("allocation");
 		if (count($this->object->loadUnallocatedQuestions()) > 0) {
 			$this->initReviewAllocForm();
 			$this->alloc_form->setValuesByPost();
 			$tpl->setContent($this->alloc_form->getHTML());
 		}
-		else 
+		else
 			$tpl->setContent($this->txt("no_alloc"));
 	}
-	
+
 	/**
 	* Check and save reviewer allocation
 	*/
 	function saveAllocateReviews() {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
-		
+
 		$ilTabs->activateTab("allocation");
 		$this->initReviewAllocForm();
 		if ($this->alloc_form->checkInput()) {
@@ -198,24 +204,24 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->alloc_form->setValuesByPost();
 		$tpl->setContent($this->alloc_form->getHTML());
 	}
-	
+
 	/**
 	* Accept allocation
 	*/
 	public function finishQuestions() {
 		global $tpl, $ilTabs;
-		
+
 		$ilTabs->activateTab("finish");
 		$this->initQuestionFinishForm();
 		$tpl->setContent($this->finish_form->getHTML());
 	}
-	
+
 	/**
 	* Check and perform finishing of questions
 	*/
 	public function saveFinishQuestions() {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
-		
+
 		$ilTabs->activateTab("finish");
 		$this->initQuestionFinishForm();
 		if (count($_POST["q_id"] > 0)) {
@@ -227,12 +233,98 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$tpl->setContent($this->finish_form->getHTML());
 	}
 
+    /*
+     * Select old questions to make them reviewable
+     */
+    public function convertQuestion() {
+        global $tpl, $ilTabs;
+
+        $ilTabs->activateTab("convert");
+		$convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
+        $tpl->setContent($convert_form->getHTML());
+    }
+
+    /*
+     * Check and perform conversion of questions
+     */
+    public function performConvertQuestion() {
+        global $tpl, $ilTabs, $ilCtrl;
+
+        $ilTabs->activateTab("convert");
+        $this->initAddTaxonomyForm($_GET["q_id"]);
+        $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
+        $hv = new ilHiddenInputGUI("", "q_id");
+        $hv->setValue($_GET["q_id"]);
+        echo $_GET["q_id"];
+        $this->add_taxonomy_form->addItem($hv);
+        $tpl->setContent($this->add_taxonomy_form->getHTML());
+    }
+
+    /**
+     * Init form to enter taxonomy and knowledge dimension
+     */
+    public function initAddTaxonomyForm() {
+        global $ilCtrl;
+
+        $this->add_taxonomy_form = new ilPropertyFormGUI();
+        $this->add_taxonomy_form->setTitle($this->txt("add_taxonomy"));
+
+
+        $head_cog = new ilSelectInputGUI("", "taxonomy");
+        $head_cog->setTitle($this->txt("taxonomy"));
+        $head_cog->setValue(0);
+        $head_cog->setOptions($this->object->taxonomy());
+        $head_cog->setRequired(true);
+        $this->add_taxonomy_form->addItem($head_cog);
+
+        $head_kno = new ilSelectInputGUI("", "knowledge_dimension");
+        $head_kno->setTitle($this->txt("knowledge_dim"));
+        $head_kno->setValue(0);
+        $head_kno->setOptions($this->object->knowledgeDimension());
+        $head_kno->setRequired(true);
+        $this->add_taxonomy_form->addItem($head_kno);
+
+        $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
+
+        $this->add_taxonomy_form->addCommandButton("saveConvertQuestion", $this->txt("save"));
+
+        /* Evil hack as ILIAS won't pass this f***ing q_id */
+        $this->add_taxonomy_form->setFormAction($ilCtrl->getFormAction($this) . "&q_id=" . $_GET["q_id"]);
+    }
+
+    /**
+     * Save adding missing taxonomy data and converting the question
+     */
+    public function saveConvertQuestion() {
+        global $tpl, $ilTabs, $lng, $ilCtrl;
+
+        $ilTabs->activateTab("convert");
+        $this->initAddTaxonomyForm();
+        // if ($_GET["q_id"] == NULL) die;
+        if ($this->add_taxonomy_form->checkInput()
+            && $this->add_taxonomy_form->getInput("taxonomy") != 0
+            && $this->add_taxonomy_form->getInput("knowledge_dimension") != 0
+        ) {
+            $this->object->saveQuestionConversion($_GET["q_id"],
+                $this->add_taxonomy_form->getInput("taxonomy"),
+                $this->add_taxonomy_form->getInput("knowledge_dimension")
+            );
+            ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+            $ilCtrl->redirect($this, "convertQuestion");
+        }
+        ilUtil::sendFailure($lng->txt("form_input_not_valid"));
+
+        $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
+        $this->add_taxonomy_form->setValuesByPost();
+		$tpl->setContent($this->add_taxonomy_form->getHTML());
+	}
+
 	/**
 	* Init form for reviewer allocation
 	*/
 	public function initReviewAllocForm() {
 		global $ilCtrl;
-		
+
 		$this->alloc_form = new ilPropertyFormGUI();
 		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
@@ -264,7 +356,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		
 		$this->finish_form = new ilQuestionFinishTableGUI($this, "saveFinishQuestions", $this->object->loadReviewedQuestions());
 	}
-	
+
 	/**
 	* Init  form for editing plugin object properties
 	*/

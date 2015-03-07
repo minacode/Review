@@ -105,3 +105,7 @@ msg_question_deleted_intr#:#a question you were asked to review has been deleted
 no_access#:#Access denied
 compl_question#:#question and answers
 no_alloc#:#There are no new questions to allocate.
+convert_questions#:#Convert questions
+nonrev_questions#:#Non-reviewable questions
+add_taxonomy#:#Enter missing meta data
+convert#:#Convert
