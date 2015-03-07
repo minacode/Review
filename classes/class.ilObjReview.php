@@ -32,16 +32,17 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 *
 * $Id$
 */
+
 class ilObjReview extends ilObjectPlugin {
-	private $group_id;	
-	
+	private $group_id;
+
 	/**
 	* Constructor
 	*/
 	public function __construct($a_ref_id = 0) {
 		parent::__construct($a_ref_id);
 	}
-	
+
 
 	/**
 	* Get type.
@@ -49,26 +50,26 @@ class ilObjReview extends ilObjectPlugin {
 	final function initType() {
 		$this->setType("xrev");
 	}
-	
+
 	/**
 	* Create object
 	*/
 	function doCreate() {
 		global $ilDB, $ilCtrl;
-		
+
 		$ilDB->insert("rep_robj_xrev_revobj",
 						  array("id" => array("integer", $this->getId()),
 								  "group_id" => array("integer", $_GET["ref_id"])
 						  )
 		);
 	}
-	
+
 	/**
 	* Read data from db
 	*/
 	function doRead() {
 		global $ilDB;
-		
+
 		$set = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
 									array("integer"),
 									array($this->getId())
@@ -700,5 +701,68 @@ class ilObjReview extends ilObjectPlugin {
 		
 		$ntf->sendMail($receivers);
 	}
+
+    /*
+     * Load all questions that are not reviewable
+     *
+     * @return   array       $questions      associative array of question data
+     */
+    public function loadNonReviewableQuestions() {
+        global $ilDB;
+
+        $res = $ilDB->queryF("SELECT question_id, type_tag, title, author FROM qpl_questions " .
+                             "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
+							 "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
+                             "INNER JOIN qpl_qst_type ON qpl_qst_type.question_type_id=qpl_questions.question_type_fi " .
+                             "WHERE crs_items.parent_id=%s",
+                             array("integer"),
+                             array($this->getGroupId())
+               );
+
+        $questions = array();
+        while ($question = $ilDB->fetchAssoc($res))
+            $questions[] = $question;
+        foreach ($questions as $index => $question) {
+            if (strpos($question["type_tag"], "assReviewable") !== FALSE)
+                unset($questions[$index]);
+        }
+        return $questions;
+    }
+
+    /**
+     * Update a former non reviewable question
+     *
+     * @param   int         $id         id of the question to update
+     * @param   int         $tax        taxonomy -""-
+     * @param   int         $knowd      knowledge dimension -""-
+     */
+    public function saveQuestionConversion($id, $tax, $knowd) {
+        global $ilDB;
+
+        $res = $ilDB->queryF("SELECT type_tag FROM qpl_qst_type " .
+                             "INNER JOIN qpl_questions ON qpl_questions.question_type_fi=qpl_qst_type.question_type_id " .
+                             "WHERE question_id=%s",
+                             array("integer"),
+                             array($id)
+               );
+        $old_type = $ilDB->fetchAssoc($res)["type_tag"];
+        $new_type = sprintf("assReviewable%s", substr($old_type, 3));
+        $res = $ilDB->queryF("SELECT question_type_id FROM qpl_qst_type " .
+                             "WHERE type_tag=%s",
+                             array("text"),
+                             array($new_type)
+               );
+        $type_id = $ilDB->fetchAssoc($res)["question_type_id"];
+        $ilDB->update("qpl_questions",
+            array("question_type_fi" => array("integer", $type_id)),
+            array("question_id" => array("integer", $id))
+        );
+        $ilDB->insert("qpl_rev_qst",
+            array("question_id" => array("integer", $id),
+                "taxonomy" => array("integer", $tax),
+                "knowledge_dimension" => array("integer", $knowd)
+            )
+        );
+    }
 }
 ?>
