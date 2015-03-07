@@ -132,13 +132,13 @@ class ilObjReview extends ilObjectPlugin {
                 $not_reviewable_types = array();
                 $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
                 while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                        array_push($not_reviewable_types, $data[0]);
+                        array_push($not_reviewable_types, $data['type_tag']);
                 }
                 
                 $reviewable_types = array();
                 $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
                 while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                        array_push($reviewable_types, $data[0]);
+                        array_push($reviewable_types, $data['type_tag']);
                 }
                 
                 foreach ( $not_reviewable_types as $nr_type ) {

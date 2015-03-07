@@ -1,6 +1,8 @@
 <?php
 class ilReviewableQuestionPluginGenerator {
     
+    private static $ilias_path = '/opt/lampp/htdocs/ilias/';
+    
     private static $instance = null;
     
     private function _construct() {}
@@ -29,9 +31,9 @@ class ilReviewableQuestionPluginGenerator {
         $result = $ilDB->query('SELECT plugin FROM qpl_qst_type WHERE type_tag LIKE "ass'. $question_type .'"');
         if ( $result = $ilDB->fetchAssoc( $result ) ) {
             if ($result['plugin']) {
-                return '.Modules/TestQuestionPool/Questions/ass'. $question_type . '/classes/';
+                return $this->ilias_path . 'Customizing/global/plugins/Modules/TestQuestionPool/Questions/ass'. $question_type .'/';
             } else {
-                return '.Modules/TestQuestionPool/classes/';
+                return $this->ilias_path . '/Modules/TestQuestionPool/';
             }
         } 
         return null;
@@ -71,25 +73,68 @@ class ilReviewableQuestionPluginGenerator {
     
     public function createPlugin( $question_type ) {
         $question_type = substr( $question_type, 3);
-        $base_path = './Modules/TestQuestionPool/Questions/assReviewable'. $question_type .'/';
-        mkdir( $base_path, true );
+        $plugin_path = self::$ilias_path . 'Customizing/global/plugins/Modules/TestQuestionPool/Questions/assReviewable'. $question_type .'/';
+        $template_path = self::$ilias_path . 'Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/question_files/';
+        echo $plugin_path;
+        mkdir( $plugin_path, true );
         // template_name, file_name, path
         $files = array(
-            array( 'plugin-php',                            'plugin.php',                           '' ),
-            array( 'class.assQuestionType.php',             'class.assReviewable'. $question_type .'php',               'classes/'              ),
-            array( 'class.assQuestionTypeGUI.php',          'class.assReviewable'. $question_type .'GUI.php',           'classes/'              ),
-            array( 'class.ilAssQuestionTypeFeedback.php',   'class.ilAssReviewable'. $question_type .'Feedback.php',    'classes/'              ),
-            array( 'class.ilAssQuestionTypePlugin.php',     'class.ilAssReviewable'. $question_type .'Plugin.php',      'classes/'              ),
-            array( 'ilias_en.lang',                         'ilias_en.lang',                                            'lang/'                 ),
-            array( 'ilias_ger.lang',                        'ilias_ger.lang',                                           'lang/'                 ),
-            array( 'dbupdate.php',                          'dbupdate.php',                                             'sql/'                  ),
-            array( 'class.assQuestionTypeExport.php',       'class.assReviewable'. $question_type .'Export.php',        'classes/export/qti12/' ),
-            array( 'class.assQuestionTypeImport.php',       'class.assReviewable'. $question_type .'Import.php',        'classes/import/qti12/' )
+            array( 
+                'template_name' => 'plugin.php',
+                'file_name'     => 'plugin.php',
+                'path'          => ''
+            ),
+            array( 
+                'template_name' => 'class.assQuestionType.php',
+                'file_name'     => 'class.assReviewable'. $question_type .'php',
+                'path'          => 'classes/'
+            ),
+            array( 
+                'template_name' => 'class.assQuestionTypeGUI.php',
+                'file_name'     => 'class.assReviewable'. $question_type .'GUI.php',
+                'path'          => 'classes/'
+            ),
+            array( 
+                'template_name' => 'class.ilAssQuestionTypeFeedback.php',
+                'file_name'     => 'class.ilAssReviewable'. $question_type .'Feedback.php',
+                'path'          => 'classes/'
+            ),
+            array( 
+                'template_name' => 'class.ilAssQuestionTypePlugin.php',
+                'file_name'     => 'class.ilAssReviewable'. $question_type .'Plugin.php',
+                'path'          => 'classes/'
+            ),
+            array( 
+                'template_name' => 'ilias_en.lang',
+                'file_name'     => 'ilias_en.lang',
+                'path'          => 'lang/'
+            ),
+            array( 
+                'template_name' => 'ilias_ger.lang',
+                'file_name'     => 'ilias_ger.lang',
+                'path'          => 'lang/'
+            ),
+            array( 
+                'template_name' => 'dbupdate.php',
+                'file_name'     => 'dbupdate.php',
+                'path'          => 'sql/'
+            ),
+            array( 
+                'template_name' => 'class.assQuestionTypeExport.php',
+                'file_name'     => 'class.assReviewable'. $question_type .'Export.php',
+                'path'          => 'classes/export/qti12/' 
+            ),
+            array( 
+                'template_name' => 'class.assQuestionTypeImport.php',
+                'file_name'     => 'class.assReviewable'. $question_type .'Import.php',
+                'path'          => 'classes/import/qti12/' 
+            )
         ); 
         foreach( $files as $file ) {
-            mkdir( $base_path . file[2], true );
-            $template = 'templates/question_files/' . file[0];
-            $file = $base_path . file[2] . file[1];
+            echo $plugin_path . $file['path'];
+            mkdir( $plugin_path . $file['path'], true );
+            $template = $template_path . $file['template_name'];
+            $file = $plugin_path . $file['path'] . $file['file_name'];
             $this->createFileFromTemplate( $question_type, $template, $file );
         }
     }
