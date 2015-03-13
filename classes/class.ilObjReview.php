@@ -22,7 +22,7 @@
 */
 
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
-require_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
+# require_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
 
 /**
 * Application class for Review repository object.
@@ -81,7 +81,7 @@ class ilObjReview extends ilObjectPlugin {
                 }
                 
                 $this->syncQuestionDB();
-                $this->generateNewQuestionTypePlugins();
+                # $this->generateNewQuestionTypePlugins();
         }
         
         /**

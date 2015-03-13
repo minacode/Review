@@ -424,7 +424,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	* Display review input form
 	*/
 	public function inputReview() {
-		global $tpl, $ilTabs, $ilCtrl, $lng, $ilPluginAdmin;		
+		global $tpl, $ilTabs, $ilCtrl, $lng;
 		$ilTabs->activateTab("content");
 		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "inputReview", "review")) {
 			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
@@ -440,20 +440,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 												$this->object->rating(),
 												$this->object->evaluation()
 						 );
-		if ($ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
-			$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
-			$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
-			$tpl->setContent($quest->getHTML().$input->getHtml());
-		}
-		else 
-			$tpl->setContent($input->getHtml());
+		$this->initQuestionOverview();
+        $tpl->setContent($input->getHtml());
 	}
-	
+
 	/*
 	* Save review input
 	*/
 	public function saveReview() {
-		global $tpl, $ilTabs, $lng, $ilCtrl, $ilPluginAdmin;
+		global $tpl, $ilTabs, $lng, $ilCtrl;
 		$ilTabs->activateTab("content");
 		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "saveReview", "review")) {
 			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
@@ -482,24 +477,19 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		else
 			$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
 		$input->setValuesByPost();
-		if ($ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
-			$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
-			$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
-			$tpl->setContent($quest->getHTML().$input->getHtml());
-		}
-		else 
-			$tpl->setContent($input->getHtml());
+		$this->initQuestionOverview();
+        $tpl->setContent($this->question_overview . $input->getHtml());
 	}
 
 	/**
 	* Output reviews
 	*/
 	public function showReviews() {
-		global $tpl, $ilTabs, $ilCtrl, $lng, $ilPluginAdmin;
+		global $tpl, $ilTabs, $ilCtrl, $lng;
 		if (!ilObjReviewAccess::checkAccessToObject($_GET[substr($_GET["origin"], 0, 1)."_id"], "", "showReviews", $_GET["origin"])) {
 			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
 			$ilCtrl->redirect($this, "showContent");
-		}		
+		}
 		$ilTabs->activateTab("content");
 		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
 											  $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
@@ -509,13 +499,24 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 											  $this->object->rating(),
 											  $this->object->evaluation()
 					  );
-		if ($ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
-			$q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
-			$quest = new ilQuestionOverviewGUI($this, $q_gui->getPreview(true), $this->object->loadQuestionMetaData($_GET["q_id"]));
-			$tpl->setContent($quest->getHTML().$tbl->getHtml());
-		}
-		else 
-			$tpl->setContent($tbl->getHtml());
+        $this->initQuestionOverview();
+		$tpl->setContent($this->question_overview . $tbl->getHtml());
 	}
+
+    /**
+     * Create the question overview GUI
+     */
+    private function initQuestionOverview() {
+        global $ilPluginAdmin;
+        if (!isset($_GET["q_id"]) || !$ilPluginAdmin->isActive(IL_COMP_MODULE,
+            "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
+            /* TODO make it check for all question plugins */
+            $this->question_overview = "";
+        } else {
+            $q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
+            $quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
+            $this->question_overview = $quest->getHTML();
+        }
+    }
 }
 ?>
