@@ -60,8 +60,8 @@ tax_and_know_dim#:#Taxonomy and knowledge dimension
 taxonomy#:#Taxonomy
 knowledge_dim#:#Knowledge dimension
 reviewer#:#Reviewer
-add_info#:#Further Informations
-auth_quest#:#Author of Question
+add_info#:#Further Information
+auth_quest#:#Author
 rating#:#Judgement
 comment#:#Comment
 expertise#:#Expertise
@@ -103,7 +103,7 @@ msg_question_created_intr#:#a new question has been created in a question pool b
 msg_question_deleted_subj#:#Question deleted
 msg_question_deleted_intr#:#a question you were asked to review has been deleted and reviews on it are not necessary any longer.
 no_access#:#Access denied
-compl_question#:#question and answers
+compl_question#:#Question and answers
 no_alloc#:#There are no new questions to allocate.
 convert_questions#:#Convert questions
 nonrev_questions#:#Non-reviewable questions
