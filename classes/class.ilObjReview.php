@@ -1,24 +1,24 @@
 <?php
 /*
-        +-----------------------------------------------------------------------------+
-        | ILIAS open source                                                           |
-        +-----------------------------------------------------------------------------+
-        | Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-        |                                                                             |
-        | This program is free software; you can redistribute it and/or               |
-        | modify it under the terms of the GNU General Public License                 |
-        | as published by the Free Software Foundation; either version 2              |
-        | of the License, or (at your option) any later version.                      |
-        |                                                                             |
-        | This program is distributed in the hope that it will be useful,             |
-        | but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-        | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-        | GNU General Public License for more details.                                |
-        |                                                                             |
-        | You should have received a copy of the GNU General Public License           |
-        | along with this program; if not, write to the Free Software                 |
-        | Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-        +-----------------------------------------------------------------------------+
++-----------------------------------------------------------------------------+
+| ILIAS open source                                                           |
++-----------------------------------------------------------------------------+
+| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
+|                                                                             |
+| This program is free software; you can redistribute it and/or               |
+| modify it under the terms of the GNU General Public License                 |
+| as published by the Free Software Foundation; either version 2              |
+| of the License, or (at your option) any later version.                      |
+|                                                                             |
+| This program is distributed in the hope that it will be useful,             |
+| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
+| GNU General Public License for more details.                                |
+|                                                                             |
+| You should have received a copy of the GNU General Public License           |
+| along with this program; if not, write to the Free Software                 |
+| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
++-----------------------------------------------------------------------------+
 */
 
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
@@ -79,30 +79,30 @@ class ilObjReview extends ilObjectPlugin {
                         $this->obj_id = $rec["obj_id"];
                         $this->group_id = $rec["group_id"];
                 }
-                
+
                 $this->syncQuestionDB();
                 # $this->generateNewQuestionTypePlugins();
         }
-        
+
         /**
         * Update data
         */
         function doUpdate() {
                 global $ilDB;
-                
+
                 $ilDB->update("rep_robj_xrev_revobj",
                                                   array("group_id" => array("integer", $this->getGroupId())),
                                                   array("id" => array("integer", $this->getId()))
                 );
         }
-        
+
         /**
         * Delete data from db
         */
         function doDelete() {
                 // pointless, it seems this function is not called by ILIAS
         }
-        
+
         /**
         * Do Cloning
         */
@@ -110,37 +110,36 @@ class ilObjReview extends ilObjectPlugin {
                 $new_obj->setGroupId($this->getGroupId());
                 $new_obj->update();
         }
-        
-        
+
         /**
         * Get the id of the group this object belongs to
         */
         public function getGroupId() {
                 return $this->group_id;
         }
-        
+
         /**
         * Set the id of the group this object belongs to
         */
         public function setGroupId($group_id) {
                 $this->group_id = $group_id;
         }
-                
+
         private function generateNewQuestionTypePlugins() {
                 global $ilDB;
-                
+
                 $not_reviewable_types = array();
                 $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
                 while ( $data = $ilDB->fetchAssoc( $result ) ) {
                         array_push($not_reviewable_types, $data[0]);
                 }
-                
+
                 $reviewable_types = array();
                 $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
                 while ( $data = $ilDB->fetchAssoc( $result ) ) {
                         array_push($reviewable_types, $data[0]);
                 }
-                
+
                 foreach ( $not_reviewable_types as $nr_type ) {
                         if ( !in_array( 'assReviewable'. substr($nr_type, 3), $reviewable_types ) ) {
                                 $generator = ilReviewableQuestionPluginGenerator::get();
@@ -148,14 +147,14 @@ class ilObjReview extends ilObjectPlugin {
                         }
                 }
         }
-                
+
         /**
         * Load all questions from the groups´ Question Pools,
         * thus updating the plugin´s question db
         */
         private function syncQuestionDB() {
-                global $ilDB, $ilUser, $ilPluginAdmin;          
-                
+                global $ilDB, $ilUser, $ilPluginAdmin;
+
                 function cmp_rec($a, $b) {
                         if ($a["question_id"] > $b["question_id"])
                                 return 1;
@@ -163,10 +162,11 @@ class ilObjReview extends ilObjectPlugin {
                                 return -1;
                         return 0;
                 }
-                
+
                 // uncomment as soos as needed
                 // $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
                 if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
+                    /* TODO make it work for all questions */
                         return;
                 $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
                                                                    "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
@@ -183,7 +183,7 @@ class ilObjReview extends ilObjectPlugin {
                 $pl_questions = array();
                 while ($pl_question = $ilDB->fetchAssoc($pqs))
                         $pl_questions[] = $pl_question;
-                
+
                 foreach ($db_questions as $db_question) {
                         foreach ($pl_questions as $pl_question) {
                                 if ($db_question["question_id"] == $pl_question["question_id"]) {
@@ -230,7 +230,7 @@ class ilObjReview extends ilObjectPlugin {
                                 }
                         }
                 }
-                
+
                 foreach (array_udiff($db_questions, $pl_questions, "cmp_rec") as $new_question) {
                         $ilDB->insert("rep_robj_xrev_quest", array("id" => array("integer", $ilDB->nextId("rep_robj_xrev_quest")),
                                                                                                                                          "question_id" => array("integer", $new_question["question_id"]),
@@ -251,23 +251,23 @@ class ilObjReview extends ilObjectPlugin {
                                                                          array("integer", "integer"),
                                                                          array($del_question["question_id"], $this->getId()));
                 }
-                
+
                 //uncomment as soon as needed
                 // $ilDB->unlockTables();
         }
-        
+
         /*
-        * Load all questions created by the user in all of the groups´ question pools
+        * Load all questions in the review cycle that were created by the user in all of the groups´ question pools
         *
         * @return       array           $db_questions           the questions loaded by this function as an associative array
-        */ 
+        */
         public function loadQuestionsByUser() {
                 global $ilDB, $ilUser;
 
                 $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
                                                                    "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
                                                                    "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
-                                                                   "AND rep_robj_xrev_quest.state!=%s AND rep_robj_xrev_quest.review_obj=%s",
+                                                                   "AND rep_robj_xrev_quest.state<%s AND rep_robj_xrev_quest.review_obj=%s",
                                                                    array("integer", "integer", "integer"),
                                                                    array($ilUser->getId(), 2, $this->getId()));
                 $db_questions = array();
@@ -275,12 +275,12 @@ class ilObjReview extends ilObjectPlugin {
                         $db_questions[] = $db_question;
                 return $db_questions;
         }
-        
+
         /*
         * Load all reviews created by the user for all questions in the groups´ question pools
         *
         * @return       array           $reviews                the reviews loaded by this function as an associative array
-        */ 
+        */
         public function loadReviewsByUser() {
                 global $ilDB, $ilUser;
 
@@ -302,20 +302,20 @@ class ilObjReview extends ilObjectPlugin {
         * @param                int             $a_id           ID of the review to load
         *
         * @return       array           $reviews        all reviews with the given ID (exactly one or none)
-        */ 
+        */
         public function loadReviewById($a_id) {
                 global $ilDB;
-                
+
                 $rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE id=%s",
                                                                         array("integer"),
                                                                         array($a_id));
-                
+
                 $reviews = array();
                 while ($review = $ilDB->fetchAssoc($rev))
                         $reviews[] = $review;
                 return $reviews[0];
         }
-        
+
         /*
         * Update data of an existing review by form input
         *
@@ -324,7 +324,7 @@ class ilObjReview extends ilObjectPlugin {
         */
         public function storeReviewByID($id, $form_data) {
                 global $ilDB;
-                
+
                 $ilDB->update("rep_robj_xrev_revi", array("timestamp" => array("integer", time()),
                                                                                                                                 "state" => array("integer", 1),
                                                                                                                                 "desc_corr" => array("integer", $form_data["dc"]),
@@ -343,17 +343,17 @@ class ilObjReview extends ilObjectPlugin {
                                                                                                                                 "expertise" => array("integer", $form_data["exp"])),
                                                   array("id" => array("integer", $id)));
         }
-        
+
         /*
-        * Load a review with a certain ID from the Review Database
+        * Load all review belonging to a question with a certain ID from the Review Database
         *
-        * @param                int             $a_id           ID of the review to load
+        * @param                int             $a_id           ID of the question
         *
         * @return       array           $reviews        all reviews with the given ID (exactly one or none)
-        */ 
+        */
         public function loadReviewsByQuestion($q_id) {
                 global $ilDB;
-                
+
                 $rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi ".
                                                                         "WHERE question_id=%s AND review_obj=%s",
                                                                         array("integer", "integer"),
@@ -361,18 +361,18 @@ class ilObjReview extends ilObjectPlugin {
                 $reviews = array();
                 while ($review = $ilDB->fetchAssoc($rev))
                         $reviews[] = $review;
-                        
+
                 return $reviews;
         }
-        
+
         /*
         * Load all members of a group
         *
         * @return       array           $reviewers      ids and names of the group members
-        */ 
+        */
         public function loadReviewers() {
                 global $ilDB;
-                
+
                 $res = $ilDB->queryF("SELECT usr_data.usr_id AS usr_id, firstname, lastname FROM usr_data ".
                                                                         "INNER JOIN rbac_ua ON rbac_ua.usr_id=usr_data.usr_id ".
                                                                    "INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
@@ -384,12 +384,12 @@ class ilObjReview extends ilObjectPlugin {
                         $reviewers[] = $reviewer;
                 return $reviewers;
         }
-        
+
         /*
         * Load all questions that currently have no reviewer allocated to them
         *
         * @return       array           $questions              the question loaded by this function as an associative array
-        */ 
+        */
         public function  loadUnallocatedQuestions() {
                 global $ilDB, $ilUser;
 
@@ -404,7 +404,7 @@ class ilObjReview extends ilObjectPlugin {
                         $questions[] = $question;
                 return $questions;
         }
-        
+
         /*
         * Save matrix input as review entities containing the allocated reviewer
         *
@@ -412,7 +412,7 @@ class ilObjReview extends ilObjectPlugin {
         */
         public function allocateReviews($alloc_matrix) {
                 global $ilDB;
-                
+
                 $entities = array();
                 foreach ($alloc_matrix as $row) {
                         foreach ($row["reviewers"] as $reviewer_id => $checked) {
@@ -445,7 +445,7 @@ class ilObjReview extends ilObjectPlugin {
                         }
                 }
         }
-        
+
         /**
         * Load all questions for which all reviews have been completed
         *
@@ -453,14 +453,14 @@ class ilObjReview extends ilObjectPlugin {
         */
         public function loadReviewedQuestions() {
                 global $ilDB;
-                
+
                 $req = $ilDB->queryF("SELECT qpl_questions.question_id, qpl_questions.title, qpl_questions.author ".
                                                                         "FROM qpl_questions ".
                                                                         "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
                                                                         "WHERE rep_robj_xrev_quest.review_obj=%s AND rep_robj_xrev_quest.state=1",
                                                                         array("integer"),
                                                                         array($this->getId()));
-                $questions = array();                                                   
+                $questions = array();
                 while ($question = $ilDB->fetchAssoc($req)) {
                         $rev = $ilDB->queryF("SELECT id FROM rep_robj_xrev_revi ".
                                                                                 "WHERE state=0 AND question_id=%s AND review_obj=%s",
@@ -471,7 +471,7 @@ class ilObjReview extends ilObjectPlugin {
                 }
                 return $questions;
         }
-        
+
         /**
         * Remove questions from the review cycle by marking them as finished
         *
@@ -488,7 +488,7 @@ class ilObjReview extends ilObjectPlugin {
                         );
                 }
         }
-        
+
         /*
         * Get taxonomy data from DB
         *
@@ -502,7 +502,7 @@ class ilObjReview extends ilObjectPlugin {
                         $taxonomies[$taxonomy["id"]] = $lng->txt("rep_robj_xrev_".$taxonomy["term"]);
                 return $taxonomies;
         }
-                
+
         /*
         * Get knowledge dimension data from DB
         *
@@ -516,7 +516,7 @@ class ilObjReview extends ilObjectPlugin {
                         $know_dims[$know_dim["id"]] = $lng->txt("rep_robj_xrev_".$know_dim["term"]);
                 return $know_dims;
         }
-                
+
         /*
         * Get expertise data from DB
         *
@@ -529,8 +529,8 @@ class ilObjReview extends ilObjectPlugin {
                 while ($expertise = $ilDB->fetchAssoc($res))
                         $expertises[$expertise["id"]] = $lng->txt("rep_robj_xrev_".$expertise["term"]);
                 return $expertises;
-        }       
-        
+        }
+
         /*
         * Get rating data from DB
         *
@@ -544,7 +544,7 @@ class ilObjReview extends ilObjectPlugin {
                         $ratings[$rating["id"]] = $lng->txt("rep_robj_xrev_".$rating["term"]);
                 return $ratings;
         }
-                
+
         /*
         * Get evaluation data from DB
         *
@@ -558,7 +558,7 @@ class ilObjReview extends ilObjectPlugin {
                         $evaluations[$evaluation["id"]] = $lng->txt("rep_robj_xrev_".$evaluation["term"]);
                 return $evaluations;
         }
-        
+
         /**
         * Load metadata of a question
         *
@@ -577,7 +577,7 @@ class ilObjReview extends ilObjectPlugin {
                                                   );
                 return $ilDB->fetchAssoc($req);
         }
-        
+
         /**
         * Load taxonomy and knowledge dimension of a question
         *
@@ -597,7 +597,7 @@ class ilObjReview extends ilObjectPlugin {
                                                   );
                 return $ilDB->fetchAssoc($req);
         }
-        
+
         /**
         * Prepare message output to inform reviewers about
         * their allocation to a certain question
@@ -612,7 +612,7 @@ class ilObjReview extends ilObjectPlugin {
                                         $receivers[] = explode("_", $reviewer_id)[2];
                 $this->performNotification($receivers, "msg_review_requested");
         }
-        
+
         /**
         * Prepare message output to inform authors about
         * the acceptance of a certain question by the group´s admin
@@ -630,7 +630,7 @@ class ilObjReview extends ilObjectPlugin {
                                                                                  )["owner"];
                 $this->performNotification($receivers, "msg_question_accepted");
         }
-        
+
         /**
         * Prepare message output to inform an author about
         * the completion of a review on a certain question
@@ -650,7 +650,7 @@ class ilObjReview extends ilObjectPlugin {
                         $receivers[] = $receiver["owner"];
                 $this->performNotification($receivers, "msg_review_completed");
         }
-        
+
         /**
         * Prepare message output to inform reviewers about
         * a change of a certain question they have to review
@@ -669,7 +669,7 @@ class ilObjReview extends ilObjectPlugin {
                         $receivers[] = $receiver["reviewer"];
                 $this->performNotification($receivers, "msg_question_edited");
         }
-        
+
         /**
         * Prepare message output to inform the group´s admins about
         * the creation of a new question
@@ -689,7 +689,7 @@ class ilObjReview extends ilObjectPlugin {
                         $receivers[] = $receiver["usr_id"];
                 $this->performNotification($receivers, "msg_question_created");
         }
-        
+
         /**
         * Prepare message output to inform reviewers about
         * the deletion of a question they had to review
@@ -708,7 +708,7 @@ class ilObjReview extends ilObjectPlugin {
                         $receivers[] = $receiver["reviewer"];
                 $this->performNotification($receivers, "msg_question_deleted");
         }
-        
+
         /**
         * Created and send an ILIAS message based on data prepared by this object´s notify... methods
         *
@@ -723,7 +723,7 @@ class ilObjReview extends ilObjectPlugin {
                 $ntf->setSubjectLangId("rep_robj_xrev_".$message_type."_subj");
                 $ntf->setIntroductionLangId("rep_robj_xrev_".$message_type."_intr");
                 $ntf->setGotoLangId("rep_robj_xrev_obj_xrev");
-                
+
                 $ntf->sendMail($receivers);
         }
 
@@ -787,6 +787,43 @@ class ilObjReview extends ilObjectPlugin {
                 "taxonomy" => array("integer", $tax),
                 "knowledge_dimension" => array("integer", $knowd)
             )
+        );
+    }
+
+    /*
+     * Load all finished questions
+     *
+     * @return       array           $questions              array of associative arrays of questions
+     */
+    public function loadFinishedQuestions() {
+        global $ilDB;
+
+        $req = $ilDB->queryF("SELECT qpl_questions.question_id, qpl_questions.title, qpl_questions.author ".
+                "FROM qpl_questions ".
+                "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
+                "WHERE rep_robj_xrev_quest.review_obj=%s AND rep_robj_xrev_quest.state=3",
+                array("integer"),
+                array($this->getId())
+        );
+        $questions = array();
+        while ($question = $ilDB->fetchAssoc($req))
+            $questions[] = $question;
+        return $questions;
+    }
+
+    /*
+     * Move a question into the finalized state after the master review
+     *
+     * @param                integer           $q_id              question id
+     */
+    public function finalizeQuestion($q_id) {
+        global $ilDB;
+
+        $ilDB->update("rep_robj_xrev_quest",
+                array("state" => array("integer", 3)),
+                array("question_id" => array("integer", $q_id),
+                        "review_obj" => array("integer", $this->getId())
+                )
         );
     }
 }
