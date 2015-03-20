@@ -21,13 +21,8 @@
 +-----------------------------------------------------------------------------+
 */
 
-<<<<<<< HEAD
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 include_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
-=======
-include_once "./Services/Repository/classes/class.ilObjectPlugin.php";
->>>>>>> 3d93a17338b0cab1fa7bab816e70f9c687a47bd8
-# require_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
 
 /*
  * Application class for Review repository object.
@@ -63,44 +58,6 @@ class ilObjReview extends ilObjectPlugin {
     function doCreate() {
         global $ilDB, $ilCtrl;
 
-<<<<<<< HEAD
-        /**
-        * Read data from db
-        */
-        function doRead() {
-                global $ilDB;
-
-                $set = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
-                                                                        array("integer"),
-                                                                        array($this->getId())
-                                 );
-                while ($rec = $ilDB->fetchAssoc($set)) {
-                        $this->obj_id = $rec["obj_id"];
-                        $this->group_id = $rec["group_id"];
-                }
-                
-                $this->syncQuestionDB();
-                $this->generateNewQuestionTypePlugins();
-        }
-        
-        /**
-        * Update data
-        */
-        function doUpdate() {
-                global $ilDB;
-                
-                $ilDB->update("rep_robj_xrev_revobj",
-                                                  array("group_id" => array("integer", $this->getGroupId())),
-                                                  array("id" => array("integer", $this->getId()))
-                );
-        }
-        
-        /**
-        * Delete data from db
-        */
-        function doDelete() {
-                // pointless, it seems this function is not called by ILIAS
-=======
         $ilDB->insert("rep_robj_xrev_revobj",
                 array("id" => array("integer", $this->getId()),
                         "group_id" => array("integer", $_GET["ref_id"])
@@ -121,11 +78,10 @@ class ilObjReview extends ilObjectPlugin {
         while ($rec = $ilDB->fetchAssoc($set)) {
             $this->obj_id = $rec["obj_id"];
             $this->group_id = $rec["group_id"];
->>>>>>> 3d93a17338b0cab1fa7bab816e70f9c687a47bd8
         }
 
         $this->syncQuestionDB();
-        # $this->generateNewQuestionTypePlugins();
+        $this->generateNewQuestionTypePlugins();
     }
 
     /*
@@ -169,19 +125,22 @@ class ilObjReview extends ilObjectPlugin {
         $this->group_id = $group_id;
     }
 
+    /*
+     * Max is supposed to document his code
+     */
     private function generateNewQuestionTypePlugins() {
         global $ilDB;
 
         $not_reviewable_types = array();
         $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
         while ( $data = $ilDB->fetchAssoc( $result ) ) {
-            array_push($not_reviewable_types, $data[0]);
+            array_push($not_reviewable_types, $data['type_tag']);
         }
 
         $reviewable_types = array();
         $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
         while ( $data = $ilDB->fetchAssoc( $result ) ) {
-            array_push($reviewable_types, $data[0]);
+            array_push($reviewable_types, $data['type_tag']);
         }
 
         foreach ( $not_reviewable_types as $nr_type ) {
@@ -190,111 +149,6 @@ class ilObjReview extends ilObjectPlugin {
                 $generator->createPlugin( $nr_type );
             }
         }
-<<<<<<< HEAD
-                
-        private function generateNewQuestionTypePlugins() {
-                global $ilDB;
-                
-                $not_reviewable_types = array();
-                $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
-                while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                        array_push($not_reviewable_types, $data['type_tag']);
-                }
-                
-                $reviewable_types = array();
-                $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
-                while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                        array_push($reviewable_types, $data['type_tag']);
-                }
-                
-                foreach ( $not_reviewable_types as $nr_type ) {
-                        if ( !in_array( 'assReviewable'. substr($nr_type, 3), $reviewable_types ) ) {
-                                $generator = ilReviewableQuestionPluginGenerator::get();
-                                $generator->createPlugin( $nr_type );
-                        }
-                }
-        }
-                
-        /**
-        * Load all questions from the groups´ Question Pools,
-        * thus updating the plugin´s question db
-        */
-        private function syncQuestionDB() {
-                global $ilDB, $ilUser, $ilPluginAdmin;          
-                
-                function cmp_rec($a, $b) {
-                        if ($a["question_id"] > $b["question_id"])
-                                return 1;
-                        if ($a["question_id"] < $b["question_id"])
-                                return -1;
-                        return 0;
-                }
-                
-                // uncomment as soos as needed
-                // $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
-                #if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
-                #        return;
-                $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
-                                                                   "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-                                                                   "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-                                                                   "INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
-                                                                   "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL",
-                                                                   array("integer"),
-                                                                   array($this->getGroupId()));
-                $db_questions = array();
-                while ($db_question = $ilDB->fetchAssoc($qpl))
-                        $db_questions[] = $db_question;
-                $pqs = $ilDB->queryF("SELECT * FROM rep_robj_xrev_quest WHERE review_obj=%s",
-                                                                        array("integer"), array($this->getId()));
-                $pl_questions = array();
-                while ($pl_question = $ilDB->fetchAssoc($pqs))
-                        $pl_questions[] = $pl_question;
-                
-                foreach ($db_questions as $db_question) {
-                        foreach ($pl_questions as $pl_question) {
-                                if ($db_question["question_id"] == $pl_question["question_id"]) {
-                                        if ($db_question["tstamp"] > $pl_question["timestamp"]) {
-                                                $ilDB->update("rep_robj_xrev_quest",
-                                                                                  array("timestamp" => array("integer", $db_question["tstamp"])),
-                                                                                  array("question_id" => array("integer", $db_question["question_id"]),
-                                                                                                  "review_obj" => array("integer", $this->getId())
-                                                                                  )
-                                                );
-                                                $hist_res = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE question_id=%s AND state=%s",
-                                                                                                                  array("integer", "integer"), array($db_question["question_id"], 1));
-                                                while ($review = $ilDB->fetchAssoc($hist_res)) {
-                                                        $ilDB->insert("rep_robj_xrev_hist", array("timestamp" => array("integer", $review["timestamp"]),
-                                                                                                                                                                        "desc_corr" => array("integer", $review["desc_corr"]),
-                                                                                                                                                                        "desc_relv" => array("integer", $review["desc_relv"]),
-                                                                                                                                                                        "desc_expr" => array("integer", $review["desc_expr"]),
-                                                                                                                                                                        "quest_corr" => array("integer", $review["quest_corr"]),
-                                                                                                                                                                        "quest_relv" => array("integer", $review["quest_relv"]),
-                                                                                                                                                                        "quest_expr" => array("integer", $review["quest_expr"]),
-                                                                                                                                                                        "answ_corr" => array("integer", $review["answ_corr"]),
-                                                                                                                                                                        "answ_relv" => array("integer", $review["answ_relv"]),
-                                                                                                                                                                        "answ_expr" => array("integer", $review["answ_expr"]),
-                                                                                                                                                                        "taxonomy" => array("integer", $review["taxonomy"]),
-                                                                                                                                                                        "knowledge_dimension" => array("integer", $review["knowledge_dimension"]),
-                                                                                                                                                                        "rating" => array("integer", $review["rating"]),
-                                                                                                                                                                        "eval_comment" => array("clob", $review["eval_comment"]),
-                                                                                                                                                                        "expertise" => array("integer", $review["expertise"]),
-                                                                                                                                                                        "question_id" => array("integer", $review["question_id"]),
-                                                                                                                                                                        "id" => array("integer", $review["id"]),
-                                                                                                                                                                        "reviewer" => array("integer", $review["reviewer"])
-                                                                                                                                                        )
-                                                        );
-                                                }
-                                                $ilDB->update("rep_robj_xrev_revi",
-                                                                                  array("state" => array("integer", 0)),
-                                                                                  array("question_id" => array("integer", $db_question["question_id"]),
-                                                                                                  "review_obj" => array("integer", $this->getId())
-                                                                                  )
-                                                );
-                                                $this->notifyReviewersAboutChange($db_question);
-                                                break;
-                                        }
-                                }
-=======
     }
 
     /*
@@ -369,7 +223,6 @@ class ilObjReview extends ilObjectPlugin {
                                             "reviewer" => array("integer", $review["reviewer"])
                                     )
                             );
->>>>>>> 3d93a17338b0cab1fa7bab816e70f9c687a47bd8
                         }
                         $ilDB->update("rep_robj_xrev_revi",
                                 array("state" => array("integer", 0)),
