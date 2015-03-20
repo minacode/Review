@@ -26,8 +26,8 @@ class assReviewable<qtype> extends ass<qtype> {
      * @param string     $comment               A comment string to describe the question
      * @param string     $author                A string containing the name of the questions author
      * @param integer    $owner                 A numerical ID to identify the owner/creator
-     * @param string     $question              The question string of the multiple choice question
-     * @param int|string $output_type           The output order of the multiple choice answers
+     * @param string     $question              The question string of the <qtype> question
+     * @param int|string $output_type           The output order of the <qtype> answers
      * @param int        $taxonomy              The taxonomy of the question
      * @param int        $knowledge_dimension   The knowledge dimension of the question
      */

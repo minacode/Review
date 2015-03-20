@@ -22,6 +22,7 @@
 */
 
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
+include_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
 # require_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
 
 /**
@@ -81,7 +82,7 @@ class ilObjReview extends ilObjectPlugin {
                 }
                 
                 $this->syncQuestionDB();
-                # $this->generateNewQuestionTypePlugins();
+                $this->generateNewQuestionTypePlugins();
         }
         
         /**
@@ -166,8 +167,8 @@ class ilObjReview extends ilObjectPlugin {
                 
                 // uncomment as soos as needed
                 // $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
-                if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
-                        return;
+                #if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
+                #        return;
                 $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
                                                                    "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
                                                                    "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
