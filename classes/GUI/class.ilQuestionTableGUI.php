@@ -40,8 +40,9 @@ class ilQuestionTableGUI extends ilTable2GUI {
 	* @param		object		$a_parent_obj		GUI object that contains this object
 	* @param		string		$a_parent_cmd		Command that causes construction of this object
 	* @param		array			$questions			associative arrays of displayed data (column => value)
+    * @param        string      $command        Command to be executed on click
 	*/
-	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
+	public function __construct($a_parent_obj, $a_parent_cmd, $questions, $command = "showReviews") {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
 		$this->addColumn($lng->txt("title"), "", "80%");
@@ -51,26 +52,30 @@ class ilQuestionTableGUI extends ilTable2GUI {
      	$this->setRowTemplate("tpl.question_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
       $this->setDefaultOrderField("id");
       $this->setDefaultOrderDirection("asc");
-      
+
       $ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id", "origin"));
-      
+        $this->command = $command;
+
       $this->setData($questions);
- 
-      $this->setTitle($lng->txt("rep_robj_xrev_my_questions"));
+        switch ($a_parent_cmd) {
+        case "showContent": $this->setTitle($lng->txt("rep_robj_xrev_my_questions")); break;
+        case "showFinishedQuestions": $this->setTitle($lng->txt("rep_robj_xrev_questions_to_finalize")); break;
+        default: $this->setTitle("");
+        }
 	}
-	
+
 	/*
 	* Fill a single data row
 	*
 	* @param	array		$a_set		Data record, displayed as one table row
 	*/
 	protected function fillRow($a_set) {
-		global $ilCtrl, $lng; 
+		global $ilCtrl, $lng;
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["id"]);
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "question");
 		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
 		$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
-		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
+		$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", $this->command));
 	}
 }
 ?>

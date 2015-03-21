@@ -188,7 +188,7 @@ foreach ($values as $key => $value)
         $ilDB->insert("rep_robj_xrev_taxon", array(
                 'id' => array('integer', $key),
                 'term' => array('text', $value)));
-                
+
 $fields = array(
         'id' => array(
                 'type' => 'integer',
@@ -209,7 +209,7 @@ foreach ($values as $key => $value)
         $ilDB->insert("rep_robj_xrev_knowd", array(
                 'id' => array('integer', $key),
                 'term' => array('text', $value)));
-                
+
 $fields = array(
         'id' => array(
                 'type' => 'integer',
@@ -349,22 +349,57 @@ $ilDB->createTable("rep_robj_xrev_hist", $fields);
 <?php
 
 if (!$ilDB->tableExists("qpl_rev_qst")) {
-        $fields = array(
-            'question_id'         => array( 
-                        'type'  => 'integer' ,
-                        'length' => 8
+    $fields = array(
+        'question_id'         => array(
+                    'type'  => 'integer' ,
+                    'length' => 8
+        ),
+        'taxonomy'            => array(
+                    'type' => 'text' ,
+                    'length' => 20
             ),
-            'taxonomy'            => array(
-                        'type' => 'text' ,
-                        'length' => 20
-                ),
-            'knowledge_dimension' => array( 
-                        'type' => 'text',
-                        'length' => 20   
-            )
-        );
-        
-        $ilDB->createTable("qpl_rev_qst", $fields);
+        'knowledge_dimension' => array(
+                    'type' => 'text',
+                    'length' => 20
+        )
+    );
+
+    $ilDB->createTable("qpl_rev_qst", $fields);
 }
 
+?>
+<#18>
+/**
+ * Note: version number has not been increased, so this update won't trigger
+ * Better talk to MA Kombrink first
+ */
+<?php
+$tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
+        "rep_robj_xrev_topic", "rep_robj_xrev_subar");
+$fields = array(
+        'id' => array(
+                'type' => 'integer',
+                'length' => 4,
+                'notnull' => true
+        ),
+        'term' => array(
+                'type' => 'text',
+                'length' => 64
+        )
+);
+foreach ($tables as $table) {
+    $ilDB->createTable($table, $fields);
+    $ilDB->addPrimaryKey($table, array("id"));
+    $ilDB->addSequence($table);
+    $ilDB->insert($table, array(
+            'id' => array('integer', $ilDB->nextID($table)),
+            'term' => array('text', "select")));
+}
+
+if ($ilDB->tableExists("qpl_rev_qst")) {
+    $ilDB->addTableColumn("qpl_rev_qst", "learning_outcome", array("type" => "integer", "length" => 8));
+    $ilDB->addTableColumn("qpl_rev_qst", "content", array("type" => "integer", "length" => 8));
+    $ilDB->addTableColumn("qpl_rev_qst", "topic", array("type" => "integer", "length" => 8));
+    $ilDB->addTableColumn("qpl_rev_qst", "subject_area", array("type" => "integer", "length" => 8));
+}
 ?>

@@ -168,9 +168,6 @@ class ilObjReview extends ilObjectPlugin {
 
         // uncomment as soos as needed
         // $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
-        if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
-            /* TODO make it work for all questions */
-            return;
         $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
                 "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
                 "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".

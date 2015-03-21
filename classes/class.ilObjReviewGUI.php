@@ -93,6 +93,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             case "convertQuestion":
             case "performConvertQuestion":
             case "saveConvertQuestion":
+            case "showFinishedQuestions":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -141,7 +142,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviews"));
 			$ilTabs->addTab("finish", $this->txt("finished_questions"), $ilCtrl->getLinkTarget($this, "finishQuestions"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
-            $ilTabs->addTab("finalize", $this->txt("finalize_questions"), $ilCtrl->getLinkTarget($this, "finalizeQuestion"));
+            $ilTabs->addTab("finalize", $this->txt("finalize_questions"), $ilCtrl->getLinkTarget($this, "showFinishedQuestions"));
 		}
 
 		// standard epermission tab
@@ -329,7 +330,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->alloc_form = new ilPropertyFormGUI();
 		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
-		
+
 		$reviewers = $this->object->loadReviewers();
 		$reviewer_names = array();
 		foreach ($reviewers as $reviewer)
@@ -337,24 +338,24 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$reviewer_ids = array();
 		foreach ($reviewers as $reviewer)
 			$reviewer_ids[] = $reviewer["usr_id"];
-			
+
 		$reviewer_head = new ilAspectHeadGUI($reviewer_names);
 		$this->alloc_form->addItem($reviewer_head);
-		
+
 		foreach ($this->object->loadUnallocatedQuestions() as $question) {
 			$matrix_row = new ilCheckMatrixRowGUI($question, $reviewer_ids);
 			$this->alloc_form->addItem($matrix_row);
 		}
-		
+
 		$this->alloc_form->addCommandButton("saveAllocateReviews", $this->txt("request"));
 	}
-	
+
 	/**
 	* init form for finishing questions (removing them from the review cycle)
 	*/
 	public function initQuestionFinishForm() {
 		global $ilCtrl;
-		
+
 		$this->finish_form = new ilQuestionFinishTableGUI($this, "saveFinishQuestions", $this->object->loadReviewedQuestions());
 	}
 
@@ -365,22 +366,22 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		global $ilCtrl;
 
 		$this->form = new ilPropertyFormGUI();
-	
+
 		// title
 		$ti = new ilTextInputGUI($this->txt("title"), "title");
 		$ti->setRequired(true);
 		$this->form->addItem($ti);
-		
+
 		// description
 		$ta = new ilTextAreaInputGUI($this->txt("description"), "desc");
 		$this->form->addItem($ta);
 
 		$this->form->addCommandButton("updateProperties", $this->txt("save"));
-	                
+
 		$this->form->setTitle($this->txt("edit_properties"));
 		$this->form->setFormAction($ilCtrl->getFormAction($this));
 	}
-	
+
 	/**
 	* Get values for edit properties form
 	*/
@@ -389,7 +390,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$values["desc"] = $this->object->getDescription();
 		$this->form->setValuesByArray($values);
 	}
-	
+
 	/**
 	* Update properties
 	*/
@@ -413,9 +414,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	*/
 	protected function showContent() {
 		global $tpl, $ilTabs;
-		
+
 		$ilTabs->activateTab("content");
-		
+
 		$table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
 		$table_r = new ilReviewTableGUI($this, "showContent", $this->object->loadReviewsByUser());
 		$tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
@@ -509,15 +510,27 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
      */
     private function initQuestionOverview() {
         global $ilPluginAdmin;
-        if (!isset($_GET["q_id"]) || !$ilPluginAdmin->isActive(IL_COMP_MODULE,
-            "TestQuestionPool", "qst", "assReviewableMultipleChoice")) {
-            /* TODO make it check for all question plugins */
+        if (!isset($_GET["q_id"])) {
             $this->question_overview = "";
         } else {
             $q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
             $quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
             $this->question_overview = $quest->getHTML();
         }
+    }
+
+    /**
+     * Show a list of all finished questions waiting for final acceptance
+     *
+     * @return void
+     */
+    public function showFinishedQuestions() {
+        global $ilTabs, $tpl;
+
+        $ilTabs->activateTab("finalize");
+        $tbl = new ilQuestionTableGUI($this, "showFinishedQuestions",
+                $this->object->loadFinishedQuestions(), "showContent");
+        $tpl->setContent($tbl->getHTML());
     }
 }
 ?>
