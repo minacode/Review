@@ -253,45 +253,73 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs, $ilCtrl;
 
         $ilTabs->activateTab("convert");
-        $this->initAddTaxonomyForm($_GET["q_id"]);
+        $this->initMissingDataForm($_GET["q_id"]);
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
         $hv = new ilHiddenInputGUI("", "q_id");
         $hv->setValue($_GET["q_id"]);
         echo $_GET["q_id"];
-        $this->add_taxonomy_form->addItem($hv);
-        $tpl->setContent($this->add_taxonomy_form->getHTML());
+        $this->missing_data_form->addItem($hv);
+        $tpl->setContent($this->missing_data_form->getHTML());
     }
 
     /**
      * Init form to enter taxonomy and knowledge dimension
      */
-    public function initAddTaxonomyForm() {
+    public function initMissingDataForm() {
         global $ilCtrl;
 
-        $this->add_taxonomy_form = new ilPropertyFormGUI();
-        $this->add_taxonomy_form->setTitle($this->txt("add_taxonomy"));
+        $this->missing_data_form = new ilPropertyFormGUI();
+        $this->missing_data_form->setTitle($this->txt("add_taxonomy"));
 
 
-        $head_cog = new ilSelectInputGUI("", "taxonomy");
-        $head_cog->setTitle($this->txt("taxonomy"));
-        $head_cog->setValue(0);
-        $head_cog->setOptions($this->object->taxonomy());
-        $head_cog->setRequired(true);
-        $this->add_taxonomy_form->addItem($head_cog);
+        $cog = new ilSelectInputGUI("", "taxonomy");
+        $cog->setTitle($this->txt("taxonomy"));
+        $cog->setValue(0);
+        $cog->setOptions($this->object->taxonomy());
+        $cog->setRequired(true);
+        $this->missing_data_form->addItem($cog);
 
-        $head_kno = new ilSelectInputGUI("", "knowledge_dimension");
-        $head_kno->setTitle($this->txt("knowledge_dim"));
-        $head_kno->setValue(0);
-        $head_kno->setOptions($this->object->knowledgeDimension());
-        $head_kno->setRequired(true);
-        $this->add_taxonomy_form->addItem($head_kno);
+        $kno = new ilSelectInputGUI("", "knowledge_dimension");
+        $kno->setTitle($this->txt("knowledge_dim"));
+        $kno->setValue(0);
+        $kno->setOptions($this->object->knowledgeDimension());
+        $kno->setRequired(true);
+        $this->missing_data_form->addItem($kno);
+
+        $loutc = new ilSelectInputGUI("", "learning_outcome");
+        $loutc->setTitle($this->txt("learning_outcome"));
+        $loutc->setValue(0);
+        $loutc->setOptions($this->object->getEnum("taxonomy"));
+        $loutc->setRequired(true);
+        $this->missing_data_form->addItem($loutc);
+
+        $cont = new ilSelectInputGUI("", "content");
+        $cont->setTitle($this->txt("content"));
+        $cont->setValue(0);
+        $cont->setOptions($this->object->knowledgeDimension());
+        $cont->setRequired(true);
+        $this->missing_data_form->addItem($cont);
+
+        $topic = new ilSelectInputGUI("", "topic");
+        $topic->setTitle($this->txt("topic"));
+        $topic->setValue(0);
+        $topic->setOptions($this->object->knowledgeDimension());
+        $topic->setRequired(true);
+        $this->missing_data_form->addItem($topic);
+
+        $subar = new ilSelectInputGUI("", "subject_area");
+        $subar->setTitle($this->txt("subject_area"));
+        $subar->setValue(0);
+        $subar->setOptions($this->object->knowledgeDimension());
+        $subar->setRequired(true);
+        $this->missing_data_form->addItem($subar);
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
 
-        $this->add_taxonomy_form->addCommandButton("saveConvertQuestion", $this->txt("save"));
+        $this->missing_data_form->addCommandButton("saveConvertQuestion", $this->txt("save"));
 
         /* Evil hack as ILIAS won't pass this f***ing q_id */
-        $this->add_taxonomy_form->setFormAction($ilCtrl->getFormAction($this) . "&q_id=" . $_GET["q_id"]);
+        $this->missing_data_form->setFormAction($ilCtrl->getFormAction($this) . "&q_id=" . $_GET["q_id"]);
     }
 
     /**
@@ -301,15 +329,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs, $lng, $ilCtrl;
 
         $ilTabs->activateTab("convert");
-        $this->initAddTaxonomyForm();
+        $this->initMissingDataForm();
         // if ($_GET["q_id"] == NULL) die;
-        if ($this->add_taxonomy_form->checkInput()
-            && $this->add_taxonomy_form->getInput("taxonomy") != 0
-            && $this->add_taxonomy_form->getInput("knowledge_dimension") != 0
+        if ($this->missing_data_form->checkInput()
+            && $this->missing_data_form->getInput("taxonomy") != 0
+            && $this->missing_data_form->getInput("knowledge_dimension") != 0
         ) {
             $this->object->saveQuestionConversion($_GET["q_id"],
-                $this->add_taxonomy_form->getInput("taxonomy"),
-                $this->add_taxonomy_form->getInput("knowledge_dimension")
+                $this->missing_data_form->getInput("taxonomy"),
+                $this->missing_data_form->getInput("knowledge_dimension")
             );
             ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilCtrl->redirect($this, "convertQuestion");
@@ -317,8 +345,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         ilUtil::sendFailure($lng->txt("form_input_not_valid"));
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
-        $this->add_taxonomy_form->setValuesByPost();
-		$tpl->setContent($this->add_taxonomy_form->getHTML());
+        $this->missing_data_form->setValuesByPost();
+		$tpl->setContent($this->missing_data_form->getHTML());
 	}
 
 	/**

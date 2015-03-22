@@ -825,5 +825,26 @@ class ilObjReview extends ilObjectPlugin {
                 array("question_id" => array("integer", $q_id),
                         "review_obj" => array("integer", $this->getId())));
     }
+
+    /*
+     * Get a review plugin specific enumeration
+     * TODO use this instead of those nasty taxonomy() etc functions
+     *
+     * @param       string      $identifier     name of the enumeration
+     *
+     * @return      array       $taxonomies     associative array of enum entry id => term
+     */
+    public static function getEnum($identifier) {
+        global $ilDB, $lng;
+        switch ($identifier) {
+        case "taxonomy": $table = "taxon"; break;
+        default: return null;
+        }
+        $res = $ilDB->query("SELECT * FROM rep_robj_xrev_$table");
+        $enum = array();
+        while ($entry = $ilDB->fetchAssoc($res))
+            $enum[$entry["id"]] = $lng->txt("rep_robj_xrev_".$entry["term"]);
+        return $enum;
+    }
 }
 ?>
