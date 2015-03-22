@@ -31,7 +31,7 @@ class ilReviewableQuestionPluginGenerator {
             if ($result['plugin']) {
                 return $this->ilias_path . 'Customizing/global/plugins/Modules/TestQuestionPool/Questions/ass'. $question_type .'/';
             } else {
-                return $this->ilias_path . '/Modules/TestQuestionPool/';
+                return $this->ilias_path . 'Modules/TestQuestionPool/';
             }
         } 
         return null;
