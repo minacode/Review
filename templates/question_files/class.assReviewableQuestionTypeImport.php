@@ -1,6 +1,6 @@
 <?php
 
-require_once("<qpath>/import/qti12/class.ass<qtype>Import.php");
+require_once("<qpath>classes/import/qti12/class.ass<qtype>Import.php");
 
 /**
 * Reviewable<qtype> Import

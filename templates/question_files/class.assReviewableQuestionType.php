@@ -7,7 +7,7 @@
  * @ingroup     ModulesTestQuestionPool
  */
 
-require_once('<qpath>class.ass<qtype>.php');
+require_once('<qpath>classes/class.ass<qtype>.php');
 require_once('export/qti12/class.assReviewable<qtype>Export.php');
 require_once('import/qti12/class.assReviewable<qtype>Import.php');
 

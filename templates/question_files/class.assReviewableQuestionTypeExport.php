@@ -1,6 +1,6 @@
 <?php
 
-require_once("<qpath>export/qti12/class.ass<qtype>Export.php");
+require_once("<qpath>classes/export/qti12/class.ass<qtype>Export.php");
 
 /**
 * Reviewable<qtype> Export

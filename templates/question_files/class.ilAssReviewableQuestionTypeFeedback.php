@@ -1,6 +1,6 @@
 <?php
 
-require_once("<qpath>/feedback/class.ilAss<qtype>Feedback.php");
+require_once("<qpath>classes/feedback/class.ilAss<qtype>Feedback.php");
 
 /**
  * Reviewable<qtype> object

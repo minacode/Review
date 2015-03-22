@@ -1,7 +1,7 @@
 <?php
 require_once "./Services/Form/classes/class.ilPropertyFormGUI.php";
 require_once "./Modules/Test/classes/inc.AssessmentConstants.php";
-require_once "<qpath>class.ass<qtype>GUI.php";
+require_once "<qpath>classes/class.ass<qtype>GUI.php";
 
 /**
  * GUI class for Reviewable<qtype>
@@ -68,7 +68,7 @@ class assReviewable<qtype>GUI extends ass<qtype>GUI{
     // ...
     public function addQuestionFormCommandButtons( $form ) {
         parent::addQuestionFormCommandButtons( $form );
-        this->populateTaxonomyFormPart( $form );
+        $this->populateTaxonomyFormPart( $form );
     }
 
     /**
