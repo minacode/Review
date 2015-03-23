@@ -275,14 +275,14 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $cog = new ilSelectInputGUI("", "taxonomy");
         $cog->setTitle($this->txt("taxonomy"));
         $cog->setValue(0);
-        $cog->setOptions($this->object->taxonomy());
+        $cog->setOptions($this->object->getEnum("taxonomy"));
         $cog->setRequired(true);
         $this->missing_data_form->addItem($cog);
 
         $kno = new ilSelectInputGUI("", "knowledge_dimension");
         $kno->setTitle($this->txt("knowledge_dim"));
         $kno->setValue(0);
-        $kno->setOptions($this->object->knowledgeDimension());
+        $kno->setOptions($this->object->getEnum("knowledge dimension"));
         $kno->setRequired(true);
         $this->missing_data_form->addItem($kno);
 
@@ -296,21 +296,21 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $cont = new ilSelectInputGUI("", "content");
         $cont->setTitle($this->txt("content"));
         $cont->setValue(0);
-        $cont->setOptions($this->object->knowledgeDimension());
+        $cont->setOptions($this->object->getEnum("taxonomy"));
         $cont->setRequired(true);
         $this->missing_data_form->addItem($cont);
 
         $topic = new ilSelectInputGUI("", "topic");
         $topic->setTitle($this->txt("topic"));
         $topic->setValue(0);
-        $topic->setOptions($this->object->knowledgeDimension());
+        $topic->setOptions($this->object->getEnum("taxonomy"));
         $topic->setRequired(true);
         $this->missing_data_form->addItem($topic);
 
         $subar = new ilSelectInputGUI("", "subject_area");
         $subar->setTitle($this->txt("subject_area"));
         $subar->setValue(0);
-        $subar->setOptions($this->object->knowledgeDimension());
+        $subar->setOptions($this->object->getEnum("taxonomy"));
         $subar->setRequired(true);
         $this->missing_data_form->addItem($subar);
 
@@ -464,11 +464,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
 												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-												$this->object->taxonomy(),
-												$this->object->knowledgeDimension(),
-												$this->object->expertise(),
-												$this->object->rating(),
-												$this->object->evaluation()
+												$this->object->getEnum("taxonomy"),
+												$this->object->getEnum("knowledge dimension"),
+												$this->object->getEnum("expertise"),
+												$this->object->getEnum("rating"),
+												$this->object->getEnum("evaluation")
 						 );
 		$this->initQuestionOverview();
         $tpl->setContent($input->getHtml());
@@ -488,11 +488,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
 		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
 												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-												$this->object->taxonomy(),
-												$this->object->knowledgeDimension(),
-												$this->object->expertise(),
-												$this->object->rating(),
-												$this->object->evaluation()
+												$this->object->getEnum("taxonomy"),
+												$this->object->getEnum("knowledge dimension"),
+												$this->object->getEnum("expertise"),
+												$this->object->getEnum("rating"),
+												$this->object->getEnum("evaluation")
 						 );
 		if ($input->checkInput()) {
 			$form_data = array();
@@ -522,12 +522,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		}
 		$ilTabs->activateTab("content");
 		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
-											  $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-					  						  $this->object->taxonomy(),
-											  $this->object->knowledgeDimension(),
-											  $this->object->expertise(),
-											  $this->object->rating(),
-											  $this->object->evaluation()
+                                            $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
+                                            $this->object->getEnum("taxonomy"),
+                                            $this->object->getEnum("knowledge dimension"),
+                                            $this->object->getEnum("expertise"),
+                                            $this->object->getEnum("rating"),
+                                            $this->object->getEnum("evaluation")
+
 					  );
         $this->initQuestionOverview();
 		$tpl->setContent($this->question_overview . $tbl->getHtml());

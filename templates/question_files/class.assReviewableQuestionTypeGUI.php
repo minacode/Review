@@ -88,14 +88,14 @@ class assReviewable<qtype>GUI extends ass<qtype>GUI{
             $head_cog = new ilSelectInputGUI("", "taxonomy");
             $head_cog->setTitle($lng->txt("qpl_qst_<id>_cognitive_process"));
             $head_cog->setValue($this->getDefaultTaxonomy($this->object->getId()));
-            $head_cog->setOptions(ilObjReview::taxonomy());
+            $head_cog->setOptions(ilObjReview::getEnum("taxonomy"));
             $head_cog->setRequired(true);
             $form->addItem($head_cog);
 
             $head_kno = new ilSelectInputGUI("", "knowledge_dimension");
             $head_kno->setTitle($lng->txt("qpl_qst_<id>_knowledge_dimension"));
             $head_kno->setValue($this->getDefaultKnowledgeDimension($this->object->getId()));
-            $head_kno->setOptions(ilObjReview::knowledgeDimension());
+            $head_kno->setOptions(ilObjReview::getEnum("knowledge dimension"));
             $head_kno->setRequired(true);
             $form->addItem($head_kno);
         }
