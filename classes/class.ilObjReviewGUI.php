@@ -88,12 +88,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			case "updateProperties":
 			case "allocateReviews":
 			case "saveAllocateReviews":
-			case "finishQuestions":
-			case "saveFinishQuestions":
             case "convertQuestion":
             case "performConvertQuestion":
             case "saveConvertQuestion":
-            case "showFinishedQuestions":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -140,9 +137,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
 			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
 			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviews"));
-			$ilTabs->addTab("finish", $this->txt("finished_questions"), $ilCtrl->getLinkTarget($this, "finishQuestions"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
-            $ilTabs->addTab("finalize", $this->txt("finalize_questions"), $ilCtrl->getLinkTarget($this, "showFinishedQuestions"));
 		}
 
 		// standard epermission tab
@@ -205,34 +200,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		}
 		$this->alloc_form->setValuesByPost();
 		$tpl->setContent($this->alloc_form->getHTML());
-	}
-
-	/**
-	* Accept allocation
-	*/
-	public function finishQuestions() {
-		global $tpl, $ilTabs;
-
-		$ilTabs->activateTab("finish");
-		$this->initQuestionFinishForm();
-		$tpl->setContent($this->finish_form->getHTML());
-	}
-
-	/**
-	* Check and perform finishing of questions
-	*/
-	public function saveFinishQuestions() {
-		global $tpl, $ilTabs, $lng, $ilCtrl;
-
-		$ilTabs->activateTab("finish");
-		$this->initQuestionFinishForm();
-		if (count($_POST["q_id"] > 0)) {
-			$this->object->finishQuestions($_POST["q_id"]);
-			$this->object->notifyAuthorsAboutAcceptance($_POST["q_id"]);
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "finishQuestions");
-		}
-		$tpl->setContent($this->finish_form->getHTML());
 	}
 
     /*
@@ -546,20 +513,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
             $this->question_overview = $quest->getHTML();
         }
-    }
-
-    /**
-     * Show a list of all finished questions waiting for final acceptance
-     *
-     * @return void
-     */
-    public function showFinishedQuestions() {
-        global $ilTabs, $tpl;
-
-        $ilTabs->activateTab("finalize");
-        $tbl = new ilQuestionTableGUI($this, "showFinishedQuestions",
-                $this->object->loadFinishedQuestions(), "showContent");
-        $tpl->setContent($tbl->getHTML());
     }
 }
 ?>
