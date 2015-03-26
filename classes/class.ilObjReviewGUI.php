@@ -21,9 +21,10 @@
 +-----------------------------------------------------------------------------+
 */
 
-include_once 'Modules/TestQuestionPool/classes/class.assQuestionGUI.php';
-include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
-include_once './Services/Form/classes/class.ilCustomInputGUI.php';
+include_once "Modules/TestQuestionPool/classes/class.assQuestionGUI.php";
+include_once "Services/Repository/classes/class.ilObjectPluginGUI.php";
+include_once "Services/Form/classes/class.ilCustomInputGUI.php";
+
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewOutputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
@@ -34,8 +35,6 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 				 "/classes/GUI/class.ilQuestionTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
-include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilQuestionFinishTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
