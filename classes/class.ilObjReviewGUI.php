@@ -154,7 +154,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		$this->initPropertiesForm();
 		$this->getPropertiesValues();
 
-		$this->initQuestionFinishForm();
 		$tpl->setContent($this->form->getHTML());
 	}
 
@@ -224,7 +223,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
         $hv = new ilHiddenInputGUI("", "q_id");
         $hv->setValue($_GET["q_id"]);
-        echo $_GET["q_id"];
         $this->missing_data_form->addItem($hv);
         $tpl->setContent($this->missing_data_form->getHTML());
     }
@@ -343,15 +341,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		}
 
 		$this->alloc_form->addCommandButton("saveAllocateReviews", $this->txt("request"));
-	}
-
-	/**
-	* init form for finishing questions (removing them from the review cycle)
-	*/
-	public function initQuestionFinishForm() {
-		global $ilCtrl;
-
-		$this->finish_form = new ilQuestionFinishTableGUI($this, "saveFinishQuestions", $this->object->loadReviewedQuestions());
 	}
 
 	/**
