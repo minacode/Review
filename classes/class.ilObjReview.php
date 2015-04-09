@@ -373,21 +373,21 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Load all members of a group
      *
-     * @return       array           $reviewers      ids and names of the group members
+     * @return       array           $members       ids, names of the members
      */
-    public function loadReviewers() {
+    public function loadMembers() {
         global $ilDB;
 
-        $res = $ilDB->queryF("SELECT usr_data.usr_id AS usr_id, firstname, lastname FROM usr_data ".
+        $res = $ilDB->queryF("SELECT usr_data.usr_id AS id, firstname, lastname FROM usr_data ".
                 "INNER JOIN rbac_ua ON rbac_ua.usr_id=usr_data.usr_id ".
                 "INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
                 "WHERE object_data.title='il_grp_admin_%s' OR object_data.title='il_grp_member_%s'",
                 array("integer", "integer"),
                 array($this->getGroupId(), $this->getGroupId()));
-        $reviewers = array();
-        while ($reviewer = $ilDB->fetchAssoc($res))
-            $reviewers[] = $reviewer;
-        return $reviewers;
+        $members = array();
+        while ($member = $ilDB->fetchObject($res))
+            $members[] = $member;
+        return $members;
     }
 
     /*
@@ -447,6 +447,34 @@ class ilObjReview extends ilObjectPlugin {
                 );
                 $ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)),
                         array("question_id" => array("integer", $row["q_id"]), "review_obj" => array("integer", $this->getId())));
+            }
+        }
+    }
+
+    /*
+     * Save matrix input as author - reviewer allocation
+     *
+     * @param       integer     $phase              cycle phase
+     * @param       array       $alloc_matrix       black magic
+     */
+    public function allocateReviewers($phase, $alloc_matrix) {
+        global $ilDB;
+
+        $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc " .
+                    "WHERE phase=%s AND review_obj=%s",
+                    array("integer", "integer"),
+                    array($phase, $this->getId()));
+
+        foreach ($alloc_matrix as $row) {
+            foreach ($row["reviewers"] as $reviewer_id => $checked) {
+                if (!$checked) {
+                    continue;
+                }
+                $ilDB->insert("rep_robj_xrev_alloc", array(
+                        "phase" => array("integer", $phase),
+                        "reviewer" => array("integer", explode("_", $reviewer_id)[2]),
+                        "author" => array("integer", $row["q_id"]),
+                        "review_obj" => array("integer", $this->getId())));
             }
         }
     }

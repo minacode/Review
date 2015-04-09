@@ -21,63 +21,72 @@
 +-----------------------------------------------------------------------------+
 */
 
-/**
-* GUI, a row of checkboxes in the question-reviewer allocation matrix
-*
-* @var		array		$postvars		$_POST variables of each checkbox
-* @var		integer	$question_id	id of the question corresponding to the matrix row
-*
-* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
-*
-* $Id$
-*/
+/*
+ * GUI, a row of checkboxes in the question-reviewer allocation matrix
+ *
+ * @var		array		$postvars		$_POST variables of each checkbox
+ * @var		integer	    $row_id	        id of the row's corresponding object
+ *
+ * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+ *
+ * $Id$
+ */
 
 class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 	private $postvars;
-	private $question_id;
+	private $row_id;
 
-	/**
-	* Constructor for a line in a table-like display of ilSelectInputGUIs
-	*
-	* @param	array		$question		associative array = question record
-	* @param	array		$reviewer_ids	ids of the reviewers belonging to each select input
-	*/
-	public function __construct($question, $reviewer_ids) {
-		parent::__construct();
+	/*
+	 * Constructor for a line in a table-like display of ilCheckboxInputGUIs
+	 *
+	 * @param	array		$object 		object behind a row
+     *                                      has a name and an title
+	 * @param	array		$column_ids     ids of the objects belonging to each checkbox
+	 */
+	public function __construct($object, $column_ids) {
 		global $tpl;
-		$this->reviewer_ids = array();
-		$this->question_id = $question["id"];
-		foreach ($reviewer_ids as $reviewer_id)
-			$this->postvars[$reviewer_id] = sprintf("id_%s_%s", $this->question_id, $reviewer_id);
+
+		parent::__construct();
+
+		$this->row_id = $object->id;
+		$this->postvars = array();
+		foreach ($column_ids as $column_id) {
+            $this->postvars[$column_id] = sprintf(
+                "id_%s_%s", $this->row_id, $column_id);
+        }
+
 		$path_to_il_tpl = ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory();
 		$custom_tpl = new ilTemplate("tpl.matrix_row.html", true, true, $path_to_il_tpl);
 		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
+
 		foreach ($this->postvars as $postvar) {
+            echo $postvar . " - " . $object->id . "<br>";
 			$chbox = new ilCheckboxInputGUI("", $postvar);
-			if ($question["owner"] == explode("_", $postvar)[2])
+			if ($object->id == explode("_", $postvar)[2])
 				$chbox->setDisabled(true);
 			$chbox->insert($custom_tpl);
 		}
-		$this->setTitle($question["title"]);
+
+		$this->setTitle($object->name);
 		$this->setHTML($custom_tpl->get());
 	}
 
-	/**
-	* Get the $_POST keys of this object´s input
-	*
-	* @return	array		$this->postvars		(reviewer id => $_POST key in the shape of "id_[question id]_[reviewer id])
-	*/
+	/*
+	 * Get the $_POST keys of this object´s input
+	 *
+	 * @return	array		$this->postvars		(column_id => $_POST key in the shape of id_[row_id]_[column_id])
+	 */
 	public function getPostVars() {
 		return $this->postvars;
 	}
 
-	/**
-	* Get the question id belonging to this line of the matrix
-	*
-	* @return	integer	$this->question_id	question id
-	*/
-	public function getQuestionId() {
-		return $this->question_id;
+	/*
+	 * Get the object id belonging to this row of the matrix
+	 *
+	 * @return	integer	    $this->row_id       row id
+	 */
+	public function getRowId() {
+		return $this->row_id;
 	}
 }
 ?>

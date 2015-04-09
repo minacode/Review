@@ -85,8 +85,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		switch ($cmd) {
 			case "editProperties":
 			case "updateProperties":
-			case "allocateReviews":
-			case "saveAllocateReviews":
+			case "allocateReviewers":
+			case "saveAllocateReviewers":
             case "convertQuestion":
             case "performConvertQuestion":
             case "saveConvertQuestion":
@@ -135,7 +135,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		// tabs to edit properties and run the review cycle
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
 			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
-			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviews"));
+			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
 		}
 
@@ -159,27 +159,23 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	/**
 	* Input reviewer allocation
 	*/
-	function allocateReviews() {
+	function allocateReviewers() {
 		global $tpl, $ilTabs;
 
 		$ilTabs->activateTab("allocation");
-		if (count($this->object->loadUnallocatedQuestions()) > 0) {
-			$this->initReviewAllocForm();
-			$this->alloc_form->setValuesByPost();
-			$tpl->setContent($this->alloc_form->getHTML());
-		}
-		else
-			$tpl->setContent($this->txt("no_alloc"));
+        $this->initReviewerAllocForm();
+        $this->alloc_form->setValuesByPost();
+        $tpl->setContent($this->alloc_form->getHTML());
 	}
 
 	/**
 	* Check and save reviewer allocation
 	*/
-	function saveAllocateReviews() {
+	function saveAllocateReviewers() {
 		global $tpl, $ilTabs, $lng, $ilCtrl;
 
 		$ilTabs->activateTab("allocation");
-		$this->initReviewAllocForm();
+		$this->initReviewerAllocForm();
 		if ($this->alloc_form->checkInput()) {
 			$rows = array();
 			foreach ($this->alloc_form->getItems() as $item) {
@@ -189,12 +185,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 				$row_values = array();
 				foreach ($row_postvars as $row_postvar)
 					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
-				$rows[] = array("q_id" => $item->getQuestionId(), "reviewers" => $row_values);
+				$rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
 			}
-			$this->object->allocateReviews($rows);
-			$this->object->notifyReviewersAboutAllocation($rows);
+			$this->object->allocateReviewers(1, $rows);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "allocateReviews");
+			$ilCtrl->redirect($this, "allocateReviewers");
 		}
 		$this->alloc_form->setValuesByPost();
 		$tpl->setContent($this->alloc_form->getHTML());
@@ -316,30 +311,33 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	/**
 	* Init form for reviewer allocation
 	*/
-	public function initReviewAllocForm() {
+	public function initReviewerAllocForm() {
 		global $ilCtrl;
 
 		$this->alloc_form = new ilPropertyFormGUI();
-		$this->alloc_form->setTitle($this->txt("reviewer_allocation"));
+		$this->alloc_form->setTitle($this->txt("phase") . " " . 1);
 		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
 
-		$reviewers = $this->object->loadReviewers();
-		$reviewer_names = array();
-		foreach ($reviewers as $reviewer)
-			$reviewer_names[] = $reviewer['firstname'] . ' ' . $reviewer['lastname'];
-		$reviewer_ids = array();
-		foreach ($reviewers as $reviewer)
-			$reviewer_ids[] = $reviewer["usr_id"];
+		$members = $this->object->loadMembers();
+		$member_names = array();
+		foreach ($members as $member) {
+            $member->name = $member->firstname . ' ' . $member->lastname;
+			$member_names[] = $member->name;
+        }
+		$member_ids = array();
+		foreach ($members as $member) {
+			$member_ids[] = $member->id;
+        }
 
-		$reviewer_head = new ilAspectHeadGUI($reviewer_names);
+		$reviewer_head = new ilAspectHeadGUI($member_names);
 		$this->alloc_form->addItem($reviewer_head);
 
-		foreach ($this->object->loadUnallocatedQuestions() as $question) {
-			$matrix_row = new ilCheckMatrixRowGUI($question, $reviewer_ids);
+		foreach ($members as $member) {
+			$matrix_row = new ilCheckMatrixRowGUI($member, $member_ids);
 			$this->alloc_form->addItem($matrix_row);
 		}
 
-		$this->alloc_form->addCommandButton("saveAllocateReviews", $this->txt("request"));
+		$this->alloc_form->addCommandButton("saveAllocateReviewers", $this->txt("save"));
 	}
 
 	/**
