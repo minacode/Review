@@ -400,6 +400,7 @@ if (!$ilDB->tableExists("rep_robj_xrev_alloc")) {
     );
 
     $ilDB->createTable("rep_robj_xrev_alloc", $fields);
+}
 
 /*
 $tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
