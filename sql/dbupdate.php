@@ -368,12 +368,35 @@ if (!$ilDB->tableExists("qpl_rev_qst")) {
 }
 
 ?>
+
 <#18>
 <?php
 if (!$ilDB->tableColumnExists("rep_robj_xrev_quest", "phase")) {
     $ilDB->addTableColumn("rep_robj_xrev_quest", "phase",
             array("type" => "integer", "length" => 4));
 }
+?>
+
+<#19>
+<?php
+if (!$ilDB->tableExists("rep_robj_xrev_alloc")) {
+    $fields = array(
+        'phase'         => array(
+                    'type'  => 'integer',
+                    'length' => 4
+        ),
+        'author'            => array(
+                    'type' => 'integer',
+                    'length' => 4
+            ),
+        'reviewer' => array(
+                    'type' => 'integer',
+                    'length' => 4
+        )
+    );
+
+    $ilDB->createTable("rep_robj_xrev_alloc", $fields);
+
 /*
 $tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
         "rep_robj_xrev_topic", "rep_robj_xrev_subar");
