@@ -381,6 +381,10 @@ if (!$ilDB->tableColumnExists("rep_robj_xrev_quest", "phase")) {
 <?php
 if (!$ilDB->tableExists("rep_robj_xrev_alloc")) {
     $fields = array(
+        'review_obj'         => array(
+                    'type'  => 'integer',
+                    'length' => 4
+        ),
         'phase'         => array(
                     'type'  => 'integer',
                     'length' => 4
@@ -388,7 +392,7 @@ if (!$ilDB->tableExists("rep_robj_xrev_alloc")) {
         'author'            => array(
                     'type' => 'integer',
                     'length' => 4
-            ),
+        ),
         'reviewer' => array(
                     'type' => 'integer',
                     'length' => 4
