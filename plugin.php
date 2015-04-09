@@ -1,17 +1,16 @@
 <?php
- 
-// alphanumerical ID of the plugin; never change this
-$id = "xrev";
- 
-// code version; must be changed for all code changes
-$version = "1.1.0";
 
-// ilias min and max version; must always reflect the versions that should
-// run with the plugin
+// alphanumerical ID of the plugin
+$id = "xrev";
+
+// code version
+$version = "1.1.1";
+
+// ilias min and max version
 $ilias_min_version = "4.4.0";
 $ilias_max_version = "4.4.999";
- 
-// optional, but useful: Add one or more responsible persons and a contact email
-$responsible = "Richard Mörbitz";
-$responsible_mail = "Richard.Moerbitz@mailbox.tu-dresden.de";
+
+$responsible = "Richard Mörbitz, Max Friedrich";
+$responsible_mail = "Richard.Moerbitz at mailbox.tu-dresden.de, "
+    . "Max.Friedrich at mailbox.tu-dresden.de";
 ?>

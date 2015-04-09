@@ -369,11 +369,12 @@ if (!$ilDB->tableExists("qpl_rev_qst")) {
 
 ?>
 <#18>
-/**
- * Note: version number has not been increased, so this update won't trigger
- * Better talk to MA Kombrink first
- */
 <?php
+if (!$ilDB->tableColumnExists("rep_robj_xrev_quest", "phase")) {
+    $ilDB->addTableColumn("rep_robj_xrev_quest", "phase",
+            array("type" => "integer", "length" => 4));
+}
+/*
 $tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
         "rep_robj_xrev_topic", "rep_robj_xrev_subar");
 $fields = array(
@@ -402,4 +403,5 @@ if ($ilDB->tableExists("qpl_rev_qst")) {
     $ilDB->addTableColumn("qpl_rev_qst", "topic", array("type" => "integer", "length" => 8));
     $ilDB->addTableColumn("qpl_rev_qst", "subject_area", array("type" => "integer", "length" => 8));
 }
+*/
 ?>
