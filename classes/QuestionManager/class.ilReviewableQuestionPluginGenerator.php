@@ -1,7 +1,7 @@
 <?php
 class ilReviewableQuestionPluginGenerator {
     
-    private static $ilias_path = '/opt/lampp/htdocs/ilias/';
+    private static $ilias_path = ILIAS_ABSOLUTE_PATH;
     
     private static $instance = null;
     

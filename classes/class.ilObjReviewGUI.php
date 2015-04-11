@@ -43,6 +43,8 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
                                  "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                                  "/classes/GUI/class.ilConvertQuestionTableGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+                                 "/classes/GUI/class.ilGenerateQuestionTypesGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -51,6 +53,7 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 * application classes to fulfill certain tasks.
 *
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+* @author Max Friedrich <Max.Friedrich@mailbox.tu-dresden.de>
 *
 * $Id$
 *
@@ -155,66 +158,41 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
 
         function generateQuestionPlugins() {
-                global $tpl, $ilTabs;
+            echo "plugins ";
+            global $tpl, $ilTabs;
 
-                $ilTabs->activateTab("generate");
-                $this->initGenerateQuestionPluginsForm();
-                $this->generate_form->setValuesByPost();
-                $tpl->setContent($this->generate_form->getHTML());
-        }
-        
-        function getQuestionTypesWithNoReviewablePlugin() {
-            global $ilDB;
-            
-            $return_values = array();
-            
-            $not_reviewable_types = array();
-            $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
-            while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                array_push($not_reviewable_types, $data['type_tag']);
-            }
-    
-            $reviewable_types = array();
-            $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
-            while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                array_push($reviewable_types, $data['type_tag']);
-            }
-
-            foreach ( $not_reviewable_types as $nr_type ) {
-                if ( !in_array( 'assReviewable'. substr($nr_type, 3), $reviewable_types ) ) {
-                    array_push( $return_values, $nr_type );
-                }
-            }
-            return $return_values;
+            $ilTabs->activateTab("generate");
+            $this->initGenerateQuestionPluginsForm();
+            $tpl->setContent($this->generate_form->getHTML());
         }
         
         function initGenerateQuestionPluginsForm() {
+            echo "init ";
             global $ilCtrl;
 
-            $this->generate_form = new ilPropertyFormGUI();
+            $this->generate_form = new ilGenerateQuestionTypesGUI(
+                $this, 
+                "generateQuestionTypes", 
+                $this->object->getQuestionTypesWithNoReviewablePlugin() 
+            );
             $this->generate_form->setTitle($this->txt("generate_question_plugins"));
-            $this->generate_form->setFormAction($ilCtrl->getFormAction($this));
-
-            foreach ( $this->getQuestionTypesWithNoReviewablePlugin() as $qtype ) { 
-                $cb = new ilCheckboxInputGUI( $qtype, $qtype );
-                $cb->setChecked(true);
-                $this->generate_form->addItem( $cb );
-            }
-
-            $this->generate_form->addCommandButton("generateQuestionTypes", $this->txt("generate"));
         }
         
         function generateQuestionTypes() {
-            $question_types = $this->getQuestionTypesWithNoReviewablePlugin();
+            echo "types ";
+            global $tpl, $ilTabs, $lng, $ilCtrl;
             
             $generator = ilReviewableQuestionPluginGenerator::get();
-            
-            foreach ( $question_types as $question_type ) {
-                echo $_POST[$question_type];
-                if ( $_POST[$question_type] ) {
-                    $generator->createPlugin( $question_type );
-                }
+
+            foreach ( $_POST["question_type_name"] as $question_type ) {
+                $generator->createPlugin( $question_type );
             }
+
+            $ilTabs->activateTab("generate");
+            $this->initGenerateQuestionPluginsForm();
+
+            $ilCtrl->redirect($this, "generateQuestionPlugins");
+            $tpl->setContent($this->generate_form->getHTML());
         }
 
         /**
@@ -310,7 +288,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs;
 
         $ilTabs->activateTab("convert");
-                $convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
+        $convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
         $tpl->setContent($convert_form->getHTML());
     }
 
