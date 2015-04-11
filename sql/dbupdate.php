@@ -401,7 +401,29 @@ if (!$ilDB->tableExists("rep_robj_xrev_alloc")) {
 
     $ilDB->createTable("rep_robj_xrev_alloc", $fields);
 }
+?>
 
+<#20>
+<?php
+if (!$ilDB->tableExists("rep_robj_xrev_phases")) {
+    $fields = array(
+        'review_obj'         => array(
+                    'type'  => 'integer',
+                    'length' => 4
+        ),
+        'phase'         => array(
+                    'type'  => 'integer',
+                    'length' => 4
+        ),
+        'nr_reviewers'            => array(
+                    'type' => 'integer',
+                    'length' => 4
+        )
+    );
+
+    $ilDB->createTable("rep_robj_xrev_alloc", $fields);
+}
+?
 /*
 $tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
         "rep_robj_xrev_topic", "rep_robj_xrev_subar");
