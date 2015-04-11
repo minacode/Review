@@ -421,9 +421,9 @@ if (!$ilDB->tableExists("rep_robj_xrev_phases")) {
         )
     );
 
-    $ilDB->createTable("rep_robj_xrev_alloc", $fields);
+    $ilDB->createTable("rep_robj_xrev_phases", $fields);
 }
-?
+
 /*
 $tables = array("rep_robj_xrev_loutc", "rep_robj_xrev_cont",
         "rep_robj_xrev_topic", "rep_robj_xrev_subar");

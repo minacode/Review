@@ -38,7 +38,9 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilConvertQuestionTableGUI.php");
+                 "/classes/GUI/class.ilConvertQuestionTableGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+				 "/classes/GUI/class.ilReviewerAllocFormGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -56,7 +58,7 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI
+* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI
 *
 */
 class ilObjReviewGUI extends ilObjectPluginGUI {
@@ -90,6 +92,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             case "convertQuestion":
             case "performConvertQuestion":
             case "saveConvertQuestion":
+            case "addPhase":
+            case "removePhase":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -164,7 +168,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
 		$ilTabs->activateTab("allocation");
         $this->initReviewerAllocForm();
-        $this->alloc_form->setValuesByPost();
+        //$this->alloc_form->setValuesByPost();
         $tpl->setContent($this->alloc_form->getHTML());
 	}
 
@@ -191,7 +195,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "allocateReviewers");
 		}
-		$this->alloc_form->setValuesByPost();
+		//$this->alloc_form->setValuesByPost();
 		$tpl->setContent($this->alloc_form->getHTML());
 	}
 
@@ -314,31 +318,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 	public function initReviewerAllocForm() {
 		global $ilCtrl;
 
-		$this->alloc_form = new ilPropertyFormGUI();
-		$this->alloc_form->setTitle($this->txt("phase") . " " . 1);
-		$this->alloc_form->setFormAction($ilCtrl->getFormAction($this));
-
 		$members = $this->object->loadMembers();
-		$member_names = array();
-		foreach ($members as $member) {
-            $member->name = $member->firstname . ' ' . $member->lastname;
-			$member_names[] = $member->name;
-        }
-		$member_ids = array();
-		foreach ($members as $member) {
-			$member_ids[] = $member->id;
-        }
+        $phases = $this->object->loadPhases();
 
-		$reviewer_head = new ilAspectHeadGUI($member_names);
-		$this->alloc_form->addItem($reviewer_head);
-
-		foreach ($members as $member) {
-			$matrix_row = new ilCheckMatrixRowGUI($member, $member_ids);
-			$this->alloc_form->addItem($matrix_row);
-		}
-
-		$this->alloc_form->addCommandButton("saveAllocateReviewers", $this->txt("save"));
-	}
+        $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
+    }
 
 	/**
 	* Init  form for editing plugin object properties
@@ -499,6 +483,22 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
             $this->question_overview = $quest->getHTML();
         }
+    }
+
+    public function addPhase() {
+        global $ilCtrl, $lng;
+
+        $this->object->addPhaseToCycle();
+        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+        $ilCtrl->redirect($this, "allocateReviewers");
+    }
+
+    public function removePhase() {
+        global $ilCtrl, $lng;
+
+        $this->object->removePhaseFromCycle();
+        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+        $ilCtrl->redirect($this, "allocateReviewers");
     }
 }
 ?>

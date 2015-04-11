@@ -391,6 +391,27 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
+     * Load all review cycle phases
+     *
+     * @return      array           $phases         'phases' table row objects
+     */
+    public function loadPhases() {
+        global $ilDB;
+
+        $res = $ilDB->queryF("SELECT phase, nr_reviewers "
+                . "FROM rep_robj_xrev_phases "
+                . "WHERE review_obj = %s",
+                array("integer"),
+                array($this->getId()));
+
+        $phases = array();
+        while ($phase = $ilDB->fetchObject($res)) {
+            $phases[] = $phase;
+        }
+        return $phases;
+    }
+
+    /*
      * Load all questions that currently have no reviewer allocated to them
      *
      * @return       array           $questions              the question loaded by this function as an associative array
@@ -752,6 +773,43 @@ class ilObjReview extends ilObjectPlugin {
         while ($entry = $ilDB->fetchAssoc($res))
             $enum[$entry["id"]] = $lng->txt("rep_robj_xrev_".$entry["term"]);
         return $enum;
+    }
+
+    public function addPhaseToCycle() {
+        global $ilDB;
+
+        $res = $ilDB->queryF("SELECT MAX(phase) AS maxphase "
+                . "FROM rep_robj_xrev_phases "
+                . "WHERE review_obj=%s",
+                array("integer"),
+                array($this->getID()));
+
+        $maxphase = $ilDB->fetchAssoc($res)["maxphase"];
+        $ilDB->insert("rep_robj_xrev_phases",
+            array("phase" => array("integer", $maxphase + 1),
+                "review_obj" => array("integer", $this->getID()),
+                "nr_reviewers" => array("integer", 0)));
+    }
+
+    public function removePhaseFromCycle() {
+        global $ilDB;
+
+        $res = $ilDB->queryF("SELECT MAX(phase) AS maxphase "
+                . "FROM rep_robj_xrev_phases "
+                . "WHERE review_obj=%s",
+                array("integer"),
+                array($this->getID()));
+
+        $maxphase = $ilDB->fetchAssoc($res)["maxphase"];
+        $ilDB->manipulateF("DELETE FROM rep_robj_xrev_phases "
+                . "WHERE phase=%s AND review_obj=%s",
+                array("integer", "integer"),
+                array($maxphase, $this->getID()));
+
+        $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc "
+                . "WHERE phase=%s AND review_obj=%s",
+                array("integer", "integer"),
+                array($maxphase, $this->getID()));
     }
 }
 ?>

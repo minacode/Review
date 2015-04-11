@@ -60,7 +60,6 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 		$tpl->addCss('./Customizing/global/plugins/Services/Repository/RepositoryObject/Review/templates/default/css/Review.css');
 
 		foreach ($this->postvars as $postvar) {
-            echo $postvar . " - " . $object->id . "<br>";
 			$chbox = new ilCheckboxInputGUI("", $postvar);
 			if ($object->id == explode("_", $postvar)[2])
 				$chbox->setDisabled(true);
