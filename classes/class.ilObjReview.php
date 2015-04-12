@@ -475,16 +475,15 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Save matrix input as author - reviewer allocation
      *
-     * @param       integer     $phase              cycle phase
      * @param       array       $alloc_matrix       black magic
      */
-    public function allocateReviewers($phase, $alloc_matrix) {
+    public function allocateReviewers($alloc_matrix) {
         global $ilDB;
 
         $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc " .
-                    "WHERE phase=%s AND review_obj=%s",
-                    array("integer", "integer"),
-                    array($phase, $this->getId()));
+                    "WHERE review_obj=%s",
+                    array("integer"),
+                    array($this->getId()));
 
         foreach ($alloc_matrix as $row) {
             foreach ($row["reviewers"] as $reviewer_id => $checked) {
@@ -492,12 +491,62 @@ class ilObjReview extends ilObjectPlugin {
                     continue;
                 }
                 $ilDB->insert("rep_robj_xrev_alloc", array(
-                        "phase" => array("integer", $phase),
-                        "reviewer" => array("integer", explode("_", $reviewer_id)[2]),
+                        "phase" => array("integer", explode("_", $reviewer_id)[1]),
+                        "reviewer" => array("integer", explode("_", $reviewer_id)[3]),
                         "author" => array("integer", $row["q_id"]),
                         "review_obj" => array("integer", $this->getId())));
             }
         }
+    }
+
+    /*
+     * Change the number of reviewers for a cycle phase
+     *
+     * @param       integer     $phase              phase to be changed
+     * @param       integer     $nr_reviewers       new number of reviewers
+     */
+    public function updateCyclePhase($phase, $nr_reviewers) {
+        global $ilDB;
+
+        $ilDB->update("rep_robj_xrev_phases",
+                array("nr_reviewers" => array("integer", $nr_reviewers)),
+                array("phase" => array("integer", $phase),
+                "review_obj" => array("integer", $this->getID())));
+    }
+
+    /*
+     * Load the whole review cycle allocation
+     *
+     * @return      array       $allocation         postvars and their values
+     */
+    public function loadReviewerAllocation() {
+        global $ilDB;
+
+        $allocation = array();
+
+        $res = $ilDB->queryF("SELECT phase, reviewer, author "
+                . "FROM rep_robj_xrev_alloc "
+                . "WHERE review_obj=%s",
+                array("integer"),
+                array($this->getID()));
+
+        while ($alloc = $ilDB->fetchObject($res)) {
+            $allocation[sprintf("id_%s_%s_%s", $alloc->phase,
+                    $alloc->author, $alloc->reviewer)]
+                = true;
+        }
+
+        $res = $ilDB->queryF("SELECT nr_reviewers, phase "
+                . "FROM rep_robj_xrev_phases "
+                . "WHERE review_obj=%s",
+                array("integer"),
+                array($this->getID()));
+
+        while ($phase = $ilDB->fetchObject($res)) {
+            $allocation[sprintf("nr_%s", $phase->phase)] = $phase->nr_reviewers;
+        }
+
+        return $allocation;
     }
 
     /*

@@ -193,15 +193,18 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 		if ($this->alloc_form->checkInput()) {
 			$rows = array();
 			foreach ($this->alloc_form->getItems() as $item) {
-				if (!method_exists($item, "getPostVars"))
-					continue;
-				$row_postvars = $item->getPostVars();
-				$row_values = array();
-				foreach ($row_postvars as $row_postvar)
-					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
-				$rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
+				if (method_exists($item, "getPostVars")) {
+                    $row_postvars = $item->getPostVars();
+                    $row_values = array();
+                    foreach ($row_postvars as $row_postvar)
+                        $row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
+                    $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
+                }
+                if ($item instanceof ilNumberInputGUI) {
+                    $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $this->alloc_form->getInput($item->getPostVar()));
+                }
 			}
-			//$this->object->allocateReviewers(1, $rows);
+			$this->object->allocateReviewers($rows);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "allocateReviewers");
 		}
@@ -332,6 +335,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $phases = $this->object->loadPhases();
 
         $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
+        foreach ((array) $this->object->loadReviewerAllocation as $k => $v) {
+            echo $k . ": " . $v . "<br>";
+        }
+        $this->alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
     }
 
 	/**
