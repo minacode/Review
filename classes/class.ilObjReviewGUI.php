@@ -180,6 +180,16 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
 		$ilTabs->activateTab("allocation");
 		$this->initReviewerAllocForm();
+        /*
+        foreach ($_POST as $key => $val) {
+            echo $key . ": " . $val . "<br>";
+            if (is_array($val)) {
+                foreach ($val as $k => $v) {
+                    echo $k . ": " . $v . "<br>";
+                }
+            }
+        }
+         */
 		if ($this->alloc_form->checkInput()) {
 			$rows = array();
 			foreach ($this->alloc_form->getItems() as $item) {
@@ -191,11 +201,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 					$row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
 				$rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
 			}
-			$this->object->allocateReviewers(1, $rows);
+			//$this->object->allocateReviewers(1, $rows);
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "allocateReviewers");
 		}
-		//$this->alloc_form->setValuesByPost();
+		$this->alloc_form->setValuesByPost();
 		$tpl->setContent($this->alloc_form->getHTML());
 	}
 

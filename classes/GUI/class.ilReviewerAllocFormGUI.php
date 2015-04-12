@@ -3,12 +3,16 @@
 /*
  * GUI class for the List of reviewer allocation matrizes
  */
-class ilReviewerAllocFormGUI extends ilCustomInputGUI {
+class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
 
     public function __construct($members, $phases, $parent) {
         global $lng, $ilCtrl;
 
-        $html = "";
+        parent::__construct();
+
+        $this->setTitle($lng->txt("phase") . " " . $phase->phase);
+        $this->setFormAction($ilCtrl->getFormAction($this));
+
 
         $member_names = array();
         foreach ($members as $member) {
@@ -21,31 +25,27 @@ class ilReviewerAllocFormGUI extends ilCustomInputGUI {
         }
 
         foreach ($phases as $phase) {
-            $alloc_form = new ilPropertyFormGUI();
-            $alloc_form->setTitle($lng->txt("phase") . " " . $phase->phase);
-            $alloc_form->setFormAction($ilCtrl->getFormAction($this));
-
+            $phase_head = new ilFormSectionHeaderGUI();
+            $phase_head->setTitle($lng->txt("phase") . " " . $phase->phase);
+            $this->addItem($phase_head);
             $reviewer_head = new ilAspectHeadGUI($member_names);
-            $alloc_form->addItem($reviewer_head);
+            $this->addItem($reviewer_head);
 
             foreach ($members as $member) {
-                $matrix_row = new ilCheckMatrixRowGUI($member, $member_ids);
-                $alloc_form->addItem($matrix_row);
+                $matrix_row = new ilCheckMatrixRowGUI($phase->phase, $member, $member_ids);
+                $this->addItem($matrix_row);
             }
-            $nr_input = new ilNumberInputGUI($lng->txt("nr_reviewers"), "nr_reviewers");
+            $nr_input = new ilNumberInputGUI($lng->txt("nr_reviewers"), "nr_" . $phase->phase);
             $nr_input->setMinValue(1);
             $nr_input->setRequired(true);
-            $alloc_form->addItem($nr_input);
+            $this->addItem($nr_input);
 
-            $alloc_form->addCommandButton("saveAllocateReviewers", $lng->txt("save"));
 
-            $html .= $alloc_form->getHTML();
         }
 
-        $bf = new ilPropertyFormGUI();
-        $bf->addCommandButton("addPhase", $lng->txt("add_phase"));
-        $bf->addCommandButton("removePhase", $lng->txt("remove_phase"));
-        $bf->setFormAction($ilCtrl->getFormActionByClass("ilObjReviewGUI", "allocateReviewers"));
-        $this->setHTML($html . $bf->getHTML());
+        $this->addCommandButton("saveAllocateReviewers", $lng->txt("save"));
+        $this->addCommandButton("addPhase", $lng->txt("add_phase"));
+        $this->addCommandButton("removePhase", $lng->txt("remove_phase"));
+        // $this->setFormAction($ilCtrl->getFormActionByClass("ilObjReviewGUI", "allocateReviewers"));
     }
 }
