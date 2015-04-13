@@ -40,11 +40,11 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                                  "/classes/GUI/class.ilCheckMatrixRowGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
+                                 "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                  "/classes/GUI/class.ilConvertQuestionTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewerAllocFormGUI.php");
+                                 "/classes/GUI/class.ilReviewerAllocFormGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                                  "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
@@ -69,96 +69,96 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI
+* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI, ilGenerateQuestionTypesGUI
 *
 */
 class ilObjReviewGUI extends ilObjectPluginGUI {
-	/**
-	* Initialisation
-	*/
-	protected function afterConstructor() {
-		// anything needed after object has been constructed
-		// - example: append my_id GET parameter to each request
-		//   $ilCtrl->saveParameter($this, array("my_id"));
-	}
+        /**
+        * Initialisation
+        */
+        protected function afterConstructor() {
+                // anything needed after object has been constructed
+                // - example: append my_id GET parameter to each request
+                //   $ilCtrl->saveParameter($this, array("my_id"));
+        }
 
-	/**
-	* Get type.
-	*/
-	final function getType() {
-		return "xrev";
-	}
+        /**
+        * Get type.
+        */
+        final function getType() {
+                return "xrev";
+        }
 
-	/**
-	* Handles all commmands of this class, centralizes permission checks
-	*
-	* @param string		$cmd		command to be performed by this class
-	*/
-	function performCommand($cmd) {
-		switch ($cmd) {
-			case "editProperties":
-			case "updateProperties":
-			case "allocateReviewers":
-			case "saveAllocateReviewers":
-            case "convertQuestion":
-            case "performConvertQuestion":
-            case "saveConvertQuestion":
-            case "addPhase":
-            case "removePhase":
-            case "generateQuestionPlugins":
-				$this->checkPermission("write");
-				$this->$cmd();
-				break;
+        /**
+        * Handles all commmands of this class, centralizes permission checks
+        *
+        * @param string         $cmd            command to be performed by this class
+        */
+        function performCommand($cmd) {
+            switch ($cmd) {
+                case "editProperties":
+                case "updateProperties":
+                case "allocateReviewers":
+                case "saveAllocateReviewers":
+                case "convertQuestion":
+                case "performConvertQuestion":
+                case "saveConvertQuestion":
+                case "addPhase":
+                case "removePhase":
+                case "generateQuestionPlugins":
+                case "generateQuestionTypes":
+                    $this->checkPermission("write");
+                    $this->$cmd();
+                    break;
+                case "showContent":
+                case "inputReview":
+                case "showReviews":
+                case "saveReview":
+                    $this->checkPermission("read");
+                    $this->$cmd();
+                    break;
+            }
+        }
 
-			case "showContent":
-			case "inputReview":
-			case "showReviews":
-			case "saveReview":
-				$this->checkPermission("read");
-				$this->$cmd();
-				break;
-		}
-	}
+        /**
+        * After object has been created -> jump to this command
+        */
+        function getAfterCreationCmd() {
+                return "showContent";
+        }
 
-	/**
-	* After object has been created -> jump to this command
-	*/
-	function getAfterCreationCmd() {
-		return "showContent";
-	}
+        /**
+        * Get standard command
+        */
+        function getStandardCmd() {
+                return "showContent";
+        }
 
-	/**
-	* Get standard command
-	*/
-	function getStandardCmd() {
-		return "showContent";
-	}
+        /**
+        * Set tabs
+        */
+        function setTabs() {
+                global $ilTabs, $ilCtrl, $ilAccess;
 
-	/**
-	* Set tabs
-	*/
-	function setTabs() {
-		global $ilTabs, $ilCtrl, $ilAccess;
+                // tab for the "show content" command
+                if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
+                        $ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"));
+                }
 
-		// tab for the "show content" command
-		if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
-			$ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"));
-		}
+                // standard info screen tab
+                $this->addInfoTab();
 
-		// standard info screen tab
-		$this->addInfoTab();
-
-		// tabs to edit properties and run the review cycle
-		if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
-			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
-			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
+                // tabs to edit properties and run the review cycle
+                if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
+                        $ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
+                        $ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
             $ilTabs->addTab("generate", $this->txt("generate_plugins"), $ilCtrl->getLinkTarget($this, "generateQuestionPlugins"));
-		}
+                }
 
-		// standard epermission tab
-		$this->addPermissionTab();
-	}
+                // standard epermission tab
+                $this->addPermissionTab();
+        }
 
         function generateQuestionPlugins() {
             echo "plugins ";
@@ -173,11 +173,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             echo "init ";
             global $ilCtrl;
 
-            $this->generate_form = new ilGenerateQuestionTypesGUI(
-                $this, 
-                "generateQuestionTypes", 
-                $this->object->getQuestionTypesWithNoReviewablePlugin() 
-            );
+            $this->generate_form = new ilGenerateQuestionTypesGUI( $this->object->getQuestionTypesWithNoReviewablePlugin() );
             $this->generate_form->setTitle($this->txt("generate_question_plugins"));
         }
         
@@ -198,39 +194,39 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $tpl->setContent($this->generate_form->getHTML());
         }
 
-	/**
-	* Edit plugin object properties
-	*/
-	function editProperties() {
-		global $tpl, $ilTabs;
+        /**
+        * Edit plugin object properties
+        */
+        function editProperties() {
+                global $tpl, $ilTabs;
 
-		$ilTabs->activateTab("properties");
-		$this->initPropertiesForm();
-		$this->getPropertiesValues();
+                $ilTabs->activateTab("properties");
+                $this->initPropertiesForm();
+                $this->getPropertiesValues();
 
-		$tpl->setContent($this->form->getHTML());
-	}
+                $tpl->setContent($this->form->getHTML());
+        }
 
-	/**
-	* Input reviewer allocation
-	*/
-	function allocateReviewers() {
-		global $tpl, $ilTabs;
+        /**
+        * Input reviewer allocation
+        */
+        function allocateReviewers() {
+                global $tpl, $ilTabs;
 
-		$ilTabs->activateTab("allocation");
+                $ilTabs->activateTab("allocation");
         $this->initReviewerAllocForm();
         //$this->alloc_form->setValuesByPost();
         $tpl->setContent($this->alloc_form->getHTML());
-	}
+        }
 
-	/**
-	* Check and save reviewer allocation
-	*/
-	function saveAllocateReviewers() {
-		global $tpl, $ilTabs, $lng, $ilCtrl;
+        /**
+        * Check and save reviewer allocation
+        */
+        function saveAllocateReviewers() {
+                global $tpl, $ilTabs, $lng, $ilCtrl;
 
-		$ilTabs->activateTab("allocation");
-		$this->initReviewerAllocForm();
+                $ilTabs->activateTab("allocation");
+                $this->initReviewerAllocForm();
         /*
         foreach ($_POST as $key => $val) {
             echo $key . ": " . $val . "<br>";
@@ -241,10 +237,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             }
         }
          */
-		if ($this->alloc_form->checkInput()) {
-			$rows = array();
-			foreach ($this->alloc_form->getItems() as $item) {
-				if (method_exists($item, "getPostVars")) {
+                if ($this->alloc_form->checkInput()) {
+                        $rows = array();
+                        foreach ($this->alloc_form->getItems() as $item) {
+                                if (method_exists($item, "getPostVars")) {
                     $row_postvars = $item->getPostVars();
                     $row_values = array();
                     foreach ($row_postvars as $row_postvar)
@@ -254,14 +250,14 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 if ($item instanceof ilNumberInputGUI) {
                     $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $this->alloc_form->getInput($item->getPostVar()));
                 }
-			}
-			$this->object->allocateReviewers($rows);
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "allocateReviewers");
-		}
-		$this->alloc_form->setValuesByPost();
-		$tpl->setContent($this->alloc_form->getHTML());
-	}
+                        }
+                        $this->object->allocateReviewers($rows);
+                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+                        $ilCtrl->redirect($this, "allocateReviewers");
+                }
+                $this->alloc_form->setValuesByPost();
+                $tpl->setContent($this->alloc_form->getHTML());
+        }
 
     /*
      * Select old questions to make them reviewable
@@ -373,16 +369,16 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
         $this->missing_data_form->setValuesByPost();
-		$tpl->setContent($this->missing_data_form->getHTML());
-	}
+                $tpl->setContent($this->missing_data_form->getHTML());
+        }
 
-	/**
-	* Init form for reviewer allocation
-	*/
-	public function initReviewerAllocForm() {
-		global $ilCtrl;
+        /**
+        * Init form for reviewer allocation
+        */
+        public function initReviewerAllocForm() {
+                global $ilCtrl;
 
-		$members = $this->object->loadMembers();
+                $members = $this->object->loadMembers();
         $phases = $this->object->loadPhases();
 
         $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
@@ -392,90 +388,90 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $this->alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
     }
 
-	/**
-	* Init  form for editing plugin object properties
-	*/
-	public function initPropertiesForm() {
-		global $ilCtrl;
+        /**
+        * Init  form for editing plugin object properties
+        */
+        public function initPropertiesForm() {
+                global $ilCtrl;
 
-		$this->form = new ilPropertyFormGUI();
+                $this->form = new ilPropertyFormGUI();
 
-		// title
-		$ti = new ilTextInputGUI($this->txt("title"), "title");
-		$ti->setRequired(true);
-		$this->form->addItem($ti);
+                // title
+                $ti = new ilTextInputGUI($this->txt("title"), "title");
+                $ti->setRequired(true);
+                $this->form->addItem($ti);
 
-		// description
-		$ta = new ilTextAreaInputGUI($this->txt("description"), "desc");
-		$this->form->addItem($ta);
+                // description
+                $ta = new ilTextAreaInputGUI($this->txt("description"), "desc");
+                $this->form->addItem($ta);
 
-		$this->form->addCommandButton("updateProperties", $this->txt("save"));
+                $this->form->addCommandButton("updateProperties", $this->txt("save"));
 
-		$this->form->setTitle($this->txt("edit_properties"));
-		$this->form->setFormAction($ilCtrl->getFormAction($this));
-	}
+                $this->form->setTitle($this->txt("edit_properties"));
+                $this->form->setFormAction($ilCtrl->getFormAction($this));
+        }
 
-	/**
-	* Get values for edit properties form
-	*/
-	function getPropertiesValues() {
-		$values["title"] = $this->object->getTitle();
-		$values["desc"] = $this->object->getDescription();
-		$this->form->setValuesByArray($values);
-	}
+        /**
+        * Get values for edit properties form
+        */
+        function getPropertiesValues() {
+                $values["title"] = $this->object->getTitle();
+                $values["desc"] = $this->object->getDescription();
+                $this->form->setValuesByArray($values);
+        }
 
-	/**
-	* Update properties
-	*/
-	public function updateProperties() {
-		global $tpl, $lng, $ilCtrl;
+        /**
+        * Update properties
+        */
+        public function updateProperties() {
+                global $tpl, $lng, $ilCtrl;
 
-		$this->initPropertiesForm();
-		if ($this->form->checkInput()) {
-			$this->object->setTitle($this->form->getInput("title"));
-			$this->object->setDescription($this->form->getInput("desc"));
-			$this->object->update();
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "editProperties");
-		}
-		$this->form->setValuesByPost();
-		$tpl->setContent($this->form->getHtml());
-	}
+                $this->initPropertiesForm();
+                if ($this->form->checkInput()) {
+                        $this->object->setTitle($this->form->getInput("title"));
+                        $this->object->setDescription($this->form->getInput("desc"));
+                        $this->object->update();
+                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+                        $ilCtrl->redirect($this, "editProperties");
+                }
+                $this->form->setValuesByPost();
+                $tpl->setContent($this->form->getHtml());
+        }
 
-	/**
-	* Show plugin content (question and review table)
-	*/
-	protected function showContent() {
-		global $tpl, $ilTabs;
+        /**
+        * Show plugin content (question and review table)
+        */
+        protected function showContent() {
+                global $tpl, $ilTabs;
 
-		$ilTabs->activateTab("content");
+                $ilTabs->activateTab("content");
 
-		$table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
-		$table_r = new ilReviewTableGUI($this, "showContent", $this->object->loadReviewsByUser());
-		$tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
-	}
+                $table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
+                $table_r = new ilReviewTableGUI($this, "showContent", $this->object->loadReviewsByUser());
+                $tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
+        }
 
-	/**
-	* Display review input form
-	*/
-	public function inputReview() {
-		global $tpl, $ilTabs, $ilCtrl, $lng;
-		$ilTabs->activateTab("content");
-		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "inputReview", "review")) {
-			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
-			$ilCtrl->redirect($this, "showContent");
-		}
-		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
-		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-												$this->object->getEnum("taxonomy"),
-												$this->object->getEnum("knowledge dimension"),
-												$this->object->getEnum("expertise"),
-												$this->object->getEnum("rating"),
-												$this->object->getEnum("evaluation")
-						 );
-		$this->initQuestionOverview();
+        /**
+        * Display review input form
+        */
+        public function inputReview() {
+                global $tpl, $ilTabs, $ilCtrl, $lng;
+                $ilTabs->activateTab("content");
+                if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "inputReview", "review")) {
+                        ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+                        $ilCtrl->redirect($this, "showContent");
+                }
+                $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+                $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
+                $input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+                                                                                                $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
+                                                                                                $this->object->getEnum("taxonomy"),
+                                                                                                $this->object->getEnum("knowledge dimension"),
+                                                                                                $this->object->getEnum("expertise"),
+                                                                                                $this->object->getEnum("rating"),
+                                                                                                $this->object->getEnum("evaluation")
+                                                 );
+                $this->initQuestionOverview();
         $tpl->setContent($input->getHtml());
         }
 
