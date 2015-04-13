@@ -109,3 +109,7 @@ convert_questions#:#Fragen konvertieren
 nonrev_questions#:#Nichtreviewbare Fragen
 add_taxonomy#:#Fehlende Metadaten eintragen
 convert#:#Konvertieren
+generate#:#Generieren
+generate_plugins#:#Fragentypen generieren
+generate_question_plugins#:#Generieren reviewbarer Fragentyp-Plugins
+question_type_name#:#Fragentyp-Name

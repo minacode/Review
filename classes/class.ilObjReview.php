@@ -81,7 +81,6 @@ class ilObjReview extends ilObjectPlugin {
         }
 
         $this->syncQuestionDB();
-        $this->generateNewQuestionTypePlugins();
     }
 
     /*
@@ -123,32 +122,6 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function setGroupId($group_id) {
         $this->group_id = $group_id;
-    }
-
-    /*
-     * Max is supposed to document his code
-     */
-    private function generateNewQuestionTypePlugins() {
-        global $ilDB;
-
-        $not_reviewable_types = array();
-        $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
-        while ( $data = $ilDB->fetchAssoc( $result ) ) {
-            array_push($not_reviewable_types, $data['type_tag']);
-        }
-
-        $reviewable_types = array();
-        $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
-        while ( $data = $ilDB->fetchAssoc( $result ) ) {
-            array_push($reviewable_types, $data['type_tag']);
-        }
-
-        foreach ( $not_reviewable_types as $nr_type ) {
-            if ( !in_array( 'assReviewable'. substr($nr_type, 3), $reviewable_types ) ) {
-                $generator = ilReviewableQuestionPluginGenerator::get();
-                $generator->createPlugin( $nr_type );
-            }
-        }
     }
 
     /*
@@ -860,5 +833,30 @@ class ilObjReview extends ilObjectPlugin {
                 array("integer", "integer"),
                 array($maxphase, $this->getID()));
     }
+    
+    function getQuestionTypesWithNoReviewablePlugin() {
+            global $ilDB;
+            
+            $return_values = array();
+            
+            $not_reviewable_types = array();
+            $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
+            while ( $data = $ilDB->fetchAssoc( $result ) ) {
+                array_push($not_reviewable_types, $data['type_tag']);
+            }
+    
+            $reviewable_types = array();
+            $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
+            while ( $data = $ilDB->fetchAssoc( $result ) ) {
+                array_push($reviewable_types, $data['type_tag']);
+            }
+
+            foreach ( $not_reviewable_types as $nr_type ) {
+                if ( !in_array( 'assReviewable'. substr($nr_type, 3), $reviewable_types ) ) {
+                    array_push( $return_values, $nr_type );
+                }
+            }
+            return $return_values;
+        }
 }
 ?>

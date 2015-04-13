@@ -109,3 +109,7 @@ convert_questions#:#Convert questions
 nonrev_questions#:#Non-reviewable questions
 add_taxonomy#:#Enter missing meta data
 convert#:#Convert
+generate#:#Generate
+generate_plugins#:#Generate question types
+generate_question_plugins#:#Generate reviewable question types
+question_type_name#:#Question type name

@@ -23,24 +23,34 @@
 
 include_once "Modules/TestQuestionPool/classes/class.assQuestionGUI.php";
 include_once "Services/Repository/classes/class.ilObjectPluginGUI.php";
-include_once "Services/Form/classes/class.ilCustomInputGUI.php";
-
+include_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
+include_once("Modules/TestQuestionPool/classes/class.assQuestionGUI.php");
+include_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
+include_once("./Services/Form/classes/class.ilCustomInputGUI.php");
+include_once("./Services/Form/classes/class.ilPropertyFormGUI.php");
+include_once("./Services/Form/classes/class.ilCheckboxInputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewOutputGUI.php");
+                                 "/classes/GUI/class.ilReviewOutputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewInputGUI.php");
+                                 "/classes/GUI/class.ilReviewInputGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilReviewTableGUI.php");
+                                 "/classes/GUI/class.ilReviewTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilQuestionTableGUI.php");
+                                 "/classes/GUI/class.ilQuestionTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
-				 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
+                                 "/classes/GUI/class.ilCheckMatrixRowGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilQuestionOverviewGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                  "/classes/GUI/class.ilConvertQuestionTableGUI.php");
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
 				 "/classes/GUI/class.ilReviewerAllocFormGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+                                 "/classes/GUI/class.ilQuestionOverviewGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+                                 "/classes/GUI/class.ilConvertQuestionTableGUI.php");
+include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
+                                 "/classes/GUI/class.ilGenerateQuestionTypesGUI.php");
 
 /**
 * User Interface class for Review repository object.
@@ -49,6 +59,7 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 * application classes to fulfill certain tasks.
 *
 * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+* @author Max Friedrich <Max.Friedrich@mailbox.tu-dresden.de>
 *
 * $Id$
 *
@@ -94,6 +105,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             case "saveConvertQuestion":
             case "addPhase":
             case "removePhase":
+            case "generateQuestionPlugins":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -141,11 +153,50 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 			$ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
 			$ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
+            $ilTabs->addTab("generate", $this->txt("generate_plugins"), $ilCtrl->getLinkTarget($this, "generateQuestionPlugins"));
 		}
 
 		// standard epermission tab
 		$this->addPermissionTab();
 	}
+
+        function generateQuestionPlugins() {
+            echo "plugins ";
+            global $tpl, $ilTabs;
+
+            $ilTabs->activateTab("generate");
+            $this->initGenerateQuestionPluginsForm();
+            $tpl->setContent($this->generate_form->getHTML());
+        }
+        
+        function initGenerateQuestionPluginsForm() {
+            echo "init ";
+            global $ilCtrl;
+
+            $this->generate_form = new ilGenerateQuestionTypesGUI(
+                $this, 
+                "generateQuestionTypes", 
+                $this->object->getQuestionTypesWithNoReviewablePlugin() 
+            );
+            $this->generate_form->setTitle($this->txt("generate_question_plugins"));
+        }
+        
+        function generateQuestionTypes() {
+            echo "types ";
+            global $tpl, $ilTabs, $lng, $ilCtrl;
+            
+            $generator = ilReviewableQuestionPluginGenerator::get();
+
+            foreach ( $_POST["question_type_name"] as $question_type ) {
+                $generator->createPlugin( $question_type );
+            }
+
+            $ilTabs->activateTab("generate");
+            $this->initGenerateQuestionPluginsForm();
+
+            $ilCtrl->redirect($this, "generateQuestionPlugins");
+            $tpl->setContent($this->generate_form->getHTML());
+        }
 
 	/**
 	* Edit plugin object properties
@@ -219,7 +270,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs;
 
         $ilTabs->activateTab("convert");
-		$convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
+        $convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
         $tpl->setContent($convert_form->getHTML());
     }
 
@@ -426,56 +477,56 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 						 );
 		$this->initQuestionOverview();
         $tpl->setContent($input->getHtml());
-	}
+        }
 
-	/*
-	* Save review input
-	*/
-	public function saveReview() {
-		global $tpl, $ilTabs, $lng, $ilCtrl;
-		$ilTabs->activateTab("content");
-		if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "saveReview", "review")) {
-			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
-			$ilCtrl->redirect($this, "showContent");
-		}
-		$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-		$ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
-		$input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-												$this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-												$this->object->getEnum("taxonomy"),
-												$this->object->getEnum("knowledge dimension"),
-												$this->object->getEnum("expertise"),
-												$this->object->getEnum("rating"),
-												$this->object->getEnum("evaluation")
-						 );
-		if ($input->checkInput()) {
-			$form_data = array();
-			$post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
-			foreach ($post_vars as $post_var)
-				$form_data[$post_var] = $input->getInput($post_var);
-			$this->object->storeReviewById($_GET["r_id"], $form_data);
-			$this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "showContent");
-		}
-		else
-			$ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-		$input->setValuesByPost();
-		$this->initQuestionOverview();
+        /*
+        * Save review input
+        */
+        public function saveReview() {
+                global $tpl, $ilTabs, $lng, $ilCtrl;
+                $ilTabs->activateTab("content");
+                if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "saveReview", "review")) {
+                        ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+                        $ilCtrl->redirect($this, "showContent");
+                }
+                $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+                $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
+                $input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
+                                                                                                $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
+                                                                                                $this->object->getEnum("taxonomy"),
+                                                                                                $this->object->getEnum("knowledge dimension"),
+                                                                                                $this->object->getEnum("expertise"),
+                                                                                                $this->object->getEnum("rating"),
+                                                                                                $this->object->getEnum("evaluation")
+                                                 );
+                if ($input->checkInput()) {
+                        $form_data = array();
+                        $post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
+                        foreach ($post_vars as $post_var)
+                                $form_data[$post_var] = $input->getInput($post_var);
+                        $this->object->storeReviewById($_GET["r_id"], $form_data);
+                        $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
+                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+                        $ilCtrl->redirect($this, "showContent");
+                }
+                else
+                        $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
+                $input->setValuesByPost();
+                $this->initQuestionOverview();
         $tpl->setContent($this->question_overview . $input->getHtml());
-	}
+        }
 
-	/**
-	* Output reviews
-	*/
-	public function showReviews() {
-		global $tpl, $ilTabs, $ilCtrl, $lng;
-		if (!ilObjReviewAccess::checkAccessToObject($_GET[substr($_GET["origin"], 0, 1)."_id"], "", "showReviews", $_GET["origin"])) {
-			ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
-			$ilCtrl->redirect($this, "showContent");
-		}
-		$ilTabs->activateTab("content");
-		$tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
+        /**
+        * Output reviews
+        */
+        public function showReviews() {
+                global $tpl, $ilTabs, $ilCtrl, $lng;
+                if (!ilObjReviewAccess::checkAccessToObject($_GET[substr($_GET["origin"], 0, 1)."_id"], "", "showReviews", $_GET["origin"])) {
+                        ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
+                        $ilCtrl->redirect($this, "showContent");
+                }
+                $ilTabs->activateTab("content");
+                $tbl = new ilReviewOutputGUI($this, "showReviews", $this->object->loadReviewsByQuestion($_GET["q_id"]),
                                             $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
                                             $this->object->getEnum("taxonomy"),
                                             $this->object->getEnum("knowledge dimension"),
@@ -483,10 +534,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                                             $this->object->getEnum("rating"),
                                             $this->object->getEnum("evaluation")
 
-					  );
+                                          );
         $this->initQuestionOverview();
-		$tpl->setContent($this->question_overview . $tbl->getHtml());
-	}
+                $tpl->setContent($this->question_overview . $tbl->getHtml());
+        }
 
     /**
      * Create the question overview GUI
