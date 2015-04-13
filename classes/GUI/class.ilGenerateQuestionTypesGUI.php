@@ -41,7 +41,7 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
     * @param    string  $a_parent_cmd   Command that causes construction of this object
     * @param        array       $question_types associative arrays of displayed data (column => value)
     */
-    public function __construct($question_types) {
+    public function __construct($a_parent_obj, $a_parent_cmd, $question_types) {
         global $ilCtrl, $lng;
         
         parent::__construct($a_parent_obj, $a_parent_cmd);
@@ -51,7 +51,7 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
         $this->addColumn($lng->txt('question_type_name'));
         $this->setEnableHeader(true);
 
-        $this->setFormAction($ilCtrl->getFormActionByClass('ilObjReviewGUI', 'generateQuestionPlugins'));
+        $this->setFormAction($ilCtrl->getFormAction($a_parent_obj, 'generateQuestionPlugins'));
         
         $this->setRowTemplate(
             'tpl.generate_question_types_table_row.html', 

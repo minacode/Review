@@ -69,7 +69,7 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI, ilGenerateQuestionTypesGUI
+* @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI
 *
 */
 class ilObjReviewGUI extends ilObjectPluginGUI {
@@ -173,7 +173,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             echo "init ";
             global $ilCtrl;
 
-            $this->generate_form = new ilGenerateQuestionTypesGUI( $this->object->getQuestionTypesWithNoReviewablePlugin() );
+            $this->generate_form = new ilGenerateQuestionTypesGUI( $this, "generateQuestionPlugins", $this->object->getQuestionTypesWithNoReviewablePlugin() );
             $this->generate_form->setTitle($this->txt("generate_question_plugins"));
         }
         
@@ -187,6 +187,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 $generator->createPlugin( $question_type );
             }
 
+                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilTabs->activateTab("generate");
             $this->initGenerateQuestionPluginsForm();
 
