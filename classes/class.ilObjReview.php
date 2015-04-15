@@ -212,9 +212,11 @@ class ilObjReview extends ilObjectPlugin {
                             "question_id" => array("integer", $new_question["question_id"]),
                             "timestamp" => array("integer", $new_question["tstamp"]),
                             "state" => array("integer", 0),
+                            "phase" => array("integer", 0),
                             "review_obj" => array("integer", $this->getId())
                     )
             );
+            $this->proceedToNextPhase($new_question["question_id"]);
             $this->notifyAdminsAboutNewQuestion($new_question);
         }
 
@@ -384,6 +386,64 @@ class ilObjReview extends ilObjectPlugin {
         return $phases;
     }
 
+    public function proceedToNextPhase($q_id) {
+        global $ilDB;
+
+        $max_phase = 0;
+        foreach ($this->loadPhases() as $phase) {
+            if ($phase->phase > $max_phase) {
+                $max_phase = $phase->phase;
+            }
+        }
+        for ($current_phase = $this->getCurrentPhase($q_id)->phase;
+                $current_phase <= $max_phase;
+                $current_phase++) {
+            foreach ($this->loadPhases() as $phase) {
+                if ($current_phase == $phase->phase
+                    && $phase->nr_reviewers > 0) {
+                    $ilDB->update(
+                        "rep_robj_xrev_quest",
+                        array(
+                            "phase" => array("integer", $current_phase),
+                            "state" => array("integer", 1)
+                        ),
+                        array(
+                            "question_id" => array("integer", $q_id),
+                            "review_obj" => array("integer", $this->getID())
+                        )
+                    );
+                    $this->allocateReviews($q_id);
+                    return;
+                }
+            }
+        }
+        $this->finishQuestion($q_id);
+    }
+
+    /*
+     * Get the current cycle phase of a question
+     *
+     * @param       integer         $q_id           question id
+     *
+     * @return      object          $phase          phase object from record
+     */
+    public function getCurrentPhase($q_id) {
+        global $ilDB;
+
+        $res = $ilDB->queryF(
+            "SELECT rep_robj_xrev_phases.phase,"
+            . " rep_robj_xrev_phases.nr_reviewers"
+            . " FROM rep_robj_xrev_phases"
+            . " INNER JOIN rep_robj_xrev_quest"
+            . " ON rep_robj_xrev_quest.phase=rep_robj_xrev_phases.phase"
+            . " WHERE rep_robj_xrev_phases.review_obj=%s"
+            . " AND rep_robj_xrev_quest.question_id=%s",
+            array("integer", "integer"),
+            array($this->getID(), $q_id)
+        );
+        return $ilDB->fetchObject($res);
+    }
+
     /*
      * Load all questions that currently have no reviewer allocated to them
      *
@@ -405,43 +465,92 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Save matrix input as review entities containing the allocated reviewer
+     * Load all reviewers allocated to the author of a question in a certain
+     * phase ordered by the amount of reviews they currently have to complete
      *
-     * @param                array           $alloc_matrix           array of arrays of reviewers
+     * @param       integer         $q_id           question id
+     * @param       integer         $phase_nr       cycle phase
+     *
+     * @return      array           $reviewer_pool  objects of allocated
+     *                                              reviewers
      */
-    public function allocateReviews($alloc_matrix) {
+    public function loadAllocatedReviewers($q_id, $phase_nr) {
         global $ilDB;
 
-        $entities = array();
-        foreach ($alloc_matrix as $row) {
-            foreach ($row["reviewers"] as $reviewer_id => $checked) {
-                if (!$checked)
-                    continue;
-                $ilDB->insert("rep_robj_xrev_revi", array("id" => array("integer", $ilDB->nextID("rep_robj_xrev_revi")),
-                        "timestamp" => array("integer", time()),
-                        "reviewer" => array("integer", explode("_", $reviewer_id)[2]),
-                        "question_id" => array("integer", $row["q_id"]),
-                        "state" => array("integer", 0),
-                        "desc_corr" => array("integer", 0),
-                        "desc_relv" => array("integer", 0),
-                        "desc_expr" => array("integer", 0),
-                        "quest_corr" => array("integer", 0),
-                        "quest_relv" => array("integer", 0),
-                        "quest_expr" => array("integer", 0),
-                        "answ_corr" => array("integer", 0),
-                        "answ_relv" => array("integer", 0),
-                        "answ_expr" => array("integer", 0),
-                        "taxonomy" => array("integer", 0),
-                        "knowledge_dimension" => array("integer", 0),
-                        "rating" => array("integer", 0),
-                        "eval_comment" => array("clob", ''),
-                        "expertise" => array("integer", 0),
-                        "review_obj" => array("integer", $this->getId())
-                    )
-                );
-                $ilDB->update("rep_robj_xrev_quest", array("state" => array("integer", 1)),
-                        array("question_id" => array("integer", $row["q_id"]), "review_obj" => array("integer", $this->getId())));
+        $res = $ilDB->queryF(
+            "SELECT qpl_questions.owner FROM qpl_questions"
+            . " WHERE qpl_questions.question_id=%s",
+            array("integer"),
+            array($q_id)
+        );
+        $author = $ilDB->fetchObject($res)->owner;
+
+        $res = $ilDB->queryF(
+            "SELECT rep_robj_xrev_alloc.reviewer FROM rep_robj_xrev_alloc"
+            . " LEFT JOIN rep_robj_xrev_revi"
+            . " ON rep_robj_xrev_revi.reviewer=rep_robj_xrev_alloc.reviewer"
+            . " WHERE rep_robj_xrev_alloc.review_obj=%s"
+            . " AND rep_robj_xrev_alloc.author=%s"
+            . " AND rep_robj_xrev_alloc.phase=%s"
+            . " ORDER BY COUNT(rep_robj_xrev_revi.id)",
+            array("integer", "integer", "integer"),
+            array($this->getID(), $author, $phase_nr)
+        );
+        $reviewer_pool = array();
+        while ($reviewer = $ilDB->fetchObject($res)) {
+            $reviewer_pool[] = $reviewer;
+        }
+        return $reviewer_pool;
+    }
+
+    /*
+     * Create review form objects for a question, one for each allocated
+     * reviewer
+     *
+     * @param       integer         $q_id           question id
+     */
+    public function allocateReviews($q_id) {
+        global $ilDB;
+
+        $current_phase = $this->getCurrentPhase($q_id);
+        $reviewer_pool = $this->loadAllocatedReviewers(
+            $q_id,
+            $current_phase->phase
+        );
+        $max_reviewers = $current_phase->nr_reviewers;
+        foreach ($reviewer_pool as $reviewer) {
+            if ($max_reviewers-- < 0) {
+                break;
             }
+            $ilDB->insert(
+                "rep_robj_xrev_revi",
+                array(
+                    "id" => array(
+                        "integer",
+                        $ilDB->nextID("rep_robj_xrev_revi")
+                    ),
+                    "timestamp" => array("integer", time()),
+                    "reviewer" => array("integer", $reviewer->reviewer),
+                    "question_id" => array("integer", $q_id),
+                    "state" => array("integer", 0),
+                    "desc_corr" => array("integer", 0),
+                    "desc_relv" => array("integer", 0),
+                    "desc_expr" => array("integer", 0),
+                    "quest_corr" => array("integer", 0),
+                    "quest_relv" => array("integer", 0),
+                    "quest_expr" => array("integer", 0),
+                    "answ_corr" => array("integer", 0),
+                    "answ_relv" => array("integer", 0),
+                    "answ_expr" => array("integer", 0),
+                    "taxonomy" => array("integer", 0),
+                    "knowledge_dimension" => array("integer", 0),
+                    "rating" => array("integer", 0),
+                    "eval_comment" => array("clob", ''),
+                    "expertise" => array("integer", 0),
+                    "review_obj" => array("integer", $this->getId())
+                )
+            );
+            $this->notifyReviewerAboutAllocation($reviewer->reviewer);
         }
     }
 
@@ -582,15 +691,10 @@ class ilObjReview extends ilObjectPlugin {
      * Prepare message output to inform reviewers about
      * their allocation to a certain question
      *
-     * @param                array                   $alloc_matrix                   array of arrays of reviewers
+     * @param       integer         $reviewer           reviewer id
      */
-    public function notifyReviewersAboutAllocation($alloc_matrix) {
-        $receivers = array();
-        foreach ($alloc_matrix as $row)
-            foreach ($row["reviewers"] as $reviewer_id => $checked)
-                if ($checked)
-                    $receivers[] = explode("_", $reviewer_id)[2];
-        $this->performNotification($receivers, "msg_review_requested");
+    public function notifyReviewerAboutAllocation($reviewer) {
+        $this->performNotification(array($reviewer), "msg_review_requested");
     }
 
     /*
