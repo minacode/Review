@@ -846,9 +846,9 @@ class ilObjReview extends ilObjectPlugin {
             }
     
             $reviewable_types = array();
-            $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag LIKE "assReviewable%"');
+            $result = $ilDB->query('SELECT name FROM il_plugin WHERE name LIKE "assReviewable%"');
             while ( $data = $ilDB->fetchAssoc( $result ) ) {
-                array_push($reviewable_types, $data['type_tag']);
+                array_push($reviewable_types, $data['name']);
             }
 
             foreach ( $not_reviewable_types as $nr_type ) {

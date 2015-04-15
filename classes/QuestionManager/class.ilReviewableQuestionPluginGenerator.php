@@ -1,7 +1,7 @@
 <?php
 class ilReviewableQuestionPluginGenerator {
     
-    private static $ilias_path = ILIAS_ABSOLUTE_PATH;
+    private static $ilias_path = ILIAS_ABSOLUTE_PATH . '/';
     
     private static $instance = null;
     
@@ -147,7 +147,10 @@ class ilReviewableQuestionPluginGenerator {
             if ( !file_exists( $file_path ) ) {
                 $this->createFileFromTemplate( $question_type, $template, $file_path );
             }
-        }
+        }        
+        // $plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, 'TestQuestionPool', 'qst', 'assReviewable' . $question_type);
+        // $plugin->update();
+        // $plugin->activate();
     }
 }
 ?>

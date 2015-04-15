@@ -161,7 +161,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
 
         function generateQuestionPlugins() {
-            echo "plugins ";
             global $tpl, $ilTabs;
 
             $ilTabs->activateTab("generate");
@@ -170,15 +169,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
         
         function initGenerateQuestionPluginsForm() {
-            echo "init ";
             global $ilCtrl;
 
-            $this->generate_form = new ilGenerateQuestionTypesGUI( $this, "generateQuestionPlugins", $this->object->getQuestionTypesWithNoReviewablePlugin() );
+            $this->generate_form = new ilGenerateQuestionTypesGUI($this, "generateQuestionPlugins", $this->object->getQuestionTypesWithNoReviewablePlugin() );
             $this->generate_form->setTitle($this->txt("generate_question_plugins"));
         }
         
         function generateQuestionTypes() {
-            echo "types ";
             global $tpl, $ilTabs, $lng, $ilCtrl;
             
             $generator = ilReviewableQuestionPluginGenerator::get();
@@ -187,12 +184,12 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 $generator->createPlugin( $question_type );
             }
 
-                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+            ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilTabs->activateTab("generate");
             $this->initGenerateQuestionPluginsForm();
+            $tpl->setContent($this->generate_form->getHTML());
 
             $ilCtrl->redirect($this, "generateQuestionPlugins");
-            $tpl->setContent($this->generate_form->getHTML());
         }
 
         /**

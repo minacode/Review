@@ -46,7 +46,7 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
         
         parent::__construct($a_parent_obj, $a_parent_cmd);
         
-        $this->setTitle($lng->txt('non_reviewable_question_types'));
+        $this->setTitle($this->lng->txt('non_reviewable_question_types'));
         
         $this->addColumn($lng->txt('question_type_name'));
         $this->setEnableHeader(true);
@@ -62,19 +62,22 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
             )->getDirectory()
         );
         
-        $this->setSelectAllCheckbox('all');
+        $this->setSelectAllCheckbox('question_type_name');
         $this->addCommandButton('generateQuestionTypes' , $this->lng->txt('generate'));
+        
+        $ilCtrl->saveParameterByClass('ilObjReviewGUI', array('question_type_name'));
         
         $data = array();
         
         foreach($question_types as $question_type)
             $data[] = array('question_type_name' => $question_type);
         
+        $this->setLimit(100);
+        
         $this->fillData($data);
     }
 
     private function fillData($question_types) {
-        echo "data ";
         $this->setDefaultOrderField('question_type_name');
         $this->setDefaultOrderDirection('asc');
         
@@ -87,7 +90,6 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
     * @param    array   $a_set  Data record, displayed as one table row (key => value)
     */
     protected function fillRow($a_set) {
-        echo "row ";
         global $ilCtrl, $lng;
         
         $ilCtrl->saveParameterByClass('ilObjReviewGUI', array('question_type_name'));
