@@ -46,9 +46,9 @@ class ilGenerateQuestionTypesGUI extends ilTable2GUI {
         
         parent::__construct($a_parent_obj, $a_parent_cmd);
         
-        $this->setTitle($this->lng->txt('non_reviewable_question_types'));
+        $this->setTitle($lng->txt('rep_robj_xrev_non_reviewable_question_types'));
         
-        $this->addColumn($lng->txt('question_type_name'));
+        $this->addColumn($lng->txt('rep_robj_xrev_question_type_name'));
         $this->setEnableHeader(true);
 
         $this->setFormAction($ilCtrl->getFormAction($a_parent_obj, 'generateQuestionPlugins'));

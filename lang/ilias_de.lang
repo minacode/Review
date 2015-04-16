@@ -112,4 +112,4 @@ convert#:#Konvertieren
 generate#:#Generieren
 generate_plugins#:#Fragentypen generieren
 generate_question_plugins#:#Generieren reviewbarer Fragentyp-Plugins
-question_type_name#:#Fragentyp-Name
+question_type_name#:#Name des Fragentyps

@@ -147,7 +147,8 @@ class ilReviewableQuestionPluginGenerator {
             if ( !file_exists( $file_path ) ) {
                 $this->createFileFromTemplate( $question_type, $template, $file_path );
             }
-        }        
+        }   
+        // scan files..     
         // $plugin = ilPlugin::getPluginObject(IL_COMP_MODULE, 'TestQuestionPool', 'qst', 'assReviewable' . $question_type);
         // $plugin->update();
         // $plugin->activate();
