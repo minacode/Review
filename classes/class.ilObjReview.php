@@ -169,31 +169,7 @@ class ilObjReview extends ilObjectPlugin {
                                         "review_obj" => array("integer", $this->getId())
                                 )
                         );
-                        $hist_res = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE question_id=%s AND state=%s",
-                                array("integer", "integer"), array($db_question["question_id"], 1)
-                        );
-                        while ($review = $ilDB->fetchAssoc($hist_res)) {
-                            $ilDB->insert("rep_robj_xrev_hist", array("timestamp" => array("integer", $review["timestamp"]),
-                                            "desc_corr" => array("integer", $review["desc_corr"]),
-                                            "desc_relv" => array("integer", $review["desc_relv"]),
-                                            "desc_expr" => array("integer", $review["desc_expr"]),
-                                            "quest_corr" => array("integer", $review["quest_corr"]),
-                                            "quest_relv" => array("integer", $review["quest_relv"]),
-                                            "quest_expr" => array("integer", $review["quest_expr"]),
-                                            "answ_corr" => array("integer", $review["answ_corr"]),
-                                            "answ_relv" => array("integer", $review["answ_relv"]),
-                                            "answ_expr" => array("integer", $review["answ_expr"]),
-                                            "taxonomy" => array("integer", $review["taxonomy"]),
-                                            "knowledge_dimension" => array("integer", $review["knowledge_dimension"]),
-                                            "rating" => array("integer", $review["rating"]),
-                                            "eval_comment" => array("clob", $review["eval_comment"]),
-                                            "expertise" => array("integer", $review["expertise"]),
-                                            "question_id" => array("integer", $review["question_id"]),
-                                            "id" => array("integer", $review["id"]),
-                                            "reviewer" => array("integer", $review["reviewer"])
-                                    )
-                            );
-                        }
+                        $this->copyReviewsToHistory($db_question["question_id"]);
                         $ilDB->update("rep_robj_xrev_revi",
                                 array("state" => array("integer", 0)),
                                 array("question_id" => array("integer", $db_question["question_id"]),
@@ -322,6 +298,94 @@ class ilObjReview extends ilObjectPlugin {
                 "eval_comment" => array("clob", $form_data["comment"]),
                 "expertise" => array("integer", $form_data["exp"])),
                 array("id" => array("integer", $id)));
+
+        $res = $ilDB->queryF(
+            "SELECT question_id FROM rep_robj_xrev_revi"
+            . " WHERE review_obj=%s AND id=%s",
+            array("integer", "integer"),
+            array($this->getID(), $id)
+        );
+        $q_id = $ilDB->fetchObject($res)->question_id;
+        $this->checkPhaseProgress($q_id);
+    }
+
+    /*
+     * Copy all review entries belonging to a question into the history table
+     *
+     * @param       integer         $q_id           $question_id
+     */
+    public function copyReviewsToHistory($q_id) {
+        global $ilDB;
+
+        $hist_res = $ilDB->queryF(
+            "SELECT * FROM rep_robj_xrev_revi"
+            . " WHERE question_id=%s AND state=%s",
+            array("integer", "integer"),
+            array($q_id, 1)
+        );
+        while ($review = $ilDB->fetchAssoc($hist_res)) {
+            $ilDB->insert(
+                "rep_robj_xrev_hist",
+                array(
+                    "timestamp" => array("integer", $review["timestamp"]),
+                    "desc_corr" => array("integer", $review["desc_corr"]),
+                    "desc_relv" => array("integer", $review["desc_relv"]),
+                    "desc_expr" => array("integer", $review["desc_expr"]),
+                    "quest_corr" => array("integer", $review["quest_corr"]),
+                    "quest_relv" => array("integer", $review["quest_relv"]),
+                    "quest_expr" => array("integer", $review["quest_expr"]),
+                    "answ_corr" => array("integer", $review["answ_corr"]),
+                    "answ_relv" => array("integer", $review["answ_relv"]),
+                    "answ_expr" => array("integer", $review["answ_expr"]),
+                    "taxonomy" => array("integer", $review["taxonomy"]),
+                    "knowledge_dimension" => array("integer", $review["knowledge_dimension"]),
+                    "rating" => array("integer", $review["rating"]),
+                    "eval_comment" => array("clob", $review["eval_comment"]),
+                    "expertise" => array("integer", $review["expertise"]),
+                    "question_id" => array("integer", $review["question_id"]),
+                    "id" => array("integer", $review["id"]),
+                    "reviewer" => array("integer", $review["reviewer"])
+                )
+            );
+        }
+    }
+
+    /*
+     * Check if all reviews for a question are completed and evaluate them
+     *
+     * @param       integer         $q_id           question id
+     */
+    public function checkPhaseProgess($q_id) {
+        global $ilDB;
+
+        $res = $ilDB->queryF(
+            "SELECT rating, state FROM rep_robj_xrev_revi"
+            . " WHERE review_obj=%s AND question_id=%s",
+            array("integer", "integer"),
+            array($this->getID(), $q_id)
+        );
+        $reviews = array();
+        while ($review = $ilDB->fetchObject($res)) {
+            $reviews[] = $review;
+        }
+        $accepted = true;
+        $refused = true;
+        foreach ($reviews as $review) {
+            if ($review->state == 0) {
+                return;
+            }
+            $accepted &= $review->rating == 0;
+            $refused &= $review->rating == 2;
+        }
+        if ($accepted) {
+            $this->proceedToNextPhase($q_id);
+        }
+        else if ($refused) {
+            $this->markQuestionAsRefused($q_id);
+        }
+        else /* to edit */ {
+            $this->notifyAuthorAboutNeedToEdit($q_id);
+        }
     }
 
     /*
@@ -412,12 +476,30 @@ class ilObjReview extends ilObjectPlugin {
                             "review_obj" => array("integer", $this->getID())
                         )
                     );
+                    $this->copyReviewsToHistory($q_id);
+                    $this->clearAllocatedReviews($q_id);
                     $this->allocateReviews($q_id);
                     return;
                 }
             }
         }
         $this->finishQuestion($q_id);
+    }
+
+    /*
+     * Delete all review form objects allocated to a question
+     *
+     * @param       integer         $q_id           question id
+     */
+    public function clearAllocatedReviews($q_id) {
+        global $ilDB;
+
+        $ilDB->manipulateF(
+            "DELETE FROM rep_robj_xrev_revi"
+            . " WHERE review_obj=%s AND question_id=%s",
+            array("integer", "integer"),
+            array($this->getID(), $q_id)
+        );
     }
 
     /*
@@ -632,20 +714,43 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Remove questions from the review cycle by marking them as finished
+     * Remove a question from the review cycle by marking it as finished
      *
-     * @param                array           $questions              array of question_ids
+     * @param       integer         $q_id           question id
      */
-    public function finishQuestions($questions) {
+    public function finishQuestion($q_id) {
         global $ilDB;
-        foreach ($questions as $question_id) {
-            $ilDB->update("rep_robj_xrev_quest",
-                    array("state" => array("integer", 2)),
-                    array("question_id" => array("integer", $question_id),
-                            "review_obj" => array("integer", $this->getId())
-                    )
-            );
-        }
+        $ilDB->update(
+            "rep_robj_xrev_quest",
+            array("state" => array("integer", 2)),
+            array(
+                "question_id" => array("integer", $q_id),
+                "review_obj" => array("integer", $this->getId())
+            )
+        );
+        $this->copyReviewsToHistory($q_id);
+        $this->clearAllocatedReviews($q_id);
+        $this->notifyAuthorsAboutAcceptance(array($q_id));
+    }
+
+    /*
+     * Remove a question from the review cycle by marking it as refused
+     *
+     * @param       integer         $q_id           question id
+     */
+    public function markQuestionAsRefused($q_id) {
+        global $ilDB;
+        $ilDB->update(
+            "rep_robj_xrev_quest",
+            array("state" => array("integer", -1)),
+            array(
+                "question_id" => array("integer", $q_id),
+                "review_obj" => array("integer", $this->getId())
+            )
+        );
+        $this->copyReviewsToHistory($q_id);
+        $this->clearAllocatedReviews($q_id);
+        $this->notifyAuthorsAboutRefusal(array($q_id));
     }
 
     /*
@@ -688,7 +793,7 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Prepare message output to inform reviewers about
+     * Prepare message output to inform a reviewer about
      * their allocation to a certain question
      *
      * @param       integer         $reviewer           reviewer id
@@ -699,7 +804,7 @@ class ilObjReview extends ilObjectPlugin {
 
     /*
      * Prepare message output to inform authors about
-     * the acceptance of a certain question by the group´s admin
+     * the acceptance of a certain question by the reviewers
      *
      * @param                array                   $question_ids                   array of the ids of the accepted question
      */
@@ -710,6 +815,39 @@ class ilObjReview extends ilObjectPlugin {
             $receivers[] = $ilDB->fetchAssoc($ilDB->queryF("SELECT owner FROM qpl_questions WHERE question_id=%s",
                     array("integer"), array($id)))["owner"];
         $this->performNotification($receivers, "msg_question_accepted");
+    }
+
+    /*
+     * Prepare message output to inform authors about
+     * the refusal of a certain question by the reviewers
+     *
+     * @param                array                   $question_ids                   array of the ids of the accepted question
+     */
+    public function notifyAuthorsAboutRefusal($question_ids) {
+        global $ilDB;
+        $receivers = array();
+        foreach ($question_ids as $id)
+            $receivers[] = $ilDB->fetchAssoc($ilDB->queryF("SELECT owner FROM qpl_questions WHERE question_id=%s",
+                    array("integer"), array($id)))["owner"];
+        $this->performNotification($receivers, "msg_question_refused");
+    }
+
+    /*
+     * Prepare message output to inform an author that the reviewers want him
+     * to edit one of his questions
+     *
+     * @param       integer         $q_id           $question_id
+     */
+    public function notifyAuthorAboutNeedToEdit($q_id) {
+        global $ilDB;
+
+        $res = $ilDB->queryF(
+            "SELECT owner FROM qpl_questions WHERE question_id=%s",
+            array("integer"),
+            array($id)
+        );
+        $receiver = $ilDB->fetchAssoc($res)["owner"];
+        $this->performNotification(array($receiver), "msg_question_edit");
     }
 
     /*
@@ -937,18 +1075,18 @@ class ilObjReview extends ilObjectPlugin {
                 array("integer", "integer"),
                 array($maxphase, $this->getID()));
     }
-    
+
     function getQuestionTypesWithNoReviewablePlugin() {
             global $ilDB;
-            
+
             $return_values = array();
-            
+
             $not_reviewable_types = array();
             $result = $ilDB->query('SELECT type_tag FROM qpl_qst_type WHERE type_tag NOT LIKE "assReviewable%"');
             while ( $data = $ilDB->fetchAssoc( $result ) ) {
                 array_push($not_reviewable_types, $data['type_tag']);
             }
-    
+
             $reviewable_types = array();
             $result = $ilDB->query('SELECT name FROM il_plugin WHERE name LIKE "assReviewable%"');
             while ( $data = $ilDB->fetchAssoc( $result ) ) {

@@ -88,6 +88,15 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
 	}
 
     /*
+	 * Get the object id belonging to the whole matrix
+	 *
+	 * @return	integer	    $this->group_id     group id
+	 */
+	public function getGroupId() {
+		return $this->group_id;
+	}
+
+    /*
      * fill the template with the given checkboxes
 	 */
 	private function fillTemplate() {
@@ -115,5 +124,20 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
         }
 		$this->fillTemplate();
 	}
+
+    /*
+     * get the number of selected checkboxes
+     *
+     * @return      integer         $ticks          number of selected boxes
+     */
+    public function getTickCount() {
+        $ticks = 0;
+        foreach ($this->checkboxes as $chbox) {
+            if ($_POST[$chbox->getPostvar()]) {
+                $ticks += 1;
+            }
+        }
+        return $ticks;
+    }
 }
 ?>
