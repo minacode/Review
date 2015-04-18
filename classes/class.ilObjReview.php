@@ -568,13 +568,16 @@ class ilObjReview extends ilObjectPlugin {
         $author = $ilDB->fetchObject($res)->owner;
 
         $res = $ilDB->queryF(
-            "SELECT rep_robj_xrev_alloc.reviewer FROM rep_robj_xrev_alloc"
+            "SELECT rep_robj_xrev_alloc.reviewer,"
+            . " COUNT(DISTINCT rep_robj_xrev_revi.id)"
+            . " FROM rep_robj_xrev_alloc"
             . " LEFT JOIN rep_robj_xrev_revi"
             . " ON rep_robj_xrev_revi.reviewer=rep_robj_xrev_alloc.reviewer"
             . " WHERE rep_robj_xrev_alloc.review_obj=%s"
             . " AND rep_robj_xrev_alloc.author=%s"
             . " AND rep_robj_xrev_alloc.phase=%s"
-            . " ORDER BY COUNT(rep_robj_xrev_revi.id)",
+            . " GROUP BY rep_robj_xrev_alloc.reviewer"
+            . " ORDER BY COUNT(DISTINCT rep_robj_xrev_revi.id)",
             array("integer", "integer", "integer"),
             array($this->getID(), $author, $phase_nr)
         );
@@ -601,7 +604,7 @@ class ilObjReview extends ilObjectPlugin {
         );
         $max_reviewers = $current_phase->nr_reviewers;
         foreach ($reviewer_pool as $reviewer) {
-            if ($max_reviewers-- < 0) {
+            if (--$max_reviewers < 0) {
                 break;
             }
             $ilDB->insert(
