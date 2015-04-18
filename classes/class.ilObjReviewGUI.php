@@ -459,7 +459,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                                                                                                 $this->object->getEnum("evaluation")
                                                  );
                 $this->initQuestionOverview();
-        $tpl->setContent($input->getHtml());
+        $tpl->setContent($this->question_overview . $input->getHtml());
         }
 
         /*
