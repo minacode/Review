@@ -223,9 +223,9 @@ class ilObjReview extends ilObjectPlugin {
         $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
                 "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
                 "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
-                "AND rep_robj_xrev_quest.state<%s AND rep_robj_xrev_quest.review_obj=%s",
+                "AND rep_robj_xrev_quest.state=%s AND rep_robj_xrev_quest.review_obj=%s",
                 array("integer", "integer", "integer"),
-                array($ilUser->getId(), 2, $this->getId()));
+                array($ilUser->getId(), 1, $this->getId()));
         $db_questions = array();
         while ($db_question = $ilDB->fetchAssoc($qpl))
             $db_questions[] = $db_question;
@@ -306,6 +306,7 @@ class ilObjReview extends ilObjectPlugin {
             array($this->getID(), $id)
         );
         $q_id = $ilDB->fetchObject($res)->question_id;
+        $this->notifyAuthorAboutCompletion($id);
         $this->checkPhaseProgress($q_id);
     }
 
@@ -355,7 +356,7 @@ class ilObjReview extends ilObjectPlugin {
      *
      * @param       integer         $q_id           question id
      */
-    public function checkPhaseProgess($q_id) {
+    public function checkPhaseProgress($q_id) {
         global $ilDB;
 
         $res = $ilDB->queryF(
@@ -374,8 +375,8 @@ class ilObjReview extends ilObjectPlugin {
             if ($review->state == 0) {
                 return;
             }
-            $accepted &= $review->rating == 0;
-            $refused &= $review->rating == 2;
+            $accepted &= $review->rating == 1;
+            $refused &= $review->rating == 3;
         }
         if ($accepted) {
             $this->proceedToNextPhase($q_id);
@@ -459,16 +460,16 @@ class ilObjReview extends ilObjectPlugin {
                 $max_phase = $phase->phase;
             }
         }
-        for ($current_phase = $this->getCurrentPhase($q_id)->phase;
-                $current_phase <= $max_phase;
-                $current_phase++) {
+        $current_phase = $this->getCurrentPhase($q_id)->phase;
+
+        for ($step = 1; $step + $current_phase <= $max_phase; $step++) {
             foreach ($this->loadPhases() as $phase) {
-                if ($current_phase == $phase->phase
+                if ($current_phase + $step == $phase->phase
                     && $phase->nr_reviewers > 0) {
                     $ilDB->update(
                         "rep_robj_xrev_quest",
                         array(
-                            "phase" => array("integer", $current_phase),
+                            "phase" => array("integer", $current_phase + $step),
                             "state" => array("integer", 1)
                         ),
                         array(
@@ -847,10 +848,10 @@ class ilObjReview extends ilObjectPlugin {
         $res = $ilDB->queryF(
             "SELECT owner FROM qpl_questions WHERE question_id=%s",
             array("integer"),
-            array($id)
+            array($q_id)
         );
         $receiver = $ilDB->fetchAssoc($res)["owner"];
-        $this->performNotification(array($receiver), "msg_question_edit");
+        $this->performNotification(array($receiver), "msg_question_rework");
     }
 
     /*

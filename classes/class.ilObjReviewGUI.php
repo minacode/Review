@@ -488,7 +488,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                         foreach ($post_vars as $post_var)
                                 $form_data[$post_var] = $input->getInput($post_var);
                         $this->object->storeReviewById($_GET["r_id"], $form_data);
-                        $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
+                        // $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
                         ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
                         $ilCtrl->redirect($this, "showContent");
                 }
