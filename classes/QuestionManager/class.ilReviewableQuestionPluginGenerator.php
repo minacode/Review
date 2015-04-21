@@ -1,7 +1,7 @@
 <?php
 class ilReviewableQuestionPluginGenerator {
     
-    private static $ilias_path = ILIAS_ABSOLUTE_PATH . '/';
+    private static $ilias_path = '';
     
     private static $instance = null;
     

@@ -99,7 +99,9 @@ msg_review_completed_intr#:#ein Reviewer hat ein neues Review zu einer von Ihnen
 msg_question_edited_subj#:#Frage bearbeitet
 msg_question_edited_intr#:#eine Frage, der Sie als Reviewer zugeordnet sind, wurde bearbeitet. Bitte erstellen Sie ein neues Review.
 msg_question_created_subj#:#Frage erstellt
-msg_question_created_intr#:#in einem Fragepool in Ihrer Gruppe wurde eine neue Frage angelegt. Sie sollten ihr Reviewer zuordnen.
+msg_question_created_intr#:#in einem Fragepool in Ihrer Gruppe wurde eine neue Frage angelegt. Reviewer wurden automatisch zugewiesen.
+msg_question_rework_subj#:#Frage bearbeiten
+msg_question_rework_intr#:#Eine von Ihnen erstellte Frage muss überarbeitet werden, bevor sie weiter im Review-Zyklus voranschreiten kann.
 msg_question_deleted_subj#:#Frage gelöscht
 msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und Sie sind nicht mehr als Reviewer festgelegt.
 no_access#:#Zugriff verweigert

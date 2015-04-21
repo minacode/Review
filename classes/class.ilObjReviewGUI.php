@@ -211,6 +211,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
                 $ilTabs->activateTab("allocation");
         $this->initReviewerAllocForm();
+        $this->alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
         //$this->alloc_form->setValuesByPost();
         $tpl->setContent($this->alloc_form->getHTML());
         }
@@ -219,40 +220,32 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         * Check and save reviewer allocation
         */
         function saveAllocateReviewers() {
-                global $tpl, $ilTabs, $lng, $ilCtrl;
+            global $tpl, $ilTabs, $lng, $ilCtrl;
 
-                $ilTabs->activateTab("allocation");
-                $this->initReviewerAllocForm();
-        /*
-        foreach ($_POST as $key => $val) {
-            echo $key . ": " . $val . "<br>";
-            if (is_array($val)) {
-                foreach ($val as $k => $v) {
-                    echo $k . ": " . $v . "<br>";
+            $ilTabs->activateTab("allocation");
+            $this->initReviewerAllocForm();
+    
+            if ($this->alloc_form->checkInput()) {
+                $rows = array();
+                foreach ($this->alloc_form->getItems() as $item) {
+                    if (method_exists($item, "getPostVars")) {
+                        $row_postvars = $item->getPostVars();
+                        $row_values = array();
+                        foreach ($row_postvars as $row_postvar)
+                            $row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
+                        $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
+                    }
+                    if ($item instanceof ilNumberInputGUI) {
+                        $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $this->alloc_form->getInput($item->getPostVar()));
+                    }
                 }
-            }
-        }
-         */
-                if ($this->alloc_form->checkInput()) {
-                        $rows = array();
-                        foreach ($this->alloc_form->getItems() as $item) {
-                                if (method_exists($item, "getPostVars")) {
-                    $row_postvars = $item->getPostVars();
-                    $row_values = array();
-                    foreach ($row_postvars as $row_postvar)
-                        $row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
-                    $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
-                }
-                if ($item instanceof ilNumberInputGUI) {
-                    $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $this->alloc_form->getInput($item->getPostVar()));
-                }
-                        }
-                        $this->object->allocateReviewers($rows);
-                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-                        $ilCtrl->redirect($this, "allocateReviewers");
-                }
+                $this->object->allocateReviewers($rows);
+                ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+                $ilCtrl->redirect($this, "allocateReviewers");
+            } else {
                 $this->alloc_form->setValuesByPost();
                 $tpl->setContent($this->alloc_form->getHTML());
+            }
         }
 
     /*
@@ -378,10 +371,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $phases = $this->object->loadPhases();
 
         $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
-        foreach ((array) $this->object->loadReviewerAllocation as $k => $v) {
-            echo $k . ": " . $v . "<br>";
-        }
-        $this->alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
     }
 
         /**
@@ -468,7 +457,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                                                                                                 $this->object->getEnum("evaluation")
                                                  );
                 $this->initQuestionOverview();
-        $tpl->setContent($input->getHtml());
+        $tpl->setContent($this->question_overview . $input->getHtml());
         }
 
         /*
@@ -497,7 +486,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                         foreach ($post_vars as $post_var)
                                 $form_data[$post_var] = $input->getInput($post_var);
                         $this->object->storeReviewById($_GET["r_id"], $form_data);
-                        $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
+                        // $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
                         ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
                         $ilCtrl->redirect($this, "showContent");
                 }

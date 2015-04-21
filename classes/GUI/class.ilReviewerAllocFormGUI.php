@@ -10,7 +10,7 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
 
         parent::__construct();
 
-        $this->setTitle($lng->txt("phase") . " " . $phase->phase);
+        $this->setTitle($lng->txt("phases"));
         $this->setFormAction($ilCtrl->getFormAction($this));
 
 
@@ -47,5 +47,33 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
         $this->addCommandButton("addPhase", $lng->txt("add_phase"));
         $this->addCommandButton("removePhase", $lng->txt("remove_phase"));
         // $this->setFormAction($ilCtrl->getFormActionByClass("ilObjReviewGUI", "allocateReviewers"));
+    }
+
+    /*
+     * Check the form input of the user
+     *
+     * @return      bool            $valid          true, if everything is okay
+     */
+    public function checkInput() {
+        global $lng;
+
+        $valid = parent::checkInput();
+        $nr_inputs = array();
+        foreach ($this->getItems() as $item) {
+            if ($item instanceof ilNumberInputGUI) {
+                $nr_inputs[$item->getPostvar()]
+                    = $this->getInput($item->getPostvar());
+            }
+        }
+        foreach ($this->getItems() as $item) {
+            if ($item instanceof ilCheckMatrixRowGUI) {
+                $valid &= $item->getTickCount()
+                    >= $nr_inputs["nr_" . $item->getGroupID()];
+            }
+        }
+        if (!$valid) {
+			ilUtil::sendFailure($lng->txt("too_few_reviewers_allocated"));
+        }
+        return $valid;
     }
 }

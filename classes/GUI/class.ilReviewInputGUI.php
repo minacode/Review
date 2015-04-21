@@ -237,7 +237,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 			if ($this->getInput($input) == 0)
 				$valid = false;
 		// because not using setRequired(true) on normal input GUIs
-		if ($this->getInput("exp" == 0) or $this->getInput("comment" == ""))
+		if ($this->getInput("exp") == 0 or $this->getInput("comment") == "")
 			$valid = false; 
 		if (!$valid)
 			ilUtil::sendFailure($lng->txt("form_input_not_valid"));
