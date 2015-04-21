@@ -784,9 +784,7 @@ class ilObjReview extends ilObjectPlugin {
      * @return       array           $question       $question taxonomy data as an associative array
      */
     public function loadQuestionTaxonomyData($q_id) {
-        global $ilDB, $ilPluginAdmin;
-        if (!$ilPluginAdmin->isActive(IL_COMP_MODULE, "TestQuestionPool", "qst", "assReviewableMultipleChoice"))
-            return array();
+        global $ilDB;
         $req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
                 "FROM qpl_rev_qst ".
                 "WHERE qpl_rev_qst.question_id=%s",
