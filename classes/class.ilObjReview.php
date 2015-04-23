@@ -306,7 +306,6 @@ class ilObjReview extends ilObjectPlugin {
             array($this->getID(), $id)
         );
         $q_id = $ilDB->fetchObject($res)->question_id;
-        $this->notifyAuthorAboutCompletion($id);
         $this->checkPhaseProgress($q_id);
     }
 
@@ -853,26 +852,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Prepare message output to inform an author about
-     * the completion of a review on a certain question
-     *
-     * @param                integer                 $review_id                      id of the completed review
-     */
-    public function notifyAuthorAboutCompletion($review_id) {
-        global $ilDB;
-        $rev = $ilDB->queryF("SELECT owner FROM qpl_questions ".
-                "INNER JOIN rep_robj_xrev_revi ON rep_robj_xrev_revi.question_id=qpl_questions.question_id ".
-                "WHERE rep_robj_xrev_revi.id=%s",
-                array("integer"),
-                array($review_id)
-        );
-        $receivers = array();
-        while ($receiver = $ilDB->fetchAssoc($rev))
-            $receivers[] = $receiver["owner"];
-        $this->performNotification($receivers, "msg_review_completed");
-    }
-
-    /*
      * Prepare message output to inform reviewers about
      * a change of a certain question they have to review
      *
@@ -954,16 +933,17 @@ class ilObjReview extends ilObjectPlugin {
      * @return   array       $questions      associative array of question data
      */
     public function loadNonReviewableQuestions() {
-        global $ilDB;
+        global $ilDB, $ilUser;
 
-        $res = $ilDB->queryF("SELECT question_id, type_tag, title, author FROM qpl_questions " .
-                             "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-                                                         "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-                             "INNER JOIN qpl_qst_type ON qpl_qst_type.question_type_id=qpl_questions.question_type_fi " .
-                             "WHERE crs_items.parent_id=%s",
-                             array("integer"),
-                             array($this->getGroupId())
-               );
+        $res = $ilDB->queryF(
+            "SELECT question_id, type_tag, title, author FROM qpl_questions"
+            . " INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi"
+            . " INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id"
+            . " INNER JOIN qpl_qst_type ON qpl_qst_type.question_type_id=qpl_questions.question_type_fi"
+            . " WHERE crs_items.parent_id=%s AND qpl_questions.owner=%s",
+            array("integer", "integer"),
+            array($this->getGroupId(), $ilUser->getID())
+        );
 
         $questions = array();
         while ($question = $ilDB->fetchAssoc($res))

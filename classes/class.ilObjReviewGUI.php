@@ -89,36 +89,37 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 return "xrev";
         }
 
-        /**
-        * Handles all commmands of this class, centralizes permission checks
-        *
-        * @param string         $cmd            command to be performed by this class
-        */
-        function performCommand($cmd) {
-            switch ($cmd) {
-                case "editProperties":
-                case "updateProperties":
-                case "allocateReviewers":
-                case "saveAllocateReviewers":
-                case "convertQuestion":
-                case "performConvertQuestion":
-                case "saveConvertQuestion":
-                case "addPhase":
-                case "removePhase":
-                case "generateQuestionPlugins":
-                case "generateQuestionTypes":
-                    $this->checkPermission("write");
-                    $this->$cmd();
-                    break;
-                case "showContent":
-                case "inputReview":
-                case "showReviews":
-                case "saveReview":
-                    $this->checkPermission("read");
-                    $this->$cmd();
-                    break;
-            }
+    /*
+     * Handles all commmands of this class, centralizes permission checks
+     *
+     * @param       string          $cmd            command to be performed by
+     * this class
+     */
+    function performCommand($cmd) {
+        switch ($cmd) {
+            case "editProperties":
+            case "updateProperties":
+            case "allocateReviewers":
+            case "saveAllocateReviewers":
+            case "addPhase":
+            case "removePhase":
+            case "generateQuestionPlugins":
+            case "generateQuestionTypes":
+                $this->checkPermission("write");
+                $this->$cmd();
+                break;
+            case "showContent":
+            case "inputReview":
+            case "showReviews":
+            case "saveReview":
+            case "convertQuestion":
+            case "performConvertQuestion":
+            case "saveConvertQuestion":
+                $this->checkPermission("read");
+                $this->$cmd();
+                break;
         }
+    }
 
         /**
         * After object has been created -> jump to this command
@@ -134,31 +135,31 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 return "showContent";
         }
 
-        /**
-        * Set tabs
-        */
-        function setTabs() {
-                global $ilTabs, $ilCtrl, $ilAccess;
+    /*
+     * Set tabs
+     */
+    function setTabs() {
+        global $ilTabs, $ilCtrl, $ilAccess;
 
-                // tab for the "show content" command
-                if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
-                        $ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"));
-                }
-
-                // standard info screen tab
-                $this->addInfoTab();
-
-                // tabs to edit properties and run the review cycle
-                if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
-                        $ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
-                        $ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
+        // tab for the "show content" command
+        if ($ilAccess->checkAccess("read", "", $this->object->getRefId())) {
+            $ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"));
             $ilTabs->addTab("convert", $this->txt("convert_questions"), $ilCtrl->getLinkTarget($this, "convertQuestion"));
-            $ilTabs->addTab("generate", $this->txt("generate_plugins"), $ilCtrl->getLinkTarget($this, "generateQuestionPlugins"));
-                }
-
-                // standard epermission tab
-                $this->addPermissionTab();
         }
+
+        // standard info screen tab
+        $this->addInfoTab();
+
+        // tabs to edit properties and run the review cycle
+        if ($ilAccess->checkAccess("write", "", $this->object->getRefId())) {
+            $ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
+            $ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
+            $ilTabs->addTab("generate", $this->txt("generate_plugins"), $ilCtrl->getLinkTarget($this, "generateQuestionPlugins"));
+        }
+
+        // standard epermission tab
+        $this->addPermissionTab();
+    }
 
         function generateQuestionPlugins() {
             global $tpl, $ilTabs;
@@ -486,7 +487,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                         foreach ($post_vars as $post_var)
                                 $form_data[$post_var] = $input->getInput($post_var);
                         $this->object->storeReviewById($_GET["r_id"], $form_data);
-                        // $this->object->notifyAuthorAboutCompletion($_GET["r_id"]);
                         ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
                         $ilCtrl->redirect($this, "showContent");
                 }
