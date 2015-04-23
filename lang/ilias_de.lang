@@ -24,7 +24,7 @@ content#:#Inhalt
 properties#:#Eigenschaften
 edit_properties#:#Eigenschaften bearbeiten
 title#:#Titel
-description#:#Beschreibung
+introduction#:#Einführung in die Frage
 reviewer_allocation#:#Reviewer Zuordnung
 q1#:#Frage 1
 q2#:#Frage 2
@@ -51,8 +51,8 @@ back#:#Zurück
 question#:#Frage
 review#:#Review
 answers#:#Antworten
-correctness#:#Fachl. Richtigkeit
-relevance#:#Relevanz
+correctness#:#Fachliche Richtigkeit
+relevance#:#Relevanz für das Lernziel
 expression#:#Formulierung
 create#:#Review erstellen
 view#:#Reviews einsehen
@@ -105,7 +105,7 @@ msg_question_rework_intr#:#Eine von Ihnen erstellte Frage muss überarbeitet wer
 msg_question_deleted_subj#:#Frage gelöscht
 msg_question_deleted_intr#:#eine Frage, zu der sie Reviews erstellen sollten, wurde verworfen, und Sie sind nicht mehr als Reviewer festgelegt.
 no_access#:#Zugriff verweigert
-compl_question#:#Frage und Antworten
+compl_question#:#Einführung, Frage und Antworten
 no_alloc#:#Keine neuen Fragen zum Zuordnen vorhanden.
 convert_questions#:#Fragen konvertieren
 nonrev_questions#:#Nichtreviewbare Fragen

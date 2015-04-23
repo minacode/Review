@@ -24,7 +24,7 @@ content#:#Content
 properties#:#Properties
 edit_properties#:#Edit Properties
 title#:#Title
-description#:#Description
+introduction#:#Question introduction
 reviewer_allocation#:#Reviewer allocation
 q1#:#Question 1
 q2#:#Question 2
@@ -51,9 +51,9 @@ back#:#Back
 question#:#Question
 review#:#Review
 answers#:#Answers
-correctness#:#Correctness
-relevance#:#Relevance
-expression#:#Expression
+correctness#:#Technical correctness
+relevance#:#Relevance to learning outcome
+expression#:#Phrasing
 create#:#Create Review
 view#:#View Reviews
 tax_and_know_dim#:#Taxonomy and knowledge dimension
@@ -66,13 +66,13 @@ rating#:#Judgement
 comment#:#Comment
 expertise#:#Expertise
 quest_accept#:#Question acceptet
-quest_edit#:#Rework Question
+quest_edit#:#Revise Question
 quest_refuse#:#Question refused
 review_input#:#Review input form
 evaluation#:#Evaluation
 eval_good#:#Good
-eval_correct#:#Correct
-eval_refused#:#Refused
+eval_correct#:#Please revise
+eval_refused#:#Not accepted
 taxon_remem#:#Remember
 taxon_underst#:#Understand
 taxon_apply#:#Apply
@@ -105,7 +105,7 @@ msg_question_rework_intr#:#You have to rework one of your questions before it ca
 msg_question_deleted_subj#:#Question deleted
 msg_question_deleted_intr#:#a question you were asked to review has been deleted and reviews on it are not necessary any longer.
 no_access#:#Access denied
-compl_question#:#Question and answers
+compl_question#:#Introduction, question and answers
 no_alloc#:#There are no new questions to allocate.
 convert_questions#:#Convert questions
 nonrev_questions#:#Non-reviewable questions

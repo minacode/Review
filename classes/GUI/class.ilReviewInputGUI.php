@@ -118,7 +118,7 @@ class ilReviewInputGUI extends ilPropertyFormGUI {
 													 $lng->txt("rep_robj_xrev_expression")));
 		$this->addItem($head);
 
-		$desc = new ilAspectSelectInputGUI($lng->txt("description"), array("dc" => array("options" => $this->evaluation,
+		$desc = new ilAspectSelectInputGUI($lng->txt("rep_robj_xrev_introduction"), array("dc" => array("options" => $this->evaluation,
 																													"selected" => $this->review["desc_corr"]),
 																								 "dr" => array("options" => $this->evaluation,
 																												   "selected" => $this->review["desc_relv"]),
