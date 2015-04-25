@@ -1,33 +1,12 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| ILIAS open source                                                           |
-+-----------------------------------------------------------------------------+
-| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-|                                                                             |
-| This program is free software; you can redistribute it and/or               |
-| modify it under the terms of the GNU General Public License                 |
-| as published by the Free Software Foundation; either version 2              |
-| of the License, or (at your option) any later version.                      |
-|                                                                             |
-| This program is distributed in the hope that it will be useful,             |
-| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-| GNU General Public License for more details.                                |
-|                                                                             |
-| You should have received a copy of the GNU General Public License           |
-| along with this program; if not, write to the Free Software                 |
-| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-+-----------------------------------------------------------------------------+
-*/
 
-include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
-include_once("QuestionManager/class.ilReviewableQuestionPluginGenerator.php");
+include_once "Services/Repository/classes/class.ilObjectPlugin.php";
+include_once "QuestionManager/class.ilReviewableQuestionPluginGenerator.php";
 
 /*
  * Application class for Review repository object.
  *
- * @var  integer         $group_id               id of the group the plugin object belongs to
+ * @var     integer     $group_id       id of the group the plugin object is in
  *
  * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
  *
@@ -40,13 +19,13 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Constructor
      */
-    public function __construct($a_ref_id = 0) {
-        parent::__construct($a_ref_id);
+    public function __construct($ref_id = 0) {
+        parent::__construct($ref_id);
     }
 
 
     /*
-     * Get type
+     * Set type
      */
     final function initType() {
         $this->setType("xrev");
@@ -58,26 +37,29 @@ class ilObjReview extends ilObjectPlugin {
     function doCreate() {
         global $ilDB, $ilCtrl;
 
-        $ilDB->insert("rep_robj_xrev_revobj",
-                array("id" => array("integer", $this->getId()),
-                        "group_id" => array("integer", $_GET["ref_id"])
-                )
+        $ilDB->insert(
+            "rep_robj_xrev_revobj",
+            array(
+                "id" => array("integer", $this->getId()),
+                "group_id" => array("integer", $_GET["ref_id"])
+            )
         );
     }
 
     /*
-     * Read data from db
+     * Read object data from db
      */
     function doRead() {
         global $ilDB;
 
-        $set = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
-                array("integer"),
-                array($this->getId())
+        $set = $ilDB->queryF(
+            "SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
+            array("integer"),
+            array($this->getId())
         );
-        while ($rec = $ilDB->fetchAssoc($set)) {
-            $this->obj_id = $rec["obj_id"];
-            $this->group_id = $rec["group_id"];
+        while ($rec = $ilDB->fetchObject($set)) {
+            $this->obj_id = $rec->obj_id;
+            $this->group_id = $rec->group_id;
         }
 
         $this->syncQuestionDB();
@@ -87,12 +69,13 @@ class ilObjReview extends ilObjectPlugin {
      * Update data
      */
     function doUpdate() {
-            global $ilDB;
+        global $ilDB;
 
-            $ilDB->update("rep_robj_xrev_revobj",
-                    array("group_id" => array("integer", $this->getGroupId())),
-                    array("id" => array("integer", $this->getId()))
-            );
+        $ilDB->update(
+            "rep_robj_xrev_revobj",
+            array("group_id" => array("integer", $this->getGroupId())),
+            array("id" => array("integer", $this->getId()))
+        );
     }
 
     /*
@@ -169,7 +152,8 @@ class ilObjReview extends ilObjectPlugin {
                                         "review_obj" => array("integer", $this->getId())
                                 )
                         );
-                        $this->copyReviewsToHistory($db_question["question_id"]);
+                        //$this->copyReviewsToHistory($db_question["question_id"]);
+                        /*
                         $ilDB->update("rep_robj_xrev_revi",
                                 array("state" => array("integer", 0)),
                                 array("question_id" => array("integer", $db_question["question_id"]),
@@ -177,6 +161,10 @@ class ilObjReview extends ilObjectPlugin {
                                 )
                         );
                         $this->notifyReviewersAboutChange($db_question);
+                         */
+                        if ($pl_question["state"] == 0) {
+                            $this->proceedToNextPhase($db_question["question_id"]);
+                        }
                         break;
                     }
                 }
@@ -223,7 +211,7 @@ class ilObjReview extends ilObjectPlugin {
         $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
                 "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
                 "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
-                "AND rep_robj_xrev_quest.state=%s AND rep_robj_xrev_quest.review_obj=%s",
+                "AND (rep_robj_xrev_quest.state=%s OR rep_robj_xrev_quest.state=0) AND rep_robj_xrev_quest.review_obj=%s",
                 array("integer", "integer", "integer"),
                 array($ilUser->getId(), 1, $this->getId()));
         $db_questions = array();
@@ -243,7 +231,7 @@ class ilObjReview extends ilObjectPlugin {
         $rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title, qpl_questions.question_id, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
                 "INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
                 "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=rep_robj_xrev_revi.question_id ".
-                "WHERE rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s AND rep_robj_xrev_quest.state=1",
+                "WHERE rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s AND (rep_robj_xrev_quest.state=1 OR rep_robj_xrev_quest.state=0)",
                 array("integer", "integer"),
                 array($ilUser->getId(), $this->getId()));
         $reviews = array();
@@ -385,6 +373,14 @@ class ilObjReview extends ilObjectPlugin {
         }
         else /* to edit */ {
             $this->notifyAuthorAboutNeedToEdit($q_id);
+            $ilDB->update(
+                "rep_robj_xrev_quest",
+                array("state" => array("integer", 0)),
+                array(
+                    "question_id" => array("integer", $q_id),
+                    "review_obj" => array("integer", $this->getID())
+                )
+            );
         }
     }
 
