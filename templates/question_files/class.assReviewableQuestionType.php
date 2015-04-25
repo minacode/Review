@@ -3,7 +3,7 @@
 
 /**
  * @extends ass<qtype>
- * 
+ *
  * @ingroup     ModulesTestQuestionPool
  */
 
@@ -30,43 +30,77 @@ class assReviewable<qtype> extends ass<qtype> {
      * @param int|string $output_type           The output order of the <qtype> answers
      * @param int        $taxonomy              The taxonomy of the question
      * @param int        $knowledge_dimension   The knowledge dimension of the question
+     * @param int        $learning_outcome      The learning outcome of the question
+     * @param int        $topic                 The topic of the question
      */
     function _construct(
-        $title = "", 
-        $comment = "", 
-        $author = "", 
-        $owner = -1, 
-        $question = "", 
+        $title = "",
+        $comment = "",
+        $author = "",
+        $owner = -1,
+        $question = "",
         $output_type = OUTPUT_ORDER,
         $taxonomy = "",
-        $knowledge_dimension = ""
+        $knowledge_dimension = "",
+        $learning_outcome = "",
+        $topic = ""
     ) {
         parent::_construct($title, $comment, $author, $owner, $question, $output_type);
         $this->taxonomy = $taxonomy;
         $this->knowledge_dimension = $knowledge_dimension;
+        $this->learning_outcome = $learning_outcome;
+        $this->topic = $topic;
     }
-    
+
     /*
      * @return string
      */
     public function getQuestionType() {
         return "assReviewable<qtype>";
     }
-    
+
+    /*
+     * @return int $learning_outcome
+     */
+    public function getLearningOutcome() {
+        return $this->learning_outcome;
+    }
+
+    /*
+     * @param int $learning_outcome
+     */
+    public function setLearningOutcome($learning_outcome) {
+        $this->learning_outcome = $learning_outcome;
+    }
+
+    /*
+     * @return int $topic
+     */
+    public function getTopic() {
+        return $this->topic;
+    }
+
+    /*
+     * @param int $a_taxonomy
+     */
+    public function setTopic($topic) {
+        $this->topic = $topic;
+    }
+
     /*
      * @return int $taxonomy
      */
     public function getTaxonomy() {
         return $this->taxonomy;
     }
-    
+
     /*
      * @param int $a_taxonomy
      */
     public function setTaxonomy($a_taxonomy) {
         $this->taxonomy = $a_taxonomy;
     }
-    
+
     /*
      * @return int $knowledge_dimension
      */
@@ -103,15 +137,19 @@ class assReviewable<qtype> extends ass<qtype> {
                 array(
                     "question_id"         => array( "integer"    , $this->getId()                 ),
                     "taxonomy"            => array( "integer"    , $this->getTaxonomy()           ),
-                    "knowledge_dimension" => array( "integer"    , $this->getKnowledgeDimension() )
+                    "knowledge_dimension" => array( "integer"    , $this->getKnowledgeDimension() ),
+                    "learning_outcome" => array( "clob"    , $this->getLearningOutcome() ),
+                    "topic" => array( "text"    , $this->getTopic() )
                 )
             );
         } else {
             $affectedRows = $ilDB->update(
-                "qpl_rev_qst", 
+                "qpl_rev_qst",
                 array(
                     "taxonomy"            => array( "integer"    , $this->getTaxonomy()           ),
-                    "knowledge_dimension" => array( "integer"    , $this->getKnowledgeDimension() )
+                    "knowledge_dimension" => array( "integer"    , $this->getKnowledgeDimension() ),
+                    "learning_outcome" => array( "clob"    , $this->getLearningOutcome() ),
+                    "topic" => array( "text"    , $this->getTopic() )
                 ),
                 array(
                     "question_id"         => array( "integer" , $this->getId()                 )
@@ -139,7 +177,7 @@ class assReviewable<qtype> extends ass<qtype> {
         global $ilDB;
         
         $result = $ilDB->queryF(
-            "SELECT taxonomy, knowledge_dimension FROM qpl_rev_qst WHERE question_id = %s",
+            "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
             array("integer"),
             array($this->getId())
         );
@@ -148,6 +186,8 @@ class assReviewable<qtype> extends ass<qtype> {
             $data = $ilDB->fetchAssoc($result);
             $this->setTaxonomy( $data['taxonomy'] );
             $this->setKnowledgeDimension( $data['knowledge_dimension'] );
+            $this->setLearningOutcome( $data['learning_outcome'] );
+            $this->setTopic( $data['topic'] );
         }
     }
     
@@ -182,6 +222,8 @@ class assReviewable<qtype> extends ass<qtype> {
         
         $result['taxonomy'] = $this->getTaxonomy();
         $result['knowlegde_dimension'] = $this->getKnowlegdgeDimension();
+        $result['learning_outcome'] = $this->getLearningOutcome();
+        $result['topic'] = $this->getTopic();
         
         return json_encode($result);
     }

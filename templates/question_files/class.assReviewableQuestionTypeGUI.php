@@ -45,6 +45,8 @@ class assReviewable<qtype>GUI extends ass<qtype>GUI{
     {
         $this->object->setTaxonomy($_POST["taxonomy"]);
         $this->object->setKnowledgeDimension($_POST["knowledge_dimension"]);
+        $this->object->setLearningOutcome($_POST["learning_outcome"]);
+        $this->object->setTopic($_POST["topic"]);
     }
 
     /**
@@ -55,36 +57,63 @@ class assReviewable<qtype>GUI extends ass<qtype>GUI{
      * @return integer A positive value, if one of the required fields wasn't set, else 0
      */
     public function writePostData($always = false) {
-        $hasErrors = (!$always) ? $this->editQuestion(true) : false;
-        if (!$hasErrors)
-        {
+        if (!$always) {
+            $hasErrors = $this->editQuestion(true) || !$this->checkAddInput();
+        } else {
+            $hasErrors = false;
+        }
+
+        if (!$hasErrors) {
             parent::writePostData($always);
             $this->writeReviewData();
             return 0;
+        }
+
+        if (!$this->checkAddInput()) {
+            $this->editQuestion();
         }
         return 1;
     }
 
     // ...
-    public function addQuestionFormCommandButtons( $form ) {
-        parent::addQuestionFormCommandButtons( $form );
-        $this->populateTaxonomyFormPart( $form );
+    public function addBasicQuestionFormProperties( $form ) {
+        parent::addBasicQuestionFormProperties( $form );
+        $this->populateReviewSpecificPart( $form );
     }
 
     /**
-     * Creates the output of the taxonomy and knowledgeDimension for the question
+     * Creates the output of all GUIs needed for review specific data
      *
      * @param object $form (ilPropertyFormGUI())
      *
      * @return object (ilPropertyFormGUI())
      */
     
-    private function populateTaxonomyFormPart($form){
+    private function populateReviewSpecificPart($form){
         global $lng;
         global $ilPluginAdmin;
         if($ilPluginAdmin->isActive(IL_COMP_SERVICE, "Repository", "robj", "Review")){
             include_once ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                  "/classes/class.ilObjReview.php";
+
+            $lo = new ilTextAreaInputGUI(
+                $lng->txt("rep_robj_xrev_learning_outcome"),
+                "learning_outcome"
+            );
+            $lo->setValue($this->object->getLearningOutcome());
+            $lo->setRequired(TRUE);
+            $lo->setRows(10);
+            $lo->setCols(80);
+            $form->addItem($lo);
+
+            $topic = new ilTextInputGUI(
+                $lng->txt("rep_robj_xrev_topic"),
+                "topic"
+            );
+            $topic->setValue($this->object->getTopic());
+            $topic->setRequired(TRUE);
+            $form->addItem($topic);
+
             $head_cog = new ilSelectInputGUI("", "taxonomy");
             $head_cog->setTitle($lng->txt("qpl_qst_<id>_cognitive_process"));
             $head_cog->setValue($this->getDefaultTaxonomy($this->object->getId()));
