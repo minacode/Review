@@ -299,33 +299,17 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $kno->setRequired(true);
         $this->missing_data_form->addItem($kno);
 
-        $loutc = new ilSelectInputGUI("", "learning_outcome");
+        $loutc = new ilTextAreaInputGUI("", "learning_outcome");
         $loutc->setTitle($this->txt("learning_outcome"));
-        $loutc->setValue(0);
-        $loutc->setOptions($this->object->getEnum("taxonomy"));
         $loutc->setRequired(true);
+        $loutc->setRows(10);
+        $loutc->setCols(80);
         $this->missing_data_form->addItem($loutc);
 
-        $cont = new ilSelectInputGUI("", "content");
-        $cont->setTitle($this->txt("content"));
-        $cont->setValue(0);
-        $cont->setOptions($this->object->getEnum("taxonomy"));
-        $cont->setRequired(true);
-        $this->missing_data_form->addItem($cont);
-
-        $topic = new ilSelectInputGUI("", "topic");
+        $topic = new ilTextInputGUI("", "topic");
         $topic->setTitle($this->txt("topic"));
-        $topic->setValue(0);
-        $topic->setOptions($this->object->getEnum("taxonomy"));
         $topic->setRequired(true);
         $this->missing_data_form->addItem($topic);
-
-        $subar = new ilSelectInputGUI("", "subject_area");
-        $subar->setTitle($this->txt("subject_area"));
-        $subar->setValue(0);
-        $subar->setOptions($this->object->getEnum("taxonomy"));
-        $subar->setRequired(true);
-        $this->missing_data_form->addItem($subar);
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
 
@@ -350,7 +334,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         ) {
             $this->object->saveQuestionConversion($_GET["q_id"],
                 $this->missing_data_form->getInput("taxonomy"),
-                $this->missing_data_form->getInput("knowledge_dimension")
+                $this->missing_data_form->getInput("knowledge_dimension"),
+                $this->missing_data_form->getInput("learning_outcome"),
+                $this->missing_data_form->getInput("topic")
             );
             ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilCtrl->redirect($this, "convertQuestion");
@@ -359,7 +345,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
         $this->missing_data_form->setValuesByPost();
-                $tpl->setContent($this->missing_data_form->getHTML());
+            $tpl->setContent($this->missing_data_form->getHTML());
         }
 
         /**

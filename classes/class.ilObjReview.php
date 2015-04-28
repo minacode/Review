@@ -761,12 +761,14 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function loadQuestionMetaData($q_id) {
         global $ilDB;
-        $req = $ilDB->queryF("SELECT qpl_questions.title, qpl_questions.description, usr_data.firstname, usr_data.lastname ".
-                "FROM qpl_questions ".
-                "INNER JOIN usr_data ON usr_data.usr_id=qpl_questions.owner ".
-                "WHERE qpl_questions.question_id=%s",
-                array("integer"),
-                array($q_id)
+        $req = $ilDB->queryF(
+            "SELECT qpl_questions.title, qpl_rev_qst.learning_outcome, usr_data.firstname, usr_data.lastname ".
+            "FROM qpl_questions ".
+            "INNER JOIN usr_data ON usr_data.usr_id=qpl_questions.owner ".
+            "INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
+            "WHERE qpl_questions.question_id=%s",
+            array("integer"),
+            array($q_id)
         );
         return $ilDB->fetchAssoc($req);
     }
@@ -957,8 +959,10 @@ class ilObjReview extends ilObjectPlugin {
      * @param   int         $id         id of the question to update
      * @param   int         $tax        taxonomy -""-
      * @param   int         $knowd      knowledge dimension -""-
+     * @param   int         $loutc      knowledge dimension -""-
+     * @param   int         $topic      knowledge dimension -""-
      */
-    public function saveQuestionConversion($id, $tax, $knowd) {
+    public function saveQuestionConversion($id, $tax, $knowd, $loutc, $topic) {
         global $ilDB;
 
         $res = $ilDB->queryF("SELECT type_tag FROM qpl_qst_type " .
@@ -982,7 +986,9 @@ class ilObjReview extends ilObjectPlugin {
         $ilDB->insert("qpl_rev_qst",
             array("question_id" => array("integer", $id),
                 "taxonomy" => array("integer", $tax),
-                "knowledge_dimension" => array("integer", $knowd)
+                "knowledge_dimension" => array("integer", $knowd),
+                "learning_outcome" => array("clob", $loutc),
+                "topic" => array("text", $topic)
             )
         );
     }
