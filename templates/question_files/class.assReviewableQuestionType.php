@@ -166,6 +166,36 @@ class assReviewable<qtype> extends ass<qtype> {
     public function saveToDb($original_id = "") {
         $this->saveReviewDataToDb($original_id);
         parent::saveToDb($original_id);
+        $this->createDescription();
+    }
+
+
+    /*
+     * Generate the description of a question (question pool title + topic)
+     */
+    public function createDescription() {
+        global $ilDB;
+
+        $res = $ilDB->queryF(
+            "SELECT object_data.title"
+            . " FROM object_data"
+            . " INNER JOIN qpl_questions"
+            . " ON object_data.obj_id = qpl_questions.obj_fi"
+            . " WHERE qpl_questions.question_id = %s",
+            array("integer"),
+            array($this->getID())
+        );
+
+        $pool = $ilDB->fetchAssoc($res)["title"];
+
+        $ilDB->update(
+            "qpl_questions",
+            array("description" => array(
+                "text",
+                $pool . "/" . $this->getTopic())
+            ),
+            array("question_id" => array("integer", $this->getID()))
+        );
     }
     
     /**

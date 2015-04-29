@@ -959,8 +959,8 @@ class ilObjReview extends ilObjectPlugin {
      * @param   int         $id         id of the question to update
      * @param   int         $tax        taxonomy -""-
      * @param   int         $knowd      knowledge dimension -""-
-     * @param   int         $loutc      knowledge dimension -""-
-     * @param   int         $topic      knowledge dimension -""-
+     * @param   int         $loutc      learning outcome -""-
+     * @param   int         $topic      topic -""-
      */
     public function saveQuestionConversion($id, $tax, $knowd, $loutc, $topic) {
         global $ilDB;
@@ -979,8 +979,21 @@ class ilObjReview extends ilObjectPlugin {
                              array($new_type)
                );
         $type_id = $ilDB->fetchAssoc($res)["question_type_id"];
+        $res = $ilDB->queryF(
+            "SELECT object_data.title"
+            . " FROM object_data"
+            . " INNER JOIN qpl_questions"
+            . " ON object_data.obj_id = qpl_questions.obj_fi"
+            . " WHERE qpl_questions.question_id = %s",
+            array("integer"),
+            array($id)
+        );
+        $pool = $ilDB->fetchAssoc($res)["title"];
         $ilDB->update("qpl_questions",
-            array("question_type_fi" => array("integer", $type_id)),
+            array(
+                "question_type_fi" => array("integer", $type_id),
+                "description" => array("text", $pool . "/" . $topic)
+            ),
             array("question_id" => array("integer", $id))
         );
         $ilDB->insert("qpl_rev_qst",
