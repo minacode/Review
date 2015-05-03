@@ -729,7 +729,116 @@ class ilObjReview extends ilObjectPlugin {
         );
         $this->copyReviewsToHistory($q_id);
         $this->clearAllocatedReviews($q_id);
+        $this->copyQuestionToReviewedPool($q_id);
         $this->notifyAuthorsAboutAcceptance(array($q_id));
+    }
+
+    /*
+     * Copy a question that has finished the review cycle to a special question
+     * pool for use in tests
+     *
+     * @param   integer     $q_id       question id
+     */
+    public function copyQuestionToReviewedPool($q_id) {
+        /*
+        include_once "Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php";
+        $new_pool = new ilObjQuestionPool();
+        $new_pool->setTitle("foo");
+        $new_pool->create();
+        $new_pool->save();
+         */
+        global $ilDB;
+
+        $res = $ilDB->queryF(
+            "SELECT object_data.title
+             FROM object_data
+             INNER JOIN qpl_questions
+             ON qpl_questions.obj_fi = object_data.obj_id
+             WHERE qpl_questions.question_id = %s",
+            array("integer"),
+            array($q_id)
+        );
+        $target_pool = $ilDB->fetchObject($res)->title . " [Reviewed]";
+
+        $res = $ilDB->queryF(
+            "SELECT obj_id FROM object_data
+             WHERE title = %s AND type = 'qpl'",
+            array("text"),
+            array($target_pool)
+        );
+        $qpl_id = $ilDB->fetchObject($res)->obj_id;
+
+        /*
+        $new_id = $ilDB->nextID("qpl_questions");
+
+        $res = $ilDB->queryF(
+            "SELECT * FROM qpl_questions WHERE question_id = %s",
+            array("integer"),
+            array($q_id)
+        );
+        $qst = $ilDB->fetchObject($res);
+        $ilDB->insert(
+            "qpl_questions",
+            array(
+                "question_id" => array("integer", $new_id),
+                "question_type_fi" => array("integer", $qst->question_type_fi),
+                "obj_fi" => array("integer", $qpl_id),
+                "title" => array("text", $qst->title),
+                "description" => array("text", $qst->description),
+                "author" => array("text", $qst->author),
+                "owner" => array("integer", $qst->owner),
+                "working_time" => array("text", $qst->working_time),
+                "points" => array("double", $qst->points),
+                "complete" => array("text", $qst->complete),
+                "original_id" => array("integer", $qst->original_id),
+                "tstamp" => array("integer", $qst->tstamp),
+                "created" => array("integer", $qst->created),
+                "nr_of_tries" => array("integer", $qst->nr_of_tries),
+                "question_text" => array("clob", $qst->question_text),
+                "add_cont_edit_mode" => array("text", $qst->add_cont_edit_mode),
+                "external_id" => array("text", $qst->external_id)
+            )
+        );
+         */
+        $question = assQuestion::_instantiateQuestion($q_id);
+        $new_id = $question->copyObject($qpl_id);
+
+        $res = $ilDB->queryF(
+            "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
+            array("integer"),
+            array($q_id)
+        );
+        $qst = $ilDB->fetchObject($res);
+        $ilDB->insert(
+            "qpl_rev_qst",
+            array(
+                "question_id" => array("integer", $new_id),
+                "taxonomy" => array("integer", $qst->taxonomy),
+                "knowledge_dimension" => array("integer", $qst->knowledge_dimension),
+                "learning_outcome" => array("clob", $qst->learning_outcome),
+                "topic" => array("text", $qst->topic),
+            )
+        );
+
+        $res = $ilDB->queryF(
+            "SELECT * FROM rep_robj_xrev_quest WHERE question_id = %s",
+            array("integer"),
+            array($q_id)
+        );
+        $qst = $ilDB->fetchObject($res);
+        $ilDB->insert(
+            "rep_robj_xrev_quest",
+            array(
+                "question_id" => array("integer", $new_id),
+                "id" => array("integer", $ilDB->nextID("rep_robj_xrev_quest")),
+                "timestamp" => array("integer", $qst->timestamp),
+                "state" => array("integer", $qst->state),
+                "phase" => array("integer", $qst->phase),
+                "review_obj" => array("integer", $qst->review_obj),
+            )
+        );
+
+
     }
 
     /*
@@ -1016,18 +1125,12 @@ class ilObjReview extends ilObjectPlugin {
     public static function getEnum($identifier) {
         global $ilDB, $lng;
         switch ($identifier) {
-        case "taxonomy": $table = "taxon"; break;
-        case "knowledge dimension": $table = "knowd"; break;
-        case "evaluation": $table = "eval"; break;
-        case "rating": $table = "rate"; break;
-        case "expertise": $table = "expert"; break;
-        /*
-        case "learning outcome": $table = "loutc"; break;
-        case "content": $table = "cont"; break;
-        case "topic": $table = "topic"; break;
-        case "subject area": $table = "subar"; break
-        */
-        default: return null;
+            case "taxonomy": $table = "taxon"; break;
+            case "knowledge dimension": $table = "knowd"; break;
+            case "evaluation": $table = "eval"; break;
+            case "rating": $table = "rate"; break;
+            case "expertise": $table = "expert"; break;
+            default: return null;
         }
         $res = $ilDB->query("SELECT * FROM rep_robj_xrev_$table");
         $enum = array();

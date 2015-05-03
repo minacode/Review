@@ -105,6 +105,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             case "removePhase":
             case "generateQuestionPlugins":
             case "generateQuestionTypes":
+            case "test":
                 $this->checkPermission("write");
                 $this->$cmd();
                 break;
@@ -155,10 +156,18 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $ilTabs->addTab("properties", $this->txt("properties"), $ilCtrl->getLinkTarget($this, "editProperties"));
             $ilTabs->addTab("allocation", $this->txt("reviewer_allocation"), $ilCtrl->getLinkTarget($this, "allocateReviewers"));
             $ilTabs->addTab("generate", $this->txt("generate_plugins"), $ilCtrl->getLinkTarget($this, "generateQuestionPlugins"));
+            $ilTabs->addTab("test", $this->txt("test"), $ilCtrl->getLinkTarget($this, "test"));
         }
 
         // standard epermission tab
         $this->addPermissionTab();
+    }
+
+    function test() {
+        global $ilCtrl;
+
+        $this->object->copyQuestionToReviewedPool(31);
+        $ilCtrl->redirect($this, "showContent");
     }
 
         function generateQuestionPlugins() {
