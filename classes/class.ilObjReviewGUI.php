@@ -166,8 +166,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
     function test() {
         global $ilCtrl;
 
-        $this->object->copyQuestionToReviewedPool(31);
-        $ilCtrl->redirect($this, "showContent");
+        //$ilCtrl->redirect($this, "showContent");
+        foreach ($this->object->fooTestBar(38) as $k => $v) {
+            echo $k . ": " . $v . "<br>";
+        }
     }
 
         function generateQuestionPlugins() {

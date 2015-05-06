@@ -734,6 +734,58 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
+     * Create a new question pool that stores reviewed questions
+     *
+     * @param   string      $old_id     id of the corresponding question pool
+     * @param   string      $title      title of the new question pool
+     *
+     * @return  integer     $new_id     object id of the new question pool
+     */
+    public function createPoolForReviewedQuestions($old_id, $title) {
+        global $ilDB;
+        include_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
+        include_once 'Services/Object/classes/class.ilObjectActivation.php';
+
+        $res = $ilDB->queryF(
+            "SELECT ref_id FROM object_reference WHERE obj_id = %s",
+            array("integer"),
+            array($old_id)
+        );
+        $id = -1;
+        while ($ref_pool = $ilDB->fetchObject($res)) {
+            $pool = new ilObjQuestionPool($ref_id);
+            //$pool->create();
+            ///*
+            $new_pool = $pool->cloneObject($this->getGroupID());
+            foreach ($new_pool->getAllQuestions() as $question_id) {
+                $new_pool->deleteQuestion($question_id);
+            }
+            //$ilDB->nextID("qpl_questions");
+            $new_pool->setTitle($title);
+            $new_pool->update();
+            ilObjectActivation::getItem($new_pool->getRefID());
+            $id = $new_pool->getID();
+            //*/
+        }
+        return $id;
+    }
+
+    public function checkTable($id) {
+        global $ilDB;
+        $res = $ilDB->queryF(
+            "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
+            array("integer"),
+            array($id)
+        );
+        return ($res->numRows() > 0) ? "true" . $id : "real";
+    }
+
+    public function fooTestBar($q_id) {
+        return $this->copyQuestionToReviewedPool($q_id);
+
+    }
+
+    /*
      * Copy a question that has finished the review cycle to a special question
      * pool for use in tests
      *
@@ -747,10 +799,12 @@ class ilObjReview extends ilObjectPlugin {
         $new_pool->create();
         $new_pool->save();
          */
+        $debugs = array();
+
         global $ilDB;
 
         $res = $ilDB->queryF(
-            "SELECT object_data.title
+            "SELECT object_data.title, object_data.obj_id
              FROM object_data
              INNER JOIN qpl_questions
              ON qpl_questions.obj_fi = object_data.obj_id
@@ -758,7 +812,10 @@ class ilObjReview extends ilObjectPlugin {
             array("integer"),
             array($q_id)
         );
-        $target_pool = $ilDB->fetchObject($res)->title . " [Reviewed]";
+
+        $fetch_pool = $ilDB->fetchObject($res);
+        $old_id = $fetch_pool->obj_id;
+        $target_pool = $fetch_pool->title . " [Reviewed]";
 
         $res = $ilDB->queryF(
             "SELECT obj_id FROM object_data
@@ -766,7 +823,12 @@ class ilObjReview extends ilObjectPlugin {
             array("text"),
             array($target_pool)
         );
-        $qpl_id = $ilDB->fetchObject($res)->obj_id;
+
+        if (($qpl = $ilDB->fetchObject($res)) != null) {
+            $qpl_id = $qpl->obj_id;
+        } else {
+            $qpl_id = $this->createPoolForReviewedQuestions($old_id, $target_pool);
+        }
 
         /*
         $new_id = $ilDB->nextID("qpl_questions");
@@ -802,6 +864,9 @@ class ilObjReview extends ilObjectPlugin {
          */
         $question = assQuestion::_instantiateQuestion($q_id);
         $new_id = $question->copyObject($qpl_id);
+        $debugs["after_copy"] = $this->checkTable($new_id);
+        for ($i = 1; $i < 1000000; $i+=1) {
+        }
 
         $res = $ilDB->queryF(
             "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
@@ -837,8 +902,8 @@ class ilObjReview extends ilObjectPlugin {
                 "review_obj" => array("integer", $qst->review_obj),
             )
         );
-
-
+        $debugs["after_insert"] = $this->checkTable($new_id);
+        return $debugs;
     }
 
     /*
