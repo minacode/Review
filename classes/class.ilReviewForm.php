@@ -71,6 +71,7 @@ class ilReviewForm {
         $eval_comment = "",
         $rating = ""
     ) {
+        global $ilDB;
         $this->id = $id;
         $this->review_obj = $review_obj;
         $this->question_id = $question_id;
@@ -90,12 +91,15 @@ class ilReviewForm {
         $this->knowledge_dimension = $taxonomy;
         $this->eval_comment = $eval_comment;
         $this->rating = $rating;
+        $this->db = $ilDB;
     }
 
     /*
      * Load the data of a review form object from the database
      *
      * @param   integer     $review_id          id of the review
+     *
+     * @return  boolean     $success        true, if operation was performed
      */
     public function loadFromDB($review_id) {
         $result = $this->db->queryF(
@@ -103,6 +107,7 @@ class ilReviewForm {
             array("integer"),
             array($review_id)
         );
+
         if ($result->numRows() == 1) {
             $record = $this->db->fetchObject($result);
             $this->id = $record->id;
@@ -124,7 +129,291 @@ class ilReviewForm {
             $this->knowledge_dimension = $record->taxonomy;
             $this->eval_comment = $record->eval_comment;
             $this->rating = $record->rating;
+
+            return true;
+        } else {
+            return false;
         }
     }
+
+    /*
+     * Store the data of a review form object into the database
+     *
+     * @return  boolean     $success        true, if operation was performed
+     */
+    public function storeToDB() {
+        if ($this->id == "") {
+            return false;
+        }
+
+        $result = $this->db->queryF(
+            "SELECT * FROM rep_robj_xrev_revi WHERE id = %s",
+            array("integer"),
+            array($this->id)
+        );
+
+        if ($result->numRows() == 0) {
+            $this->db->insert(
+                "rep_robj_xrev_revi",
+                array(
+                    "id" => array("integer", $this->id),
+                    "review_obj" => array("integer", $this->review_obj),
+                    "question_id" => array("integer", $this->question_id),
+                    "state" => array("integer", $this->state),
+                    "reviewer" => array("integer", $this->reviewer),
+                    "timestamp" => array("integer", $this->timestamp),
+                    "desc_corr" => array("integer", $this->desc_corr),
+                    "desc_relv" => array("integer", $this->desc_relv),
+                    "desc_expr" => array("integer", $this->desc_expr),
+                    "quest_corr" => array("integer", $this->quest_corr),
+                    "quest_relv" => array("integer", $this->quest_relv),
+                    "quest_expr" => array("integer", $this->quest_expr),
+                    "answ_corr" => array("integer", $this->answ_corr),
+                    "answ_relv" => array("integer", $this->answ_relv),
+                    "answ_expr" => array("integer", $this->answ_expr),
+                    "taxonomy" => array("integer", $this->taxonomy),
+                    "knowledge_dimension" => array(
+                        "integer",
+                        $this->knowledge_dimension
+                    ),
+                    "eval_comment" => array("clob", $this->eval_comment),
+                    "rating" => array("integer", $this->rating)
+                )
+            );
+        } else {
+            $this->db->update(
+                "rep_robj_xrev_revi",
+                array(
+                    "review_obj" => array("integer", $this->review_obj),
+                    "question_id" => array("integer", $this->question_id),
+                    "state" => array("integer", $this->state),
+                    "reviewer" => array("integer", $this->reviewer),
+                    "timestamp" => array("integer", $this->timestamp),
+                    "desc_corr" => array("integer", $this->desc_corr),
+                    "desc_relv" => array("integer", $this->desc_relv),
+                    "desc_expr" => array("integer", $this->desc_expr),
+                    "quest_corr" => array("integer", $this->quest_corr),
+                    "quest_relv" => array("integer", $this->quest_relv),
+                    "quest_expr" => array("integer", $this->quest_expr),
+                    "answ_corr" => array("integer", $this->answ_corr),
+                    "answ_relv" => array("integer", $this->answ_relv),
+                    "answ_expr" => array("integer", $this->answ_expr),
+                    "taxonomy" => array("integer", $this->taxonomy),
+                    "knowledge_dimension" => array(
+                        "integer",
+                        $this->knowledge_dimension
+                    ),
+                    "eval_comment" => array("clob", $this->eval_comment),
+                    "rating" => array("integer", $this->rating)
+                ),
+                array("id" => array("integer", $this->id))
+            );
+        }
+        return true;
+    }
+
+    /*
+     * Store the review form data in the history table of the database
+     *
+     * @return  boolean     $success        true, if operation was performed
+     */
+    public function copyToHistory() {
+        if ($this->id == "") {
+            return false;
+        }
+
+        $this->db->insert(
+            "rep_robj_xrev_hist",
+            array(
+                "id" => array("integer", $this->id),
+                "question_id" => array("integer", $this->question_id),
+                "state" => array("integer", $this->state),
+                "reviewer" => array("integer", $this->reviewer),
+                "timestamp" => array("integer", $this->timestamp),
+                "desc_corr" => array("integer", $this->desc_corr),
+                "desc_relv" => array("integer", $this->desc_relv),
+                "desc_expr" => array("integer", $this->desc_expr),
+                "quest_corr" => array("integer", $this->quest_corr),
+                "quest_relv" => array("integer", $this->quest_relv),
+                "quest_expr" => array("integer", $this->quest_expr),
+                "answ_corr" => array("integer", $this->answ_corr),
+                "answ_relv" => array("integer", $this->answ_relv),
+                "answ_expr" => array("integer", $this->answ_expr),
+                "taxonomy" => array("integer", $this->taxonomy),
+                "knowledge_dimension" => array(
+                    "integer",
+                    $this->knowledge_dimension
+                ),
+                "eval_comment" => array("clob", $this->eval_comment),
+                "rating" => array("integer", $this->rating)
+            )
+        );
+
+        return true;
+    }
+
+    /*
+     * Delete a review object from the database
+     *
+     * @return  boolean     $success        true, if operation was performed
+     */
+    public function deleteFromDB() {
+        if ($this->id == "") {
+            return false;
+        }
+
+        $this->db->delete(
+            "rep_robj_xrev_revi",
+            array("id" => array("integer", $this->id))
+        );
+
+        return true;
+    }
+
+    /*
+     * Set the state
+     *
+     * @param   integer     $state          state
+     */
+    public function setState($state) {
+        $this->state = $state;
+    }
+
+    /*
+     * Set the timestamp
+     *
+     * @param   integer     $timestamp      timestamp
+     */
+    public function setTimestamp($timestamp) {
+        $this->timestamp = $timestamp;
+    }
+
+    /*
+     * Get the id
+     *
+     * @return  integer     $id             id
+     */
+    public function getID() {
+        return $this->id;
+    }
+
+    /*
+     * Get the review object
+     *
+     * @return  integer     $review_obj     review object
+     */
+    public function getReviewObj() {
+        return $this->review_obj;
+    }
+
+    /*
+     * Get the question id
+     *
+     * @return  integer     $question_id    question id
+     */
+    public function getQuestionID() {
+        return $this->question_id;
+    }
+
+    /*
+     * Get the state
+     *
+     * @return  integer     $state          state
+     */
+    public function getState() {
+        return $this->state;
+    }
+
+    /*
+     * Get the timestamp
+     *
+     * @return  integer     $timestamp      timestamp
+     */
+    public function getTimestamp() {
+        return $this->timestamp;
+    }
+
+    /*
+     * Get the description correctness
+     *
+     * @return  integer     $desc_corr      description correctness
+     */
+    public function getDescCorr() {
+        return $this->desc_corr;
+    }
+
+    /*
+     * Get the description relevancy
+     *
+     * @return   integer     $desc_relv     description relevancy
+     */
+    public function getDescRelv() {
+        return $this->desc_relv;
+    }
+
+    /*
+     * Get the description expression
+     *
+     * @return   integer     $desc_expr     description expression
+     */
+    public function getDescExpr() {
+        return $this->desc_expr;
+    }
+
+    /*
+     * Get the answer correctness
+     *
+     * @return   integer     $answ_corr     answer correctness
+     */
+    public function getAnswCorr() {
+        return $this->answ_corr;
+    }
+
+    /*
+     * Get the answer relevancy
+     *
+     * @return   integer     $answ_relv     answer relevancy
+     */
+    public function getAnswRelv() {
+        return $this->answ_relv;
+    }
+
+    /*
+     * Get the answer expression
+     *
+     * @return   integer     $answ_expr     answer expression
+     */
+    public function getAnswExpr() {
+        return $this->answ_expr;
+    }
+
+    /*
+     * Get the question correctness
+     *
+     * @return   integer     $quest_corr    question correctness
+     */
+    public function getQuestCorr() {
+        return $this->quest_corr;
+    }
+
+    /*
+     * Get the question relevancy
+     *
+     * @return   integer     $quest_relv    question relevancy
+     */
+    public function getQuestRelv() {
+        return $this->quest_relv;
+    }
+
+    /*
+     * Get the question expression
+     *
+     * @return   integer     $quest_expr    question expression
+     */
+    public function getQuestExpr() {
+        return $this->quest_expr;
+    }
+
+
 }
 ?>
