@@ -72,6 +72,7 @@ class ilReviewForm {
         $rating = ""
     ) {
         global $ilDB;
+
         $this->id = $id;
         $this->review_obj = $review_obj;
         $this->question_id = $question_id;
@@ -97,7 +98,7 @@ class ilReviewForm {
     /*
      * Load the data of a review form object from the database
      *
-     * @param   integer     $review_id          id of the review
+     * @param   integer     $review_id      id of the review
      *
      * @return  boolean     $success        true, if operation was performed
      */
@@ -129,7 +130,6 @@ class ilReviewForm {
             $this->knowledge_dimension = $record->taxonomy;
             $this->eval_comment = $record->eval_comment;
             $this->rating = $record->rating;
-
             return true;
         } else {
             return false;
@@ -248,7 +248,6 @@ class ilReviewForm {
                 "rating" => array("integer", $this->rating)
             )
         );
-
         return true;
     }
 
@@ -262,11 +261,11 @@ class ilReviewForm {
             return false;
         }
 
-        $this->db->delete(
-            "rep_robj_xrev_revi",
-            array("id" => array("integer", $this->id))
+        $this->db->manipulateF(
+            "DELETE FROM rep_robj_xrev_revi WHERE id = %s",
+            array("integer"),
+            array($this->id)
         );
-
         return true;
     }
 

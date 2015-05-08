@@ -53,8 +53,7 @@ class ilReviewDBMapper {
      */
     private function loadCycleQuestions() {
         $result = $this->db->queryF(
-            "SELECT id FROM rep_robj_xrev_quest
-             WHERE state = 1 AND review_obj = %s",
+            "SELECT id FROM rep_robj_xrev_quest WHERE review_obj = %s",
             array("integer"),
             array($this->obj_id)
         );
