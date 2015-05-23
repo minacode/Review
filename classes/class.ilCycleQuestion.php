@@ -172,6 +172,130 @@ class ilCycleQuestion {
         $this->phase = $phase;
     }
 
-    // TODO     ca. 1000000 getters
+    /*
+     * Get the ID
+     *
+     * @return  integer     $id             id
+     */
+    public function getID() {
+        return $this->id;
+    }
+
+    /*
+     * Get the review object
+     *
+     * @return  integer     $review_object  review object
+     */
+    public function getReviewObject() {
+        return $this->review_object;
+    }
+
+    /*
+     * Get the question ID
+     *
+     * @return  integer     $question_id    question id
+     */
+    public function getQuestionID() {
+        return $this->question_id;
+    }
+
+    /*
+     * Get the state
+     *
+     * @return  integer     $state          state
+     */
+    public function getState() {
+        return $this->state;
+    }
+
+    /*
+     * Get the phase
+     *
+     * @return  integer     $phase          phase
+     */
+    public function getPhase() {
+        return $this->phase;
+    }
+
+    /*
+     * Get the timestamp
+     *
+     * @return  integer     $timestamp      timestamp
+     */
+    public function getTimestamp() {
+        return $this->timestamp;
+    }
+
+    /*
+     * Get the taxonomy
+     *
+     * @return  integer     $taxonomy       taxonomy
+     */
+    public function getTaxonomy() {
+        return $this->question->getTaxonomy();
+    }
+
+    /*
+     * Get the knowledge dimension
+     *
+     * @return  integer     $knowledge_dimension    knowledge dimension
+     */
+    public function getKnowledgeDimension() {
+        return $this->question->getKnowledgeDimension();
+    }
+
+    /*
+     * Get the learning outcome
+     *
+     * @return  integer     $learning_outcome       learning outcome
+     */
+    public function getLearningOutcome() {
+        return $this->question->getLearningOutcome();
+    }
+
+    /*
+     * Get the topic
+     *
+     * @return  integer     $topic          topic
+     */
+    public function getTopic() {
+        return $this->question->getTopic();
+    }
+
+    /*
+     * Get the question pool
+     *
+     * @return  integer     $obj_fi         question pool
+     */
+    public function getQuestionPool() {
+        return $this->question->getObjID();
+    }
+
+    /*
+     * Get the title
+     *
+     * @return  string      $title          title
+     */
+    public function getTitle() {
+        return $this->question->getTitle();
+    }
+
+    /*
+     * Get the author
+     *
+     * @return  string      $author         author
+     */
+    public function getAuthor() {
+        return $this->question->getAuthor();
+    }
+
+    /*
+     * Get the owner
+     *
+     * @return  integer     $owner          owner
+     */
+    public function getOwner() {
+        return $this->question->getOwner();
+    }
 }
 ?>
