@@ -28,7 +28,6 @@ class ilReviewFormGUI extends ilPropertyFormGUI {
     private function populateForm() {
         global $ilCtrl;
 
-        /* General form part */
         $this->setTitle($this->parent_obj->txt("review_input");
         $this->setFormAction($ilCtrl->getFormAction($this));
         $this->addCommandButton("saveReview", $this->parent_obj->txt("save"));
@@ -37,37 +36,167 @@ class ilReviewFormGUI extends ilPropertyFormGUI {
             $this->parent_obj->txt("cancel")
         );
 
-        /* Part to review the question */
-        $review_header = new ilFormSectionHeaderGUI();
-        $review_header->setTitle($this->parent_obj->txt("review");
-        $this->addItem($review_header);
+        $this->populateReviewPart();
+        $this->populateTaxonomyPart();
+        $this->populateEvaluationPart();
+    }
 
-        $review_aspect_header = new ilAspectHeaderGUI();
-        $this->addItem($review_aspect_header);
-        $introduction = new ilAspectSelectInpuGUI(/* TODO new parameters */);
+    /*
+     * Fill in the part to review the question
+     */
+    private function populateReviewPart() {
+        $header = new ilFormSectionHeaderGUI();
+        $header->setTitle($this->parent_obj->txt("review");
+        $this->addItem($header);
+
+        $aspect_header = new ilAspectHeaderGUI(
+            "",
+            array(
+                $this->parent_obj->txt("correctness"),
+                $this->parent_obj->txt("relevance"),
+                $this->parent_obj->txt("expression")
+            )
+        );
+        $this->addItem($aspect_header);
+        $introduction = new ilAspectSelectInpuGUI(
+            $this->parent_obj->txt("introduction"),
+            array(
+                array(
+                    "postvar" => "dc",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getDescCorr(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "dr",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getDescRelv(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "de",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getDescExpr(),
+                    "disabled" => $this->readonly
+                )
+            )
+        );
         $this->addItem($introduction);
-        $question = new ilAspectSelectInpuGUI(/* TODO new parameters */);
+        $question = new ilAspectSelectInpuGUI(
+            $this->parent_obj->txt("question"),
+            array(
+                array(
+                    "postvar" => "qc",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getQuestCorr(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "qr",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getQuestRelv(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "qe",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getQuestExpr(),
+                    "disabled" => $this->readonly
+                )
+            )
+        );
         $this->addItem($question);
-        $answers = new ilAspectSelectInpuGUI(/* TODO new parameters */);
+        $answers = new ilAspectSelectInpuGUI(
+            $this->parent_obj->txt("answers"),
+            array(
+                array(
+                    "postvar" => "ac",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getAnswCorr(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "ar",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getAnswRelv(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "ae",
+                    "options" => $this->parent_obj->getEnum("rating"),
+                    "value" => $this->review->getAnswExpr(),
+                    "disabled" => $this->readonly
+                )
+            )
+        );
         $this->addItem($answers);
+    }
 
-        /* Part to suggest the taxonomy and knowledge dimension */
-        $taxknowdim_header = new ilFormSectionHeaderGUI();
-        $taxknowdim_header->setTitle($this->parent_obj->txt("tax_know_dim");
-        $this->addItem($taxknowdim_header);
+    /*
+     * Fill in the part to suggest the taxonomy and knowledge dimension
+     */
+    private function populateTaxonomyPart() {
+        $header = new ilFormSectionHeaderGUI();
+        $header->setTitle($this->parent_obj->txt("tax_know_dim");
+        $this->addItem($header);
 
-        $taxknowdim_aspect_header = new ilAspectHeaderGUI();
-        $this->addItem($taxknowdim_aspect_header);
-        $author = new ilAspectSelectInpuGUI(/* TODO new parameters */);
+        $aspect_header = new ilAspectHeaderGUI(
+            "",
+            array(
+                $this->parent_obj->txt("taxonomy"),
+                $this->parent_obj->txt("knowledge_dim")
+            )
+        );
+        $this->addItem($aspect_header);
+        $author = new ilAspectSelectInpuGUI(
+            $this->parent_obj->txt("author"),
+            array(
+                array(
+                    "postvar" => "cog_a",
+                    "options" => $this->parent_obj->getEnum("taxonomy"),
+                    "value" => $this->question->getTaxonomy(),
+                    "disabled" => true
+                ),
+                array(
+                    "postvar" => "kno_a",
+                    "options" => $this->parent_obj->getEnum(
+                        "knowledge_dimension"
+                    ),
+                    "value" => $this->question->getKnowledgeDimension(),
+                    "disabled" => true
+                )
+            )
+        );
         $this->addItem($author);
-        $reviewer = new ilAspectSelectInpuGUI(/* TODO new parameters */);
+        $reviewer = new ilAspectSelectInpuGUI(
+            $this->parent_obj->txt("reviewer"),
+            array(
+                array(
+                    "postvar" => "cog_r",
+                    "options" => $this->parent_obj->getEnum("taxonomy"),
+                    "value" => $this->review->getTaxonomy(),
+                    "disabled" => $this->readonly
+                ),
+                array(
+                    "postvar" => "kno_r",
+                    "options" => $this->parent_obj->getEnum(
+                        "knowledge_dimension"
+                    ),
+                    "value" => $this->review->getKnowledgeDimension(),
+                    "disabled" => $this->readonly
+                )
+            )
+        );
         $this->addItem($reviewer);
+    }
 
-        /* Part to evaluate the question */
-        $evaluation_header = new ilFormSectionHeaderGUI();
-        $evaluation_header->setTitle($this->parent_obj->txt("evaluation");
-        $this->addItem($evaluation_header);
-
+    /*
+     * Fill in the part to evaluate the question
+     */
+    private function populateEvaluationPart() {
+        $header = new ilFormSectionHeaderGUI();
+        $header->setTitle($this->parent_obj->txt("evaluation");
+        $this->addItem($header);
         /* TODO fill in the rest of this */
     }
 }
