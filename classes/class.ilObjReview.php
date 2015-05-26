@@ -2,11 +2,13 @@
 
 include_once "Services/Repository/classes/class.ilObjectPlugin.php";
 include_once "QuestionManager/class.ilReviewableQuestionPluginGenerator.php";
+include_once "class.ilReviewDBMapper.php";
 
 /*
  * Application class for Review repository object.
  *
  * @var     integer     $group_id       id of the group the plugin object is in
+ * @var     ilReviewDBMapper    $review_db      review plugin part of ILIAS db
  *
  * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
  *
@@ -15,6 +17,7 @@ include_once "QuestionManager/class.ilReviewableQuestionPluginGenerator.php";
 
 class ilObjReview extends ilObjectPlugin {
     private $group_id;
+    private $review_db;
 
     /*
      * Constructor
@@ -53,7 +56,7 @@ class ilObjReview extends ilObjectPlugin {
         global $ilDB;
 
         $set = $ilDB->queryF(
-            "SELECT * FROM rep_robj_xrev_revobj WHERE id=%s",
+            "SELECT * FROM rep_robj_xrev_revobj WHERE id = %s",
             array("integer"),
             array($this->getId())
         );
@@ -62,6 +65,7 @@ class ilObjReview extends ilObjectPlugin {
             $this->group_id = $rec->group_id;
         }
 
+        $this->review_db = new ilReviewDBMapper($this->getID());
         $this->syncQuestionDB();
     }
 
@@ -241,23 +245,52 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load a review with a certain ID from the Review Database
+     * Load a review with a certain ID from the review database
      *
-     * @param                int             $a_id           ID of the review to load
+     * @param   int         $review_id          ID of the review to load
      *
-     * @return       array           $reviews        all reviews with the given ID (exactly one or none)
+     * @return  ilReviewForm    $review         review with the given ID
      */
-    public function loadReviewById($a_id) {
-        global $ilDB;
+    public function loadReviewById($review_id) {
+        foreach ($this->review_db->getReviewForms(0) as $review_form) {
+            if ($review_form->getID() == $review_id) {
+                return $review_form;
+            }
+        }
+        return count($this->review_db->getReviewForms(0));
+    }
 
-        $rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi WHERE id=%s",
-                array("integer"),
-                array($a_id));
+    /*
+     * Load a question with a certain ID from the review database
+     *
+     * @param   int         $question_id        ID of the question to load
+     *
+     * @return  ilCycleQuestion     $question   question with the given ID
+     */
+    public function loadQuestionById($question_id) {
+        foreach ($this->review_db->getCycleQuestions(0) as $cycle_question) {
+            if ($cycle_question->getQuestionID() == $question_id) {
+                return $cycle_question;
+            }
+        }
+        return null;
+    }
 
-        $reviews = array();
-        while ($review = $ilDB->fetchAssoc($rev))
-            $reviews[] = $review;
-        return $reviews[0];
+    /*
+     * Load all reviews that belong to a question from the review database
+     *
+     * @param   int         $question_id        ID of the question
+     *
+     * @return  array       $reviews            ilReviewForm objects
+     */
+    public function loadReviewsByQuestion($question_id) {
+        $result = array();
+        foreach ($this->review_db->getReviewForms(0) as $review_form) {
+            if ($review_form->getQuestionID() == $question_id) {
+                $result[] = $review_form;
+            }
+        }
+        return $result;
     }
 
     /*
@@ -382,27 +415,6 @@ class ilObjReview extends ilObjectPlugin {
                 )
             );
         }
-    }
-
-    /*
-     * Load all review belonging to a question with a certain ID from the Review Database
-     *
-     * @param                int             $a_id           ID of the question
-     *
-     * @return       array           $reviews        all reviews with the given ID (exactly one or none)
-     */
-    public function loadReviewsByQuestion($q_id) {
-        global $ilDB;
-
-        $rev = $ilDB->queryF("SELECT * FROM rep_robj_xrev_revi ".
-                "WHERE question_id=%s AND review_obj=%s",
-                array("integer", "integer"),
-                array($q_id, $this->getId()));
-        $reviews = array();
-        while ($review = $ilDB->fetchAssoc($rev))
-            $reviews[] = $review;
-
-        return $reviews;
     }
 
     /*
@@ -1185,7 +1197,7 @@ class ilObjReview extends ilObjectPlugin {
      *
      * @param       string      $identifier     name of the enumeration
      *
-     * @return      array       $taxonomies     associative array of enum entry id => term
+     * @return      array       $enum           enum entry id => term
      */
     public static function getEnum($identifier) {
         global $ilDB, $lng;

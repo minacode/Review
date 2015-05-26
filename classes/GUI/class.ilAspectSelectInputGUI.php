@@ -70,8 +70,8 @@ class ilAspectSelectInputGUI extends ilCustomInputGUI {
     public function checkInput() {
         $valid = true;
         foreach ($this->si_guis as $si_gui) {
-            $valid &&= !$si_gui->getDisabled()
-                || $si_gui->checkInput() && $_POST[$si_gui->getPostVar() != 0;
+            $valid &= !$si_gui->getDisabled()
+                || $si_gui->checkInput() && $_POST[$si_gui->getPostVar()] != 0;
         }
         return true;
     }

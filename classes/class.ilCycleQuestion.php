@@ -10,6 +10,7 @@
  * @var     integer     $timestamp      timestamp of the last change
  * @var     assQuestion $question       the actual question object (read only)
  * @var     ilDB        $db             local reference to the ILIAS database
+ * @var     ilReviewDBMapper    $mapper     local reference to the mapper
  *
  * TODO     replace integer constants with enums
  */
@@ -22,11 +23,14 @@ class ilCycleQuestion {
     private $timestamp;
     private $question;
     private $db;
+    private $mapper;
 
     /*
      * Constructor
      */
     public function __construct(
+        $db,
+        $mapper,
         $id = "",
         $review_obj = "",
         $question_id = "",
@@ -35,8 +39,8 @@ class ilCycleQuestion {
         $timestamp = "",
         $question = ""
     ) {
-        global $ilDB;
-
+        $this->db = $db;
+        $this->mapper = $mapper;
         $this->id = $id;
         $this->review_obj = $review_obj;
         $this->question_id = $question_id;
@@ -44,7 +48,6 @@ class ilCycleQuestion {
         $this->phase = $phase;
         $this->timestamp = $timestamp;
         $this->question = $question;
-        $this->db = $ilDB;
     }
 
     /*
@@ -123,6 +126,7 @@ class ilCycleQuestion {
          * Do not save the question object to the database here, since it is
          * for read only!
          */
+        $this->mapper->notifyAboutChanges("cycle_questions");
         return true;
     }
 
@@ -142,6 +146,7 @@ class ilCycleQuestion {
             array("integer"),
             array($this->id)
         );
+        $this->mapper->notifyAboutChanges("cycle_questions");
         return true;
     }
 

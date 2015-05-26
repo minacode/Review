@@ -21,7 +21,9 @@
  * @var     integer     $knowledge_dimension       knowl. dim. assumption
  * @var     integer     $eval_comment   comment for evaluation
  * @var     integer     $rating         rating of the question
+ * @var     integer     $expertise      expertise of the reviewer
  * @var     ilDB        $db             local reference to the ILIAS database
+ * @var     ilReviewDBMapper    $mapper     local reference to the mapper
  *
  * TODO     replace integer constants with enums
  */
@@ -45,12 +47,16 @@ class ilReviewForm {
     private $knowledge_dimension;
     private $eval_comment;
     private $rating;
+    private $expertise;
     private $db;
+    private $mapper;
 
     /*
      * Constructor
      */
     public function __construct(
+        $db,
+        $mapper,
         $id = "",
         $review_obj = "",
         $question_id = "",
@@ -69,10 +75,11 @@ class ilReviewForm {
         $taxonomy = "",
         $knowledge_dimension = "",
         $eval_comment = "",
+        $expertise = "",
         $rating = ""
     ) {
-        global $ilDB;
-
+        $this->db = $db;
+        $this->mapper = $mapper;
         $this->id = $id;
         $this->review_obj = $review_obj;
         $this->question_id = $question_id;
@@ -92,7 +99,7 @@ class ilReviewForm {
         $this->knowledge_dimension = $taxonomy;
         $this->eval_comment = $eval_comment;
         $this->rating = $rating;
-        $this->db = $ilDB;
+        $this->expertise = $expertise;
     }
 
     /*
@@ -130,6 +137,7 @@ class ilReviewForm {
             $this->knowledge_dimension = $record->taxonomy;
             $this->eval_comment = $record->eval_comment;
             $this->rating = $record->rating;
+            $this->expertise = $record->expertise;
             return true;
         } else {
             return false;
@@ -177,7 +185,8 @@ class ilReviewForm {
                         $this->knowledge_dimension
                     ),
                     "eval_comment" => array("clob", $this->eval_comment),
-                    "rating" => array("integer", $this->rating)
+                    "rating" => array("integer", $this->rating),
+                    "expertise" => array("integer", $this->expertise)
                 )
             );
         } else {
@@ -204,11 +213,13 @@ class ilReviewForm {
                         $this->knowledge_dimension
                     ),
                     "eval_comment" => array("clob", $this->eval_comment),
-                    "rating" => array("integer", $this->rating)
+                    "rating" => array("integer", $this->rating),
+                    "expertise" => array("integer", $this->expertise)
                 ),
                 array("id" => array("integer", $this->id))
             );
         }
+        $this->mapper->notifyAboutChanges("review_forms");
         return true;
     }
 
@@ -245,7 +256,8 @@ class ilReviewForm {
                     $this->knowledge_dimension
                 ),
                 "eval_comment" => array("clob", $this->eval_comment),
-                "rating" => array("integer", $this->rating)
+                "rating" => array("integer", $this->rating),
+                "expertise" => array("integer", $this->expertise)
             )
         );
         return true;
@@ -266,6 +278,7 @@ class ilReviewForm {
             array("integer"),
             array($this->id)
         );
+        $this->mapper->notifyAboutChanges("review_forms");
         return true;
     }
 
@@ -285,6 +298,132 @@ class ilReviewForm {
      */
     public function setTimestamp($timestamp) {
         $this->timestamp = $timestamp;
+    }
+
+    /*
+     * Set the description correctness
+     *
+     * @param   integer     $desc_corr      description correctness
+     */
+    public function setDescCorr($desc_corr) {
+        $this->desc_corr = $desc_corr;
+    }
+
+    /*
+     * Set the description relevancy
+     *
+     * @param    integer     $desc_relv     description relevancy
+     */
+    public function setDescRelv($desc_relv) {
+        $this->desc_relv = $desc_relv;
+    }
+
+    /*
+     * Set the description expression
+     *
+     * @param    integer     $desc_expr     description expression
+     */
+    public function setDescExpr($desc_expr) {
+        $this->desc_expr = $desc_expr;
+    }
+
+    /*
+     * Set the answer correctness
+     *
+     * @param    integer     $answ_corr     answer correctness
+     */
+    public function setAnswCorr($answ_corr) {
+        $this->answ_corr = $answ_corr;
+    }
+
+    /*
+     * Set the answer relevancy
+     *
+     * @param    integer     $answ_relv     answer relevancy
+     */
+    public function setAnswRelv($answ_relv) {
+        $this->answ_relv = $answ_relv;
+    }
+
+    /*
+     * Set the answer expression
+     *
+     * @param    integer     $answ_expr     answer expression
+     */
+    public function setAnswExpr($answ_expr) {
+        $this->answ_expr = $answ_expr;
+    }
+
+    /*
+     * Set the question correctness
+     *
+     * @param    integer     $quest_corr    question correctness
+     */
+    public function setQuestCorr($quest_corr) {
+        $this->quest_corr = $quest_corr;
+    }
+
+    /*
+     * Set the question relevancy
+     *
+     * @param    integer     $quest_relv    question relevancy
+     */
+    public function setQuestRelv($quest_relv) {
+        $this->quest_relv = $quest_relv;
+    }
+
+    /*
+     * Set the question expression
+     *
+     * @param    integer     $quest_expr    question expression
+     */
+    public function setQuestExpr($quest_expr) {
+        $this->quest_expr = $quest_expr;
+    }
+
+    /*
+     * Set the taxonomy
+     *
+     * @param   integer     $taxonomy       taxonomy
+     */
+    public function setTaxonomy($taxonomy) {
+        $this->taxonomy = $taxonomy;
+    }
+
+    /*
+     * Set the knowledge dimension
+     *
+     * @param   integer     $knowledge_dimension    knowledge dimension
+     */
+    public function setKnowledgeDimension($knowledge_dimension) {
+        $this->knowledge_dimension = $knowledge_dimension;
+    }
+
+    /*
+     * Set the question rating
+     *
+     * @param   integer     $rating         question rating
+     */
+    public function setRating($rating) {
+        $this->rating = $rating;
+    }
+
+    /*
+     * Set the evaluation comment
+     *
+     * @param   string      $eval_comment   evaluation comment
+     */
+    public function setEvalComment($eval_comment) {
+        $this->eval_comment = $eval_comment;
+    }
+
+    /*
+     * Set the reviewer expertise
+     *
+     * @param   integer     $expertise      reviewer expertise
+     */
+    public function setExpertise($expertise) {
+        $this->expertise = $expertise;
     }
 
     /*
@@ -413,6 +552,49 @@ class ilReviewForm {
         return $this->quest_expr;
     }
 
+    /*
+     * Get the taxonomy
+     *
+     * @return  integer     $taxonomy       taxonomy
+     */
+    public function getTaxonomy() {
+        return $this->taxonomy;
+    }
 
+    /*
+     * Get the knowledge dimension
+     *
+     * @return  integer     $knowledge_dimension    knowledge dimension
+     */
+    public function getKnowledgeDimension() {
+        return $this->knowledge_dimension;
+    }
+
+    /*
+     * Get the question rating
+     *
+     * @return  integer     $rating         question rating
+     */
+    public function getRating() {
+        return $this->rating;
+    }
+
+    /*
+     * Get the evaluation comment
+     *
+     * @return  string      $eval_comment   evaluation comment
+     */
+    public function getEvalComment() {
+        return $this->eval_comment;
+    }
+
+    /*
+     * Get the reviewer expertise
+     *
+     * @return  integer     $expertise      reviewer expertise
+     */
+    public function getExpertise() {
+        return $this->expertise;
+    }
 }
 ?>
