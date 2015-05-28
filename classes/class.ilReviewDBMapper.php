@@ -72,7 +72,18 @@ class ilReviewDBMapper {
         if (count($this->review_forms) == 0) {
             $this->loadReviewForms();
         }
-        return $this->review_forms;
+        return array_filter(
+            $this->review_forms,
+            function($review_form) use ($conditions) {
+                foreach ($conditions as $attribute => $value) {
+                    $call = $this->toGetter($attribute);
+                    if ($review_form->{$call}() != $value) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
     }
 
     /*
@@ -86,7 +97,19 @@ class ilReviewDBMapper {
         if (count($this->cycle_questions) == 0) {
             $this->loadCycleQuestions();
         }
-        return $this->cycle_questions;
+        return array_filter(
+            $this->cycle_questions,
+            function($cycle_question) use ($conditions) {
+                foreach ($conditions as $attribute => $value) {
+                    $call = $this->toGetter($attribute);
+                    if ($cycle_question->{$call}() != $value) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
     }
 
     /*
@@ -102,7 +125,6 @@ class ilReviewDBMapper {
         foreach ($parts as $part) {
             $getter .= ucfirst($part);
         }
-        $getter .= "()";
         return $getter;
     }
 

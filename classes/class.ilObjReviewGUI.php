@@ -490,20 +490,19 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
         $ilTabs->activateTab("content");
         $output = "";
-        $review_forms = $this->object->loadReviewsByQuestion($_GET["q_id"]);
+        $review_forms =
+            $this->object->loadCompletedReviewsByQuestion($_GET["q_id"]);
         if (count($review_forms) == 0) {
             $output = $this->txt("no_reviews_for_question");
         } else {
             foreach ($review_forms as $review_form) {
-                if ($review_form->getState() == 1) {
-                    $form_gui = new ilReviewFormGUI(
-                        $review_form,
-                        $this->object->loadQuestionByID($_GET["q_id"]),
-                        $this,
-                        true
-                    );
-                    $output .= $form_gui->getHTML();
-                }
+                $form_gui = new ilReviewFormGUI(
+                    $review_form,
+                    $this->object->loadQuestionByID($_GET["q_id"]),
+                    $this,
+                    true
+                );
+                $output .= $form_gui->getHTML();
             }
         }
         $this->initQuestionOverview();
@@ -569,19 +568,19 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         );
         if ($input->checkInput()) {
             $review_form->setDescCorr($input->getInput("dc"));
-            $review_form->setDescRelv($input->getInput("dc"));
-            $review_form->setDescExpr($input->getInput("dc"));
-            $review_form->setQuestCorr($input->getInput("dc"));
-            $review_form->setQuestRelv($input->getInput("dc"));
-            $review_form->setQuestExpr($input->getInput("dc"));
-            $review_form->setAnswCorr($input->getInput("dc"));
-            $review_form->setAnswRelv($input->getInput("dc"));
-            $review_form->setAnswExpr($input->getInput("dc"));
-            $review_form->setTaxonomy($input->getInput("dc"));
-            $review_form->setKnowledgeDimension($input->getInput("dc"));
-            $review_form->setRating($input->getInput("dc"));
-            $review_form->setEvalComment($input->getInput("dc"));
-            $review_form->setExpertise($input->getInput("dc"));
+            $review_form->setDescRelv($input->getInput("dr"));
+            $review_form->setDescExpr($input->getInput("de"));
+            $review_form->setQuestCorr($input->getInput("qc"));
+            $review_form->setQuestRelv($input->getInput("qr"));
+            $review_form->setQuestExpr($input->getInput("qe"));
+            $review_form->setAnswCorr($input->getInput("ac"));
+            $review_form->setAnswRelv($input->getInput("ar"));
+            $review_form->setAnswExpr($input->getInput("ae"));
+            $review_form->setTaxonomy($input->getInput("cog_r"));
+            $review_form->setKnowledgeDimension($input->getInput("kno_r"));
+            $review_form->setRating($input->getInput("evaluation"));
+            $review_form->setEvalComment($input->getInput("comment"));
+            $review_form->setExpertise($input->getInput("exp"));
             $review_form->setState(1);
             $review_form->storeToDB();
             ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);

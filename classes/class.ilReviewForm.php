@@ -96,7 +96,7 @@ class ilReviewForm {
         $this->answ_relv = $answ_relv;
         $this->answ_expr = $answ_expr;
         $this->taxonomy = $taxonomy;
-        $this->knowledge_dimension = $taxonomy;
+        $this->knowledge_dimension = $knowledge_dimension;
         $this->eval_comment = $eval_comment;
         $this->rating = $rating;
         $this->expertise = $expertise;
@@ -134,7 +134,7 @@ class ilReviewForm {
             $this->answ_relv = $record->answ_relv;
             $this->answ_expr = $record->answ_expr;
             $this->taxonomy = $record->taxonomy;
-            $this->knowledge_dimension = $record->taxonomy;
+            $this->knowledge_dimension = $record->knowledge_dimension;
             $this->eval_comment = $record->eval_comment;
             $this->rating = $record->rating;
             $this->expertise = $record->expertise;
@@ -431,7 +431,7 @@ class ilReviewForm {
      *
      * @return  integer     $id             id
      */
-    public function getID() {
+    public function getId() {
         return $this->id;
     }
 

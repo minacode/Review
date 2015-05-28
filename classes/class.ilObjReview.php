@@ -252,12 +252,8 @@ class ilObjReview extends ilObjectPlugin {
      * @return  ilReviewForm    $review         review with the given ID
      */
     public function loadReviewById($review_id) {
-        foreach ($this->review_db->getReviewForms(0) as $review_form) {
-            if ($review_form->getID() == $review_id) {
-                return $review_form;
-            }
-        }
-        return count($this->review_db->getReviewForms(0));
+        $reviews = $this->review_db->getReviewForms(array("id" => $review_id));
+        return reset($reviews);
     }
 
     /*
@@ -268,29 +264,24 @@ class ilObjReview extends ilObjectPlugin {
      * @return  ilCycleQuestion     $question   question with the given ID
      */
     public function loadQuestionById($question_id) {
-        foreach ($this->review_db->getCycleQuestions(0) as $cycle_question) {
-            if ($cycle_question->getQuestionID() == $question_id) {
-                return $cycle_question;
-            }
-        }
-        return null;
+        $questions = $this->review_db->getCycleQuestions(
+            array("question_id" => $question_id)
+        );
+        return reset($questions);
     }
 
     /*
-     * Load all reviews that belong to a question from the review database
+     * Load all completed reviews for a question from the review database
      *
      * @param   int         $question_id        ID of the question
      *
      * @return  array       $reviews            ilReviewForm objects
      */
-    public function loadReviewsByQuestion($question_id) {
-        $result = array();
-        foreach ($this->review_db->getReviewForms(0) as $review_form) {
-            if ($review_form->getQuestionID() == $question_id) {
-                $result[] = $review_form;
-            }
-        }
-        return $result;
+    public function loadCompletedReviewsByQuestion($question_id) {
+        $reviews = $this->review_db->getReviewForms(
+            array("question_id" => $question_id, "state" => 1)
+        );
+        return $reviews;
     }
 
     /*
