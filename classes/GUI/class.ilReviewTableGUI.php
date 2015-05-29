@@ -1,82 +1,131 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
-
 
 include_once 'Services/Table/classes/class.ilTable2GUI.php';
 
-/**
-* Table GUI for reviews
-*
-* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
-*
-* $Id$
-*/
-
+/*
+ * Table GUI for reviews
+ *
+ * @var     string      read_cmd        command for links to passive GUIs
+ * @var     string      write_cmd       command for links to active GUIs
+ */
 class ilReviewTableGUI extends ilTable2GUI {
+    private $read_cmd;
+    private $write_cmd;
 
-	/**
-	* Constructor, configures GUI output
-	*
-	* @param		object		$a_parent_obj		GUI object that contains this object
-	* @param		string		$a_parent_cmd		Command that causes construction of this object
-	* @param		array			$reviews				associative arrays of displayed data (column => value)
-	*/
-	public function __construct($a_parent_obj, $a_parent_cmd, $reviews) {
-		global $ilCtrl, $lng;
-		parent::__construct($a_parent_obj, $a_parent_cmd);
-		$this->addColumn($lng->txt("rep_robj_xrev_title_quest"), "", "80%");
-      $this->addColumn($lng->txt("action"), "", "20%");
-      $this->setEnableHeader(true);
-      $this->setFormAction($ilCtrl->getFormAction($this->getParentObject(), 'showContent'));
-     	$this->setRowTemplate("tpl.review_table_row.html", ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory());
-      $this->setDefaultOrderField("id");
-      $this->setDefaultOrderDirection("asc");
-      
-      $ilCtrl->saveParameterByClass("ilObjReviewGUI", array("r_id", "q_id", "origin"));
-      
-		$this->setData($reviews);
- 
-      $this->setTitle($lng->txt("rep_robj_xrev_my_reviews"));
-	}
-	
 	/*
-	* Fill a single data row
-	*
-	* @param	array		$a_set		Data record, displayed as one table row
-	*/
-	protected function fillRow($a_set) {
-		global $ilCtrl, $lng;
-		$ilCtrl->setParameterByClass("ilObjReviewGUI", "r_id", $a_set["id"]);
-		$ilCtrl->setParameterByClass("ilObjReviewGUI", "q_id", $a_set["question_id"]);
+	 * Constructor, configures GUI output
+	 *
+	 * @param	object		$parent_obj		    GUI that contains this object
+	 * @param	string		$parent_cmd		    calling command
+	 * @param	array		$reviews		    ilReviewForm objects
+	 */
+    public function __construct(
+        $parent_obj,
+        $parent_cmd,
+        $reviews,
+        $read_cmd = "",
+        $write_cmd = ""
+    ) {
+        global $ilCtrl;
+
+        parent::__construct($parent_obj, $parent_cmd);
+        $this->read_cmd = $read_cmd;
+        $this->write_cmd = $write_cmd;
+
+        $this->addColumn(
+            $this->getParentObject()->getTxt("rep_robj_xrev_title_quest"),
+            "",
+            "80%"
+        );
+        $this->addColumn(
+            $this->getParentObject()->getTxt("action"),
+            "",
+            "20%"
+        );
+        $this->setEnableHeader(true);
+        $this->setFormAction($ilCtrl->getFormAction(
+            $this->getParentObject(),
+            $this->getParentCmd()
+        ));
+        $this->setRowTemplate(
+            "tpl.review_table_row.html",
+            ilPlugin::getPluginObject(
+                IL_COMP_SERVICE,
+                'Repository',
+                'robj',
+                'Review'
+            )->getDirectory()
+        );
+        $this->setDefaultOrderField("id");
+        $this->setDefaultOrderDirection("asc");
+
+        $ilCtrl->saveParameterByClass(
+            "ilObjReviewGUI",
+            array("r_id", "q_id", "origin")
+        );
+
+        $this->prepareData($reviews);
+	}
+
+    /*
+     * Make associative array from the review objects
+     *
+     * @param   array       $reviews            ilReviewForm objects
+     */
+    private function prepareData($reviews) {
+        $data = array();
+        foreach ($reviews as $review) {
+            $data[] = array(
+                "id" => $review->getID(),
+                "question_id" => $review->getQuestionID(),
+                "title" => $this->getParentObject()->getObject()
+                    ->loadQuestionById($review->getQuestionID())->getTitle(),
+                "state" => $review->getState()
+            );
+        }
+        $this->setData($data);
+    }
+	/*
+	 * Fill a single data row
+	 *
+	 * @param	array       $row                review data record
+	 */
+	protected function fillRow($row) {
+		global $ilCtrl;
+
+        $ilCtrl->setParameterByClass("ilObjReviewGUI", "r_id", $row["id"]);
+        $ilCtrl->setParameterByClass(
+            "ilObjReviewGUI",
+            "q_id",
+            $row["question_id"]
+        );
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "review");
-		$this->tpl->setVariable("TXT_TITLE", $a_set["title"]);
-		if ($a_set["state"]) {
-			$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_view"));
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "showReviews"));
-		}
-		else {
-			$this->tpl->setVariable("TXT_ACTION", $lng->txt("rep_robj_xrev_create"));
-			$this->tpl->setVariable("LINK_ACTION", $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", "inputReview"));
+
+        $this->tpl->setVariable("TXT_TITLE", $row["title"]);
+        if ($row["state"] != 0) {
+            $this->tpl->setVariable(
+                "TXT_ACTION",
+                $this->getParentObject()->getTxt("view")
+            );
+            $this->tpl->setVariable(
+                "LINK_ACTION",
+                $ilCtrl->getLinkTargetByClass(
+                    "ilObjReviewGUI",
+                    $this->read_cmd
+                )
+            );
+		} else {
+            $this->tpl->setVariable(
+                "TXT_ACTION",
+                $this->getParentObject()->getTxt("create")
+            );
+            $this->tpl->setVariable(
+                "LINK_ACTION",
+                $ilCtrl->getLinkTargetByClass(
+                    "ilObjReviewGUI",
+                    $this->write_cmd
+                )
+            );
 		}
 	}
 }

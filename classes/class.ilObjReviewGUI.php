@@ -405,73 +405,34 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 $tpl->setContent($this->form->getHtml());
         }
 
-        /**
-        * Show plugin content (question and review table)
-        */
-        protected function showContent() {
-                global $tpl, $ilTabs;
+    /*
+     * Show plugin content (question and review table)
+     */
+    protected function showContent() {
+        global $tpl, $ilTabs;
 
-                $ilTabs->activateTab("content");
+        $ilTabs->activateTab("content");
 
-                $table_q = new ilQuestionTableGUI($this, "showContent", $this->object->loadQuestionsByUser());
-                $table_r = new ilReviewTableGUI($this, "showContent", $this->object->loadReviewsByUser());
-                $tpl->setContent($table_q->getHtml() . "<br><hr><br>" . $table_r->getHtml());
-        }
+        $table_q = new ilQuestionTableGUI(
+            $this,
+            "showContent",
+            $this->object->loadQuestionsByUser(),
+            "showReviews"
+        );
+        $table_r = new ilReviewTableGUI(
+            $this,
+            "showContent",
+            $this->object->loadReviewsByUser(),
+            "showReviews",
+            "inputReview"
+        );
+        $tpl->setContent(
+            $table_q->getHtml()
+            . "<br><hr><br>"
+            . $table_r->getHtml()
+        );
+    }
 
-/*        public function inputReview() {
-                global $tpl, $ilTabs, $ilCtrl, $lng;
-                $ilTabs->activateTab("content");
-                if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "inputReview", "review")) {
-                        ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
-                        $ilCtrl->redirect($this, "showContent");
-                }
-                $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-                $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
-                $input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-                                                                                                $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-                                                                                                $this->object->getEnum("taxonomy"),
-                                                                                                $this->object->getEnum("knowledge dimension"),
-                                                                                                $this->object->getEnum("expertise"),
-                                                                                                $this->object->getEnum("rating"),
-                                                                                                $this->object->getEnum("evaluation")
-                                                 );
-                $this->initQuestionOverview();
-        $tpl->setContent($this->question_overview . $input->getHtml());
-        }
-
-        public function saveReview() {
-                global $tpl, $ilTabs, $lng, $ilCtrl;
-                $ilTabs->activateTab("content");
-                if (!ilObjReviewAccess::checkAccessToObject($_GET["r_id"], "", "saveReview", "review")) {
-                        ilUtil::sendFailure($lng->txt("rep_robj_xrev_no_access"), true);
-                        $ilCtrl->redirect($this, "showContent");
-                }
-                $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-                $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
-                $input = new ilReviewInputGUI($this, "showContent", $this->object->loadReviewById($_GET["r_id"]),
-                                                                                                $this->object->loadQuestionTaxonomyData($_GET["q_id"]),
-                                                                                                $this->object->getEnum("taxonomy"),
-                                                                                                $this->object->getEnum("knowledge dimension"),
-                                                                                                $this->object->getEnum("expertise"),
-                                                                                                $this->object->getEnum("rating"),
-                                                                                                $this->object->getEnum("evaluation")
-                                                 );
-                if ($input->checkInput()) {
-                        $form_data = array();
-                        $post_vars = array("dc", "dr", "de", "qc", "qr", "qe", "ac", "ar", "ae", "cog_r", "kno_r", "group_e", "comment", "exp");
-                        foreach ($post_vars as $post_var)
-                                $form_data[$post_var] = $input->getInput($post_var);
-                        $this->object->storeReviewById($_GET["r_id"], $form_data);
-                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-                        $ilCtrl->redirect($this, "showContent");
-                }
-                else
-                        $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
-                $input->setValuesByPost();
-                $this->initQuestionOverview();
-        $tpl->setContent($this->question_overview . $input->getHtml());
-        }
- */
     /*
      * Output reviews
      */
@@ -632,6 +593,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
      */
     public function getTxt($key) {
         return parent::txt($key);
+    }
+
+    /*
+     * Give components access to the plugin object
+     *
+     * @return  ilObjReview     $object     plugin object
+     */
+    public function getObject() {
+        return $this->object;
     }
 }
 ?>

@@ -596,5 +596,14 @@ class ilReviewForm {
     public function getExpertise() {
         return $this->expertise;
     }
+
+    /*
+     * Get the user id of the reviewer
+     *
+     * @return  integer     $reviewer       user id of the reviewer
+     */
+    public function getReviewer() {
+        return $this->reviewer;
+    }
 }
 ?>

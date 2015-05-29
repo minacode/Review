@@ -14,7 +14,6 @@ include_once "class.ilReviewDBMapper.php";
  *
  * $Id$
  */
-
 class ilObjReview extends ilObjectPlugin {
     private $group_id;
     private $review_db;
@@ -205,13 +204,13 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load all questions in the review cycle that were created by the user in all of the groups´ question pools
+     * Load all questions in the review cycle created by the current user
      *
-     * @return       array           $db_questions           the questions loaded by this function as an associative array
+     * @return  array       $questions          ilCycleQuestion objects
      */
     public function loadQuestionsByUser() {
-        global $ilDB, $ilUser;
-
+        global $ilUser;
+/*
         $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
                 "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
                 "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
@@ -222,16 +221,21 @@ class ilObjReview extends ilObjectPlugin {
         while ($db_question = $ilDB->fetchAssoc($qpl))
             $db_questions[] = $db_question;
         return $db_questions;
+ */
+        $questions = $this->review_db->getCycleQuestions(
+            array("owner" => $ilUser->getID(), "state" => 1)
+        );
+        return $questions;
     }
 
     /*
-     * Load all reviews created by the user for all questions in the groups´ question pools
+     * Load all reviews the current user has to complete
      *
-     * @return       array           $reviews                the reviews loaded by this function as an associative array
+     * @return  array       $reviews            ilReviewFormObjects
      */
     public function loadReviewsByUser() {
-        global $ilDB, $ilUser;
-
+        global $ilUser;
+/*
         $rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title, qpl_questions.question_id, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
                 "INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
                 "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=rep_robj_xrev_revi.question_id ".
@@ -241,6 +245,11 @@ class ilObjReview extends ilObjectPlugin {
         $reviews = array();
         while ($review = $ilDB->fetchAssoc($rev))
             $reviews[] = $review;
+        return $reviews;
+ */
+        $reviews = $this->review_db->getReviewForms(
+            array("reviewer" => $ilUser->getID())
+        );
         return $reviews;
     }
 
