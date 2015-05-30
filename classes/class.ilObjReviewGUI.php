@@ -33,48 +33,41 @@ include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'R
 include_once(ilPlugin::getPluginObject(IL_COMP_SERVICE, 'Repository', 'robj', 'Review')->getDirectory() .
                                  "/classes/GUI/class.ilReviewFormGUI.php");
 
-/**
-* User Interface class for Review repository object.
-*
-* User interface classes process GET and POST parameter and call
-* application classes to fulfill certain tasks.
-*
-* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
-* @author Max Friedrich <Max.Friedrich@mailbox.tu-dresden.de>
-*
-* $Id$
-*
-* Integration into control structure:
-* - The GUI class is called by ilRepositoryGUI
-* - GUI classes used by this class are ilPermissionGUI (provides the rbac
-*   screens) and ilInfoScreenGUI (handles the info screen).
-*
-* @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjReviewGUI: ilObjComponentSettingsGUI, ilAdministrationGUI, ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilReviewOutputGUI, ilReviewInputGUI, assQuestionGUI, ilReviewerAllocFormGUI, ilReviewFormGUI
-*
-*/
+/*
+ * User Interface class for Review repository object
+ *
+ * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+ * @author Max Friedrich <Max.Friedrich@mailbox.tu-dresden.de>
+ *
+ * $Id$
+ *
+ * @ilCtrl_isCalledBy ilObjReviewGUI: ilRepositoryGUI, ilAdministrationGUI
+ * @ilCtrl_isCalledBy ilObjReviewGUI: ilObjPluginDispatchGUI
+ * @ilCtrl_Calls ilObjReviewGUI: ilObjComponentSettingsGUI, ilAdministrationGUI
+ * @ilCtrl_Calls ilObjReviewGUI: ilPermissionGUI, ilInfoScreenGUI
+ * @ilCtrl_Calls ilObjReviewGUI: ilObjectCopyGUI, ilCommonActionDispatcherGUI
+ * @ilCtrl_Calls ilObjReviewGUI: assQuestionGUI, ilReviewerAllocFormGUI
+ * @ilCtrl_Calls ilObjReviewGUI: ilReviewFormGUI
+ */
 class ilObjReviewGUI extends ilObjectPluginGUI {
-        /**
-        * Initialisation
-        */
-        protected function afterConstructor() {
-                // anything needed after object has been constructed
-                // - example: append my_id GET parameter to each request
-                //   $ilCtrl->saveParameter($this, array("my_id"));
-        }
 
-        /**
-        * Get type.
-        */
-        final function getType() {
-                return "xrev";
-        }
+    /*
+     * Initialisation
+     */
+    protected function afterConstructor() {
+    }
+
+    /*
+     * Get type
+     */
+    final function getType() {
+        return "xrev";
+    }
 
     /*
      * Handles all commmands of this class, centralizes permission checks
      *
-     * @param       string          $cmd            command to be performed by
-     * this class
+     * @param       string          $cmd            command to be performed
      */
     function performCommand($cmd) {
         switch ($cmd) {
@@ -102,19 +95,19 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
     }
 
-        /**
-        * After object has been created -> jump to this command
-        */
-        function getAfterCreationCmd() {
-                return "showContent";
-        }
+    /*
+     * After object has been created -> jump to this command
+     */
+    function getAfterCreationCmd() {
+        return "showContent";
+    }
 
-        /**
-        * Get standard command
-        */
-        function getStandardCmd() {
-                return "showContent";
-        }
+    /*
+     * Get standard command
+     */
+    function getStandardCmd() {
+        return "showContent";
+    }
 
     /*
      * Set tabs
@@ -165,18 +158,18 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
         }
 
-        /**
-        * Edit plugin object properties
-        */
-        function editProperties() {
-                global $tpl, $ilTabs;
+    /*
+     * Edit plugin object properties
+     */
+    function editProperties() {
+        global $tpl, $ilTabs;
 
-                $ilTabs->activateTab("properties");
-                $this->initPropertiesForm();
-                $this->getPropertiesValues();
+        $ilTabs->activateTab("properties");
+        $this->initPropertiesForm();
+        $this->getPropertiesValues();
 
-                $tpl->setContent($this->form->getHTML());
-        }
+        $tpl->setContent($this->form->getHTML());
+    }
 
         /**
         * Input reviewer allocation
@@ -334,55 +327,52 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
     }
 
-        /**
-        * Init  form for editing plugin object properties
-        */
-        public function initPropertiesForm() {
-                global $ilCtrl;
+    /*
+     * Init  form for editing plugin object properties
+     */
+    public function initPropertiesForm() {
+        global $ilCtrl;
 
-                $this->form = new ilPropertyFormGUI();
+        $this->form = new ilPropertyFormGUI();
 
-                // title
-                $ti = new ilTextInputGUI($this->txt("title"), "title");
-                $ti->setRequired(true);
-                $this->form->addItem($ti);
+        $ti = new ilTextInputGUI($this->txt("title"), "title");
+        $ti->setRequired(true);
+        $this->form->addItem($ti);
 
-                // description
-                $ta = new ilTextAreaInputGUI($this->txt("description"), "desc");
-                $this->form->addItem($ta);
+        $ta = new ilTextAreaInputGUI($this->txt("description"), "desc");
+        $this->form->addItem($ta);
 
-                $this->form->addCommandButton("updateProperties", $this->txt("save"));
+        $this->form->addCommandButton("updateProperties", $this->txt("save"));
+        $this->form->setTitle($this->txt("edit_properties"));
+        $this->form->setFormAction($ilCtrl->getFormAction($this));
+    }
 
-                $this->form->setTitle($this->txt("edit_properties"));
-                $this->form->setFormAction($ilCtrl->getFormAction($this));
+    /*
+     * Get values for edit properties form
+     */
+    function getPropertiesValues() {
+        $values["title"] = $this->object->getTitle();
+        $values["desc"] = $this->object->getDescription();
+        $this->form->setValuesByArray($values);
+    }
+
+    /*
+     * Update properties
+     */
+    public function updateProperties() {
+        global $tpl, $lng, $ilCtrl;
+
+        $this->initPropertiesForm();
+        if ($this->form->checkInput()) {
+            $this->object->setTitle($this->form->getInput("title"));
+            $this->object->setDescription($this->form->getInput("desc"));
+            $this->object->update();
+            ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+            $ilCtrl->redirect($this, "editProperties");
         }
-
-        /**
-        * Get values for edit properties form
-        */
-        function getPropertiesValues() {
-                $values["title"] = $this->object->getTitle();
-                $values["desc"] = $this->object->getDescription();
-                $this->form->setValuesByArray($values);
-        }
-
-        /**
-        * Update properties
-        */
-        public function updateProperties() {
-                global $tpl, $lng, $ilCtrl;
-
-                $this->initPropertiesForm();
-                if ($this->form->checkInput()) {
-                        $this->object->setTitle($this->form->getInput("title"));
-                        $this->object->setDescription($this->form->getInput("desc"));
-                        $this->object->update();
-                        ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-                        $ilCtrl->redirect($this, "editProperties");
-                }
-                $this->form->setValuesByPost();
-                $tpl->setContent($this->form->getHtml());
-        }
+        $this->form->setValuesByPost();
+        $tpl->setContent($this->form->getHtml());
+    }
 
     /*
      * Show plugin content (question and review table)
