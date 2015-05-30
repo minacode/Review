@@ -223,7 +223,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs;
 
         $ilTabs->activateTab("convert");
-        $convert_form = new ilConvertQuestionTableGUI($this, "performConvertQuestion", $this->object->loadNonReviewableQuestions());
+        $convert_form = new ilConvertQuestionTableGUI(
+            $this,
+            "performConvertQuestion",
+            $this->object->loadNonReviewableQuestions()
+        );
         $tpl->setContent($convert_form->getHTML());
     }
 
@@ -234,23 +238,26 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs, $ilCtrl;
 
         $ilTabs->activateTab("convert");
-        $this->initMissingDataForm($_GET["q_id"]);
-        $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
-        $hv = new ilHiddenInputGUI("", "q_id");
-        $hv->setValue($_GET["q_id"]);
-        $this->missing_data_form->addItem($hv);
+        $this->initMissingDataForm();
+        $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
         $tpl->setContent($this->missing_data_form->getHTML());
     }
 
-    /**
-     * Init form to enter taxonomy and knowledge dimension
+    /*
+     * Init form to enter missing review-specific data
      */
     public function initMissingDataForm() {
         global $ilCtrl;
 
         $this->missing_data_form = new ilPropertyFormGUI();
-        $this->missing_data_form->setTitle($this->txt("add_taxonomy"));
-
+        $this->missing_data_form->setTitle($this->txt("missing_data"));
+        $this->missing_data_form->addCommandButton(
+            "saveConvertQuestion",
+            $this->txt("save")
+        );
+        $this->missing_data_form->setFormAction(
+            $ilCtrl->getFormAction($this) . "&q_id=" . $_GET["q_id"]
+        );
 
         $cog = new ilSelectInputGUI("", "taxonomy");
         $cog->setTitle($this->txt("taxonomy"));
@@ -279,14 +286,9 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $this->missing_data_form->addItem($topic);
 
         $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
-
-        $this->missing_data_form->addCommandButton("saveConvertQuestion", $this->txt("save"));
-
-        /* Evil hack as ILIAS won't pass this f***ing q_id */
-        $this->missing_data_form->setFormAction($ilCtrl->getFormAction($this) . "&q_id=" . $_GET["q_id"]);
     }
 
-    /**
+    /*
      * Save adding missing taxonomy data and converting the question
      */
     public function saveConvertQuestion() {
@@ -294,7 +296,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
         $ilTabs->activateTab("convert");
         $this->initMissingDataForm();
-        // if ($_GET["q_id"] == NULL) die;
         if ($this->missing_data_form->checkInput()
             && $this->missing_data_form->getInput("taxonomy") != 0
             && $this->missing_data_form->getInput("knowledge_dimension") != 0
@@ -310,7 +311,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
         ilUtil::sendFailure($lng->txt("form_input_not_valid"));
 
-        $ilCtrl->setParameter($this, "q_id", $_GET["qid"]);
+        $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
         $this->missing_data_form->setValuesByPost();
             $tpl->setContent($this->missing_data_form->getHTML());
         }

@@ -210,18 +210,7 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function loadQuestionsByUser() {
         global $ilUser;
-/*
-        $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title FROM qpl_questions ".
-                "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
-                "WHERE qpl_questions.original_id IS NULL AND qpl_questions.owner=%s ".
-                "AND (rep_robj_xrev_quest.state=%s OR rep_robj_xrev_quest.state=0) AND rep_robj_xrev_quest.review_obj=%s",
-                array("integer", "integer", "integer"),
-                array($ilUser->getId(), 1, $this->getId()));
-        $db_questions = array();
-        while ($db_question = $ilDB->fetchAssoc($qpl))
-            $db_questions[] = $db_question;
-        return $db_questions;
- */
+
         $questions = $this->review_db->getCycleQuestions(
             array("owner" => $ilUser->getID(), "state" => 1)
         );
@@ -235,18 +224,7 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function loadReviewsByUser() {
         global $ilUser;
-/*
-        $rev = $ilDB->queryF("SELECT rep_robj_xrev_revi.id, qpl_questions.title, qpl_questions.question_id, rep_robj_xrev_revi.state FROM rep_robj_xrev_revi ".
-                "INNER JOIN qpl_questions ON qpl_questions.question_id=rep_robj_xrev_revi.question_id ".
-                "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=rep_robj_xrev_revi.question_id ".
-                "WHERE rep_robj_xrev_revi.reviewer=%s AND rep_robj_xrev_revi.review_obj=%s AND (rep_robj_xrev_quest.state=1 OR rep_robj_xrev_quest.state=0)",
-                array("integer", "integer"),
-                array($ilUser->getId(), $this->getId()));
-        $reviews = array();
-        while ($review = $ilDB->fetchAssoc($rev))
-            $reviews[] = $review;
-        return $reviews;
- */
+
         $reviews = $this->review_db->getReviewForms(
             array("reviewer" => $ilUser->getID())
         );
@@ -291,43 +269,6 @@ class ilObjReview extends ilObjectPlugin {
             array("question_id" => $question_id, "state" => 1)
         );
         return $reviews;
-    }
-
-    /*
-     * Update data of an existing review by form input
-     *
-     * @param                int             $id                     ID of the review to be updated
-     * @param                array           $form_data      user input to be stored
-     */
-    public function storeReviewByID($id, $form_data) {
-        global $ilDB;
-
-        $ilDB->update("rep_robj_xrev_revi", array("timestamp" => array("integer", time()),
-                "state" => array("integer", 1),
-                "desc_corr" => array("integer", $form_data["dc"]),
-                "desc_relv" => array("integer", $form_data["dr"]),
-                "desc_expr" => array("integer", $form_data["de"]),
-                "quest_corr" => array("integer", $form_data["qc"]),
-                "quest_relv" => array("integer", $form_data["qr"]),
-                "quest_expr" => array("integer", $form_data["qe"]),
-                "answ_corr" => array("integer", $form_data["ac"]),
-                "answ_relv" => array("integer", $form_data["ar"]),
-                "answ_expr" => array("integer", $form_data["ae"]),
-                "taxonomy" => array("integer", $form_data["cog_r"]),
-                "knowledge_dimension" => array("integer", $form_data["kno_r"]),
-                "rating" => array("integer", $form_data["group_e"]),
-                "eval_comment" => array("clob", $form_data["comment"]),
-                "expertise" => array("integer", $form_data["exp"])),
-                array("id" => array("integer", $id)));
-
-        $res = $ilDB->queryF(
-            "SELECT question_id FROM rep_robj_xrev_revi"
-            . " WHERE review_obj=%s AND id=%s",
-            array("integer", "integer"),
-            array($this->getID(), $id)
-        );
-        $q_id = $ilDB->fetchObject($res)->question_id;
-        $this->checkPhaseProgress($q_id);
     }
 
     /*
@@ -939,45 +880,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load metadata of a question
-     *
-     * @param                int             $q_id                   question id
-     *
-     * @return       array           $question       $question metadata as an associative array
-     */
-    public function loadQuestionMetaData($q_id) {
-        global $ilDB;
-        $req = $ilDB->queryF(
-            "SELECT qpl_questions.title, qpl_rev_qst.learning_outcome, usr_data.firstname, usr_data.lastname ".
-            "FROM qpl_questions ".
-            "INNER JOIN usr_data ON usr_data.usr_id=qpl_questions.owner ".
-            "INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
-            "WHERE qpl_questions.question_id=%s",
-            array("integer"),
-            array($q_id)
-        );
-        return $ilDB->fetchAssoc($req);
-    }
-
-    /*
-     * Load taxonomy and knowledge dimension of a question
-     *
-     * @param                int             $q_id                   question id
-     *
-     * @return       array           $question       $question taxonomy data as an associative array
-     */
-    public function loadQuestionTaxonomyData($q_id) {
-        global $ilDB;
-        $req = $ilDB->queryF("SELECT qpl_rev_qst.taxonomy, qpl_rev_qst.knowledge_dimension ".
-                "FROM qpl_rev_qst ".
-                "WHERE qpl_rev_qst.question_id=%s",
-                array("integer"),
-                array($q_id)
-        );
-        return $ilDB->fetchAssoc($req);
-    }
-
-    /*
      * Prepare message output to inform a reviewer about
      * their allocation to a certain question
      *
@@ -1109,6 +1011,17 @@ class ilObjReview extends ilObjectPlugin {
         $ntf->setGotoLangId("rep_robj_xrev_obj_xrev");
 
         $ntf->sendMail($receivers);
+    }
+
+    /*
+     * Load all questions of a user that are not reviewable
+     *
+     * @return  array       $questions          assQuestion objects (hopefully)
+     */
+    public function loadNonReviewableQuestionsByUser() {
+        global $ilUser;
+        // TODO get all questions from all question pools of the group, filter
+        return array();
     }
 
     /*
