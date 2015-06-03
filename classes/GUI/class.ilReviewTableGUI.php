@@ -105,7 +105,7 @@ class ilReviewTableGUI extends ilTable2GUI {
         if ($row["state"] != 0) {
             $this->tpl->setVariable(
                 "TXT_ACTION",
-                $this->getParentObject()->getTxt("view")
+                $this->getParentObject()->getTxt($this->read_cmd)
             );
             $this->tpl->setVariable(
                 "LINK_ACTION",
@@ -117,7 +117,7 @@ class ilReviewTableGUI extends ilTable2GUI {
 		} else {
             $this->tpl->setVariable(
                 "TXT_ACTION",
-                $this->getParentObject()->getTxt("create")
+                $this->getParentObject()->getTxt($this->write_cmd)
             );
             $this->tpl->setVariable(
                 "LINK_ACTION",

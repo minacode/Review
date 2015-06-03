@@ -91,7 +91,7 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Do Cloning
      */
-    function doClone($a_target_id, $a_copy_id, $new_obj) {
+    function doClone($target_id, $copy_id, $new_obj) {
         $new_obj->setGroupId($this->getGroupId());
         $new_obj->update();
     }
@@ -1014,14 +1014,51 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
+     * Get all questions from all question pools of the group
+     *
+     * @return  array       $questions          assQuestion objects
+     */
+    public function getAllCourseQuestions() {
+        global $ilDB;
+
+        $questions = array();
+        // TODO use ILIAS objects for this search
+        $result = $ilDB->queryF(
+            "SELECT question_id AS id FROM qpl_questions "
+            . "INNER JOIN object_reference "
+            . "ON object_reference.obj_id = qpl_questions.obj_fi "
+            . "INNER JOIN crs_items "
+            . "ON crs_items.obj_id = object_reference.ref_id "
+            . "WHERE crs_items.parent_id = %s "
+            . "AND qpl_questions.original_id IS NULL",
+            array("integer"),
+            array($this->getGroupID())
+        );
+        while ($record = $ilDB->fetchAssoc($result)) {
+            $questions[] = assQuestion::_instantiateQuestion($record["id"]);
+        }
+        return $questions;
+    }
+
+    /*
      * Load all questions of a user that are not reviewable
      *
-     * @return  array       $questions          assQuestion objects (hopefully)
+     * @return  array       $questions          assQuestion objects
      */
     public function loadNonReviewableQuestionsByUser() {
         global $ilUser;
-        // TODO get all questions from all question pools of the group, filter
-        return array();
+
+        $questions = $this->getAllCourseQuestions();
+        return array_filter(
+            $questions,
+            function($question) use ($ilUser) {
+                return $question->getOwner() == $ilUser->getID()
+                    && strpos(
+                        $question->getQuestionType(),
+                        "Reviewable"
+                    ) === FALSE;
+            }
+        );
     }
 
     /*
@@ -1064,6 +1101,35 @@ class ilObjReview extends ilObjectPlugin {
     public function saveQuestionConversion($id, $tax, $knowd, $loutc, $topic) {
         global $ilDB;
 
+        $question = assQuestion::_instantiateQuestion($id);
+        $type_tag = sprintf(
+            "assReviewable%s",
+            substr($question->getQuestionType(), 3)
+        );
+        $type_id = $ilDB->fetchAssoc($ilDB->queryF(
+            "SELECT question_type_id FROM qpl_qst_type WHERE type_tag = %s",
+            array("text"),
+            array($type_tag)
+        ))["question_type_id"];
+        $pool = ilObject::_lookupTitle($question->getObjID());
+        $ilDB->update("qpl_questions",
+            array(
+                "question_type_fi" => array("integer", $type_id),
+                "description" => array("text", $pool . "/" . $topic)
+            ),
+            array("question_id" => array("integer", $id))
+        );
+        $ilDB->insert("qpl_rev_qst",
+            array("question_id" => array("integer", $id),
+                "taxonomy" => array("integer", $tax),
+                "knowledge_dimension" => array("integer", $knowd),
+                "learning_outcome" => array("clob", $loutc),
+                "topic" => array("text", $topic)
+            )
+        );
+        /*
+        global $ilDB;
+
         $res = $ilDB->queryF("SELECT type_tag FROM qpl_qst_type " .
                              "INNER JOIN qpl_questions ON qpl_questions.question_type_fi=qpl_qst_type.question_type_id " .
                              "WHERE question_id=%s",
@@ -1103,6 +1169,7 @@ class ilObjReview extends ilObjectPlugin {
                 "topic" => array("text", $topic)
             )
         );
+         */
     }
 
     /*

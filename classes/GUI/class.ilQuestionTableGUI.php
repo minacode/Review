@@ -5,12 +5,10 @@ include_once 'Services/Table/classes/class.ilTable2GUI.php';
 /*
  * Table GUI for questions
  *
- * @var     string      read_cmd        command for links to passive GUIs
- * @var     string      write_cmd       command for links to active GUIs
+ * @var     string      cmd             command for links to passive GUIs
  */
 class ilQuestionTableGUI extends ilTable2GUI {
-    private $read_cmd;
-    private $write_cmd;
+    private $cmd;
 
 	/*
 	 * Constructor, configures GUI output
@@ -23,16 +21,15 @@ class ilQuestionTableGUI extends ilTable2GUI {
         $parent_obj,
         $parent_cmd,
         $questions,
-        $read_cmd = "",
-        $write_cmd = ""
+        $cmd = ""
     ) {
         global $ilCtrl;
 
         parent::__construct($parent_obj, $parent_cmd);
-        $this->read_cmd = $read_cmd;
-        $this->write_cmd = $write_cmd;
+        $this->cmd = $cmd;
 
-        $this->addColumn($this->getParentObject()->getTxt("title"), "", "80%");
+        $this->addColumn($this->getParentObject()->getTxt("title"), "", "55%");
+        $this->addColumn($this->getParentObject()->getTxt("type"), "", "25%");
         $this->addColumn(
             $this->getParentObject()->getTxt("action"),
             "",
@@ -69,8 +66,9 @@ class ilQuestionTableGUI extends ilTable2GUI {
         $data = array();
         foreach ($questions as $question) {
             $data[] = array(
-                "question_id" => $question->getQuestionID(),
-                "title" => $question->getTitle()
+                "question_id" => $question->getID(),
+                "title" => $question->getTitle(),
+                "type" => $question->getQuestionType()
             );
         }
         $this->setData($data);
@@ -92,13 +90,14 @@ class ilQuestionTableGUI extends ilTable2GUI {
 		$ilCtrl->setParameterByClass("ilObjReviewGUI", "origin", "question");
 
 		$this->tpl->setVariable("TXT_TITLE", $row["title"]);
+        $this->tpl->setVariable("TXT_TYPE", $row["type"]);
         $this->tpl->setVariable(
             "TXT_ACTION",
-            $this->getParentObject()->getTxt("view")
+            $this->getParentObject()->getTxt($this->cmd)
         );
         $this->tpl->setVariable(
             "LINK_ACTION",
-            $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", $this->read_cmd)
+            $ilCtrl->getLinkTargetByClass("ilObjReviewGUI", $this->cmd)
         );
 	}
 }

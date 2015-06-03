@@ -302,5 +302,14 @@ class ilCycleQuestion {
     public function getOwner() {
         return $this->question->getOwner();
     }
+
+    /*
+     * Get the question type
+     *
+     * @return  string      $question_type  question type
+     */
+    public function getQuestionType() {
+        return $this->question->getQuestionType();
+    }
 }
 ?>

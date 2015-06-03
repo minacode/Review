@@ -8,13 +8,13 @@ include_once 'Modules/TestQuestionPool/classes/class.assQuestion.php';
  */
 class ilConvertQuestionTableGUI extends ilTable2GUI {
 
-	/**
-	* Constructor, configures GUI output
-	*
-	* @param		object		$a_parent_obj		GUI object that contains this object
-	* @param		string		$a_parent_cmd		Command that causes construction of this object
-	* @param		array			$questions			associative arrays of displayed data (column => value)
-	*/
+	/*
+	 * Constructor, configures GUI output
+	 *
+	 * @param		object		$a_parent_obj		GUI object that contains this object
+	 * @param		string		$a_parent_cmd		Command that causes construction of this object
+	 * @param		array			$questions			associative arrays of displayed data (column => value)
+	 */
 	public function __construct($a_parent_obj, $a_parent_cmd, $questions) {
 		global $ilCtrl, $lng;
 		parent::__construct($a_parent_obj, $a_parent_cmd);
@@ -38,10 +38,10 @@ class ilConvertQuestionTableGUI extends ilTable2GUI {
 	}
 
 	/*
-	* Fill a single data row
-	*
-	* @param	array		$a_set		Data record, displayed as one table row
-	*/
+	 * Fill a single data row
+	 *
+	 * @param	array		$set		Data record, displayed as one table row
+	 */
 	protected function fillRow($a_set) {
 		global $ilCtrl, $lng;
 		$ilCtrl->saveParameterByClass("ilObjReviewGUI", array("q_id"));

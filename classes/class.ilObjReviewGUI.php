@@ -223,10 +223,11 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs;
 
         $ilTabs->activateTab("convert");
-        $convert_form = new ilConvertQuestionTableGUI(
+        $convert_form = new ilQuestionTableGUI(
             $this,
-            "performConvertQuestion",
-            $this->object->loadNonReviewableQuestions()
+            "convertQuestion",
+            $this->object->loadNonReviewableQuestionsByUser(),
+            "performConvertQuestion"
         );
         $tpl->setContent($convert_form->getHTML());
     }
@@ -313,8 +314,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
 
         $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
         $this->missing_data_form->setValuesByPost();
-            $tpl->setContent($this->missing_data_form->getHTML());
-        }
+        $tpl->setContent($this->missing_data_form->getHTML());
+    }
 
         /**
         * Init form for reviewer allocation
