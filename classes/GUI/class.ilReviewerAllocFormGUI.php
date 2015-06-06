@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GUI class for the List of reviewer allocation matrizes
+ * GUI class for the list of reviewer allocation matrizes
  */
 class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
 

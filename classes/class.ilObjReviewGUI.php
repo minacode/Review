@@ -171,50 +171,50 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $tpl->setContent($this->form->getHTML());
     }
 
-        /**
-        * Input reviewer allocation
-        */
-        function allocateReviewers() {
-                global $tpl, $ilTabs;
+    /*
+     * Input reviewer allocation
+     */
+    function allocateReviewers() {
+        global $tpl, $ilTabs;
 
-                $ilTabs->activateTab("allocation");
-        $this->initReviewerAllocForm();
-        $this->alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
-        //$this->alloc_form->setValuesByPost();
-        $tpl->setContent($this->alloc_form->getHTML());
-        }
+        $ilTabs->activateTab("allocation");
+        $alloc_form = new ilReviewerAllocFormGUI($this->object->loadMembers, $this->object->loadPhases, $this);
+        $alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
+        //$alloc_form->setValuesByPost();
+        $tpl->setContent($alloc_form->getHTML());
+    }
 
-        /**
-        * Check and save reviewer allocation
-        */
-        function saveAllocateReviewers() {
-            global $tpl, $ilTabs, $lng, $ilCtrl;
+    /*
+     * Check and save reviewer allocation
+     */
+    function saveAllocateReviewers() {
+        global $tpl, $ilTabs, $lng, $ilCtrl;
 
-            $ilTabs->activateTab("allocation");
-            $this->initReviewerAllocForm();
-    
-            if ($this->alloc_form->checkInput()) {
-                $rows = array();
-                foreach ($this->alloc_form->getItems() as $item) {
-                    if (method_exists($item, "getPostVars")) {
-                        $row_postvars = $item->getPostVars();
-                        $row_values = array();
-                        foreach ($row_postvars as $row_postvar)
-                            $row_values[$row_postvar] = $this->alloc_form->getInput($row_postvar);
-                        $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
-                    }
-                    if ($item instanceof ilNumberInputGUI) {
-                        $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $this->alloc_form->getInput($item->getPostVar()));
-                    }
+        $ilTabs->activateTab("allocation");
+        $alloc_form = new ilReviewerAllocFormGUI($this->object->loadMembers, $this->object->loadPhases, $this);
+
+        if ($alloc_form->checkInput()) {
+            $rows = array();
+            foreach ($alloc_form->getItems() as $item) {
+                if (method_exists($item, "getPostVars")) {
+                    $row_postvars = $item->getPostVars();
+                    $row_values = array();
+                    foreach ($row_postvars as $row_postvar)
+                        $row_values[$row_postvar] = $alloc_form->getInput($row_postvar);
+                    $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
                 }
-                $this->object->allocateReviewers($rows);
-                ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-                $ilCtrl->redirect($this, "allocateReviewers");
-            } else {
-                $this->alloc_form->setValuesByPost();
-                $tpl->setContent($this->alloc_form->getHTML());
+                if ($item instanceof ilNumberInputGUI) {
+                    $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $alloc_form->getInput($item->getPostVar()));
+                }
             }
+            $this->object->allocateReviewers($rows);
+            ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+            $ilCtrl->redirect($this, "allocateReviewers");
+        } else {
+            $alloc_form->setValuesByPost();
+            $tpl->setContent($alloc_form->getHTML());
         }
+    }
 
     /*
      * Select old questions to make them reviewable
@@ -315,18 +315,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
         $this->missing_data_form->setValuesByPost();
         $tpl->setContent($this->missing_data_form->getHTML());
-    }
-
-        /**
-        * Init form for reviewer allocation
-        */
-        public function initReviewerAllocForm() {
-                global $ilCtrl;
-
-                $members = $this->object->loadMembers();
-        $phases = $this->object->loadPhases();
-
-        $this->alloc_form = new ilReviewerAllocFormGUI($members, $phases, $this);
     }
 
     /*
