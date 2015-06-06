@@ -411,7 +411,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs, $ilCtrl, $lng;
         if (
             !ilObjReviewAccess::checkAccessToObject(
-                $_GET[substr($_GET["origin"], 0, 1)."_id"],
+                $this->object,
+                $_GET["q_id"],
                 "",
                 "showReviews",
                 $_GET["origin"]
@@ -424,21 +425,22 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $output = "";
         $review_forms =
             $this->object->loadCompletedReviewsByQuestion($_GET["q_id"]);
+        $question = $this->object->loadQuestionByID($_GET["q_id"]);
         if (count($review_forms) == 0) {
             $output = $this->txt("no_reviews_for_question");
         } else {
             foreach ($review_forms as $review_form) {
                 $form_gui = new ilReviewFormGUI(
                     $review_form,
-                    $this->object->loadQuestionByID($_GET["q_id"]),
+                    $question,
                     $this,
                     true
                 );
                 $output .= $form_gui->getHTML();
             }
         }
-        $this->initQuestionOverview();
-        $tpl->setContent($this->question_overview . $output);
+        $question_overview = new ilQuestionOverviewGUI($this, $question);
+        $tpl->setContent($question_overview->getHTML() . $output);
     }
 
     /*
@@ -450,6 +452,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $ilTabs->activateTab("content");
         if (
             !ilObjReviewAccess::checkAccessToObject(
+                $this->object,
                 $_GET["r_id"],
                 "",
                 "inputReview",
@@ -461,14 +464,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         }
         $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
         $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
+        $question = $this->object->loadQuestionByID($_GET["q_id"]);
         $input = new ilReviewFormGUI(
             $this->object->loadReviewByID($_GET["r_id"]),
-            $this->object->loadQuestionByID($_GET["q_id"]),
+            $question,
             $this,
             false
         );
-        $this->initQuestionOverview();
-        $tpl->setContent($this->question_overview . $input->getHtml());
+        $question_overview = new ilQuestionOverviewGUI($this, $question);
+        $tpl->setContent($question_overview->getHTML() . $input->getHtml());
     }
 
     /*
@@ -492,9 +496,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
         $ilCtrl->setParameter($this, "q_id", $_GET["q_id"]);
         $review_form = $this->object->loadReviewByID($_GET["r_id"]);
+        $question = $this->object->loadQuestionByID($_GET["q_id"]);
         $input = new ilReviewFormGUI(
             $review_form,
-            $this->object->loadQuestionByID($_GET["q_id"]),
+            $question,
             $this,
             false
         );
@@ -521,8 +526,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $ilCtrl->setParameter($this, "r_id", $_GET["r_id"]);
         }
         $input->setValuesByPost();
-        $this->initQuestionOverview();
-        $tpl->setContent($this->question_overview . $input->getHtml());
+        $question_overview = new ilQuestionOverviewGUI($this, $question);
+        $tpl->setContent($question_overview->getHTML() . $input->getHtml());
     }
 
     /*
@@ -534,8 +539,8 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $this->question_overview = "";
         } else {
             $q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
-            $quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
-            $this->question_overview = $quest->getHTML();
+            //$quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
+            //$this->question_overview = $quest->getHTML();
         }
     }
 

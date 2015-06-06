@@ -56,6 +56,7 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 	/*
 	 * Check, if user is allowed to edit or view specific reviews
 	 *
+     * @param   ilObjReview $review_plugin  the review plugin object
 	 * @param	int			$obj_id 		object id
 	 * @param	int			$user_id		user id
 	 * @param	string		$cmd			command
@@ -63,7 +64,13 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 	 *
 	 * @return	boolean 	$_              true, if user gets access
 	 */
-	static function checkAccessToObject($obj_id, $user_id, $cmd, $obj_type) {
+    static function checkAccessToObject(
+        $review_plugin,
+        $obj_id,
+        $user_id,
+        $cmd,
+        $obj_type
+    ) {
 		global $ilDB, $ilUser;
 
 		if ($user_id == "") {
@@ -73,6 +80,12 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 		switch ($cmd) {
 			case "inputReview":
 			case "saveReview":
+                if (count($review_plugin->review_db->getReviewForms(
+                    array("id" => $obj_id, "reviewer" => $user_id)
+                )) == 1) {
+                    return true;
+                }
+                /*
                 $res = $ilDB->queryF(
                     "SELECT COUNT(id) FROM rep_robj_xrev_revi "
                     . "WHERE id=%s AND reviewer=%s",
@@ -82,8 +95,24 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 				if ($ilDB->fetchAssoc($res)["count(id)"] == 1) {
 					return true;
                 }
+                */
 				break;
 			case "showReviews":
+                if ($obj_type == "review") {
+                    if (count($review_plugin->review_db->getReviewForms(
+                        array("question_id" => $obj_id, "reviewer" => $user_id)
+                    )) == 1) {
+                        return true;
+                    }
+                }
+                if ($obj_type == "question") {
+                    if (count($review_plugin->review_db->getCycleQuestions(
+                        array("question_id" => $obj_id, "owner" => $user_id)
+                    )) == 1) {
+                        return true;
+                    }
+                }
+                /*
 				if ($obj_type == "review") {
                     $res = $ilDB->queryF(
                         "SELECT COUNT(id) FROM rep_robj_xrev_revi "
@@ -106,6 +135,7 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
 						return true;
                     }
 				}
+                */
 				break;
 		}
 		return false;

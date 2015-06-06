@@ -1,21 +1,21 @@
 <?php
 
 include_once("./Services/Repository/classes/class.ilRepositoryObjectPlugin.php");
- 
-/**
-* Review repository object plugin
-*
-* @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
-* @version $Id$
-*
-*/
+
+/*
+ * Review repository object plugin
+ *
+ * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
+ * @version $Id$
+ *
+ */
 class ilReviewPlugin extends ilRepositoryObjectPlugin {
-	
-	/**
-	* get the plugin name
-	*
-	* @param		string		$_			name of the plugin
-	*/
+
+	/*
+	 * Get the plugin name
+	 *
+	 * @param		string		$_			name of the plugin
+	 */
 	function getPluginName() {
 		return "Review";
 	}

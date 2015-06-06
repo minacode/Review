@@ -16,7 +16,7 @@ include_once "class.ilReviewDBMapper.php";
  */
 class ilObjReview extends ilObjectPlugin {
     private $group_id;
-    private $review_db;
+    public $review_db;
 
     /*
      * Constructor

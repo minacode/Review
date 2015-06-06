@@ -66,7 +66,7 @@ class ilQuestionTableGUI extends ilTable2GUI {
         $data = array();
         foreach ($questions as $question) {
             $data[] = array(
-                "question_id" => $question->getID(),
+                "question_id" => $question->getQuestionID(),
                 "title" => $question->getTitle(),
                 "type" => $question->getQuestionType()
             );

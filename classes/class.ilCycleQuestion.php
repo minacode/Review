@@ -75,6 +75,7 @@ class ilCycleQuestion {
             $this->timestamp = $record->timestamp;
             $this->question
                 = assQuestion::_instantiateQuestion($this->question_id);
+            $this->question->loadFromDB($id);
             return true;
         } else {
             return false;
@@ -201,7 +202,7 @@ class ilCycleQuestion {
      * @return  integer     $question_id    question id
      */
     public function getQuestionID() {
-        return $this->question_id;
+        return $this->question->getId();
     }
 
     /*
