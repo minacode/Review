@@ -111,12 +111,12 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load all questions from the groups´ Question Pools,
-     * thus updating the plugin´s question db
+     * Synchronize the plugin question database with the ILIAS question pools
      */
     private function syncQuestionDB() {
-        global $ilDB, $ilUser, $ilPluginAdmin;
+        global $ilDB;
 
+        /*
         function cmp_rec($a, $b) {
             if ($a["question_id"] > $b["question_id"])
                 return 1;
@@ -124,9 +124,9 @@ class ilObjReview extends ilObjectPlugin {
                 return -1;
             return 0;
         }
+         */
 
-        // uncomment as soos as needed
-        // $ilDB->lockTables(array("qpl_questions", "rep_robj_xrev_quest"));
+        /*
         $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
                 "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
                 "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
@@ -144,7 +144,11 @@ class ilObjReview extends ilObjectPlugin {
         $pl_questions = array();
         while ($pl_question = $ilDB->fetchAssoc($pqs))
             $pl_questions[] = $pl_question;
+         */
+        $qpl_questions = $this->getAllCourseQuestions();
+        $plg_questions = $this->review_db->getCycleQuestions(array());
 
+        /*
         foreach ($db_questions as $db_question) {
             foreach ($pl_questions as $pl_question) {
                 if ($db_question["question_id"] == $pl_question["question_id"]) {
@@ -156,15 +160,6 @@ class ilObjReview extends ilObjectPlugin {
                                 )
                         );
                         //$this->copyReviewsToHistory($db_question["question_id"]);
-                        /*
-                        $ilDB->update("rep_robj_xrev_revi",
-                                array("state" => array("integer", 0)),
-                                array("question_id" => array("integer", $db_question["question_id"]),
-                                        "review_obj" => array("integer", $this->getId())
-                                )
-                        );
-                        $this->notifyReviewersAboutChange($db_question);
-                         */
                         if ($pl_question["state"] == 0) {
                             $this->proceedToNextPhase($db_question["question_id"]);
                         }
@@ -173,7 +168,21 @@ class ilObjReview extends ilObjectPlugin {
                 }
             }
         }
+         */
 
+        $cmp_qst = function($question_a, $question_b) {
+            if ($question_a->getID() > $question_b->getID()) {
+                return 1;
+            }
+            if ($question_a->getID() < $question_b->getID()) {
+                return -1;
+            }
+            return 0;
+        };
+        $new_questions = array_udiff($qpl_questions, $plg_questions, $cmp_qst);
+        $del_questions = array_udiff($plg_questions, $qpl_questions, $cmp_qst);
+
+        /*
         foreach (array_udiff($db_questions, $pl_questions, "cmp_rec") as $new_question) {
             $ilDB->insert("rep_robj_xrev_quest", array("id" => array("integer", $ilDB->nextId("rep_robj_xrev_quest")),
                             "question_id" => array("integer", $new_question["question_id"]),
@@ -186,7 +195,26 @@ class ilObjReview extends ilObjectPlugin {
             $this->proceedToNextPhase($new_question["question_id"]);
             $this->notifyAdminsAboutNewQuestion($new_question);
         }
+         */
 
+        foreach ($new_questions as $new_question) {
+            $new_cycle_question = new ilCycleQuestion(
+                $ilDB,
+                $this->review_db,
+                $this->getID(),
+                $new_question->getID(),
+                0,
+                0,
+                self::getQuestionTimestamp($new_question->getID()),
+                $new_question,
+                $ilDB->nextID("rep_robj_xrev_quest")
+            );
+            $new_cycle_question->storeToDB();
+            $this->proceedToNextPhase($new_cycle_question);
+            $this->notifyAdminsAboutNewQuestion($new_cycle_question);
+        }
+
+        /*
         foreach (array_udiff($pl_questions, $db_questions, "cmp_rec") as $del_question) {
             $this->notifyReviewersAboutDeletion($del_question);
             $ilDB->manipulateF("DELETE FROM rep_robj_xrev_quest WHERE question_id=%s AND review_obj=%s",
@@ -198,9 +226,44 @@ class ilObjReview extends ilObjectPlugin {
                     array($del_question["question_id"], $this->getId())
             );
         }
+         */
 
-        //uncomment as soon as needed
-        // $ilDB->unlockTables();
+        foreach ($del_questions as $del_question) {
+            $this->notifyReviewersAboutDeletion(
+                // TODO change notify function to use the object
+                array($del_question->getID())
+            );
+            $reviews = $this->review_db->getReviewForms(
+                array("question_id" => $del_question->getID())
+            );
+            foreach ($reviews as $review) {
+                $review->copyToHistory();
+                $review->deleteFromDB();
+            }
+            $del_question->deleteFromDB();
+        }
+
+        $qpl_questions = $this->getAllCourseQuestions();
+        $plg_questions = $this->review_db->getCycleQuestions(array());
+
+        foreach ($qpl_questions as $qpl_question) {
+            foreach ($plg_questions as $plg_question) {
+                if (
+                    $qpl_question->getID()
+                    == $plg_question->getID()
+                    && self::getQuestionTimestamp($qpl_question->getID())
+                    > $plg_question->getTimestamp()
+                ) {
+                    $plg_question->setTimestamp(
+                        self::getQuestionTimestamp($qpl_question->getID())
+                    );
+                    $plg_question->storeToDB();
+                    if ($plg_question->getState() == 0) {
+                        $this->proceedToNextPhase($plg_question);
+                    }
+                }
+            }
+        }
     }
 
     /*
@@ -401,6 +464,10 @@ class ilObjReview extends ilObjectPlugin {
 
     public function proceedToNextPhase($q_id) {
         global $ilDB;
+
+        if ($q_id instanceof ilCycleQuestion) {
+            $q_id = $q_id->getID();
+        }
 
         $max_phase = 0;
         foreach ($this->loadPhases() as $phase) {
@@ -1062,34 +1129,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load all questions that are not reviewable
-     *
-     * @return   array       $questions      associative array of question data
-     */
-    public function loadNonReviewableQuestions() {
-        global $ilDB, $ilUser;
-
-        $res = $ilDB->queryF(
-            "SELECT question_id, type_tag, title, author FROM qpl_questions"
-            . " INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi"
-            . " INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id"
-            . " INNER JOIN qpl_qst_type ON qpl_qst_type.question_type_id=qpl_questions.question_type_fi"
-            . " WHERE crs_items.parent_id=%s AND qpl_questions.owner=%s",
-            array("integer", "integer"),
-            array($this->getGroupId(), $ilUser->getID())
-        );
-
-        $questions = array();
-        while ($question = $ilDB->fetchAssoc($res))
-            $questions[] = $question;
-        foreach ($questions as $index => $question) {
-            if (strpos($question["type_tag"], "assReviewable") !== FALSE)
-                unset($questions[$index]);
-        }
-        return $questions;
-    }
-
-    /*
      * Update a former non reviewable question
      *
      * @param   int         $id         id of the question to update
@@ -1127,49 +1166,6 @@ class ilObjReview extends ilObjectPlugin {
                 "topic" => array("text", $topic)
             )
         );
-        /*
-        global $ilDB;
-
-        $res = $ilDB->queryF("SELECT type_tag FROM qpl_qst_type " .
-                             "INNER JOIN qpl_questions ON qpl_questions.question_type_fi=qpl_qst_type.question_type_id " .
-                             "WHERE question_id=%s",
-                             array("integer"),
-                             array($id)
-               );
-        $old_type = $ilDB->fetchAssoc($res)["type_tag"];
-        $new_type = sprintf("assReviewable%s", substr($old_type, 3));
-        $res = $ilDB->queryF("SELECT question_type_id FROM qpl_qst_type " .
-                             "WHERE type_tag=%s",
-                             array("text"),
-                             array($new_type)
-               );
-        $type_id = $ilDB->fetchAssoc($res)["question_type_id"];
-        $res = $ilDB->queryF(
-            "SELECT object_data.title"
-            . " FROM object_data"
-            . " INNER JOIN qpl_questions"
-            . " ON object_data.obj_id = qpl_questions.obj_fi"
-            . " WHERE qpl_questions.question_id = %s",
-            array("integer"),
-            array($id)
-        );
-        $pool = $ilDB->fetchAssoc($res)["title"];
-        $ilDB->update("qpl_questions",
-            array(
-                "question_type_fi" => array("integer", $type_id),
-                "description" => array("text", $pool . "/" . $topic)
-            ),
-            array("question_id" => array("integer", $id))
-        );
-        $ilDB->insert("qpl_rev_qst",
-            array("question_id" => array("integer", $id),
-                "taxonomy" => array("integer", $tax),
-                "knowledge_dimension" => array("integer", $knowd),
-                "learning_outcome" => array("clob", $loutc),
-                "topic" => array("text", $topic)
-            )
-        );
-         */
     }
 
     /*
@@ -1257,5 +1253,25 @@ class ilObjReview extends ilObjectPlugin {
             }
             return $return_values;
         }
+
+    /*
+     * Look up the timestamp of a question in the ILIAS database
+     *
+     * @param   integer     $question_id        question id
+     *
+     * @return  integer     $timestamp          timestamp
+     */
+    static function getQuestionTimestamp($question_id) {
+        global $ilDB;
+
+        $result = $ilDB->queryF(
+            "SELECT tstamp FROM qpl_questions WHERE question_id = %s",
+            array("integer"),
+            array($question_id)
+        );
+        $record = $ilDB->fetchObject($result);
+        file_put_contents("debug_log", $record->tstamp."\n", FILE_APPEND);
+        return $record->tstamp;
+    }
 }
 ?>

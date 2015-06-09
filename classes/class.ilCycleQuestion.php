@@ -2,7 +2,7 @@
 /*
  * Encapsulated data of a question in the review cycle
  *
- * @var     integer     $id             unique object identifier
+ * @var     integer     $cycle_id             unique object identifier
  * @var     integer     $review_obj     id of the calling review object
  * @var     integer     $question_id    id of the corresponding ILIAS question
  * @var     integer     $state          current state
@@ -15,7 +15,7 @@
  * TODO     replace integer constants with enums
  */
 class ilCycleQuestion {
-    private $id;
+    private $cycle_id;
     private $review_obj;
     private $question_id;
     private $state;
@@ -31,43 +31,43 @@ class ilCycleQuestion {
     public function __construct(
         $db,
         $mapper,
-        $id = "",
         $review_obj = "",
         $question_id = "",
         $state = "",
         $phase = "",
         $timestamp = "",
-        $question = ""
+        $question = "",
+        $cycle_id = ""
     ) {
         $this->db = $db;
         $this->mapper = $mapper;
-        $this->id = $id;
         $this->review_obj = $review_obj;
         $this->question_id = $question_id;
         $this->state = $state;
         $this->phase = $phase;
         $this->timestamp = $timestamp;
         $this->question = $question;
+        $this->cycle_id = $cycle_id;
     }
 
     /*
      * Load the data of a question object from the database
      *
-     * @param   integer     $id             id of the question in the review
+     * @param   integer     $cycle_id             id of the question in the review
      * cycle (NOT the ILIAS object id!)
      *
      * @return  boolean     $success        true, if operation was performed
      */
-    public function loadFromDB($id) {
+    public function loadFromDB($cycle_id) {
         $result = $this->db->queryF(
             "SELECT * FROM rep_robj_xrev_quest WHERE id = %s",
             array("integer"),
-            array($id)
+            array($cycle_id)
         );
 
         if ($result->numRows() == 1) {
             $record = $this->db->fetchObject($result);
-            $this->id = $record->id;
+            $this->cycle_id = $record->id;
             $this->review_obj = $record->review_obj;
             $this->question_id = $record->question_id;
             $this->state = $record->state;
@@ -75,7 +75,6 @@ class ilCycleQuestion {
             $this->timestamp = $record->timestamp;
             $this->question
                 = assQuestion::_instantiateQuestion($this->question_id);
-            $this->question->loadFromDB($id);
             return true;
         } else {
             return false;
@@ -88,21 +87,21 @@ class ilCycleQuestion {
      * @return  boolean     $success        true, if operation was performed
      */
     public function storeToDB() {
-        if ($this->id == "") {
+        if ($this->cycle_id == "") {
             return false;
         }
 
         $result = $this->db->queryF(
             "SELECT * FROM rep_robj_xrev_quest WHERE id = %s",
             array("integer"),
-            array($this->id)
+            array($this->cycle_id)
         );
 
         if ($result->numRows() == 0) {
             $this->db->insert(
                 "rep_robj_xrev_quest",
                 array(
-                    "id" => array("integer", $this->id),
+                    "id" => array("integer", $this->cycle_id),
                     "review_obj" => array("integer", $this->review_obj),
                     "question_id" => array("integer", $this->question_id),
                     "state" => array("integer", $this->state),
@@ -120,7 +119,7 @@ class ilCycleQuestion {
                     "phase" => array("integer", $this->phase),
                     "timestamp" => array("integer", $this->timestamp)
                 ),
-                array("id" => array("integer", $this->id))
+                array("id" => array("integer", $this->cycle_id))
             );
         }
         /*
@@ -138,14 +137,14 @@ class ilCycleQuestion {
      * @return  boolean     $success        true, if operation was performed
      */
     public function deleteFromDB() {
-        if ($this->id == "") {
+        if ($this->cycle_id == "") {
             return false;
         }
 
         $this->db->manipulateF(
             "DELETE FROM rep_robj_xrev_quest WHERE id = %s",
             array("integer"),
-            array($this->id)
+            array($this->cycle_id)
         );
         $this->mapper->notifyAboutChanges("cycle_questions");
         return true;
@@ -179,12 +178,12 @@ class ilCycleQuestion {
     }
 
     /*
-     * Get the ID
+     * Get the question ID
      *
      * @return  integer     $id             id
      */
     public function getID() {
-        return $this->id;
+        return $this->question_id;
     }
 
     /*
@@ -197,12 +196,12 @@ class ilCycleQuestion {
     }
 
     /*
-     * Get the question ID
+     * Get the cycle ID
      *
-     * @return  integer     $question_id    question id
+     * @return  integer     $cycle          id in the review cycle
      */
-    public function getQuestionID() {
-        return $this->question->getId();
+    public function getCycleID() {
+        return $this->cycle_id;
     }
 
     /*

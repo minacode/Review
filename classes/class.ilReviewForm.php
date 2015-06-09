@@ -238,7 +238,6 @@ class ilReviewForm {
             array(
                 "id" => array("integer", $this->id),
                 "question_id" => array("integer", $this->question_id),
-                "state" => array("integer", $this->state),
                 "reviewer" => array("integer", $this->reviewer),
                 "timestamp" => array("integer", $this->timestamp),
                 "desc_corr" => array("integer", $this->desc_corr),

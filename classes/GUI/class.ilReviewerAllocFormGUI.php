@@ -13,7 +13,6 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
         $this->setTitle($lng->txt("phases"));
         $this->setFormAction($ilCtrl->getFormAction($this));
 
-
         $member_names = array();
         foreach ($members as $member) {
             $member->name = $member->firstname . ' ' . $member->lastname;
@@ -39,14 +38,11 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             $nr_input->setMinValue(1);
             $nr_input->setRequired(true);
             $this->addItem($nr_input);
-
-
         }
 
         $this->addCommandButton("saveAllocateReviewers", $lng->txt("save"));
         $this->addCommandButton("addPhase", $lng->txt("add_phase"));
         $this->addCommandButton("removePhase", $lng->txt("remove_phase"));
-        // $this->setFormAction($ilCtrl->getFormActionByClass("ilObjReviewGUI", "allocateReviewers"));
     }
 
     /*
