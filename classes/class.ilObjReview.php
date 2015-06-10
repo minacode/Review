@@ -116,59 +116,8 @@ class ilObjReview extends ilObjectPlugin {
     private function syncQuestionDB() {
         global $ilDB;
 
-        /*
-        function cmp_rec($a, $b) {
-            if ($a["question_id"] > $b["question_id"])
-                return 1;
-            if ($a["question_id"] < $b["question_id"])
-                return -1;
-            return 0;
-        }
-         */
-
-        /*
-        $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS question_id, tstamp FROM qpl_questions ".
-                "INNER JOIN object_reference ON object_reference.obj_id=qpl_questions.obj_fi ".
-                "INNER JOIN crs_items ON crs_items.obj_id=object_reference.ref_id ".
-                "INNER JOIN qpl_rev_qst ON qpl_rev_qst.question_id=qpl_questions.question_id ".
-                "WHERE crs_items.parent_id=%s AND qpl_questions.original_id IS NULL",
-                array("integer"),
-                array($this->getGroupId())
-        );
-        $db_questions = array();
-        while ($db_question = $ilDB->fetchAssoc($qpl))
-            $db_questions[] = $db_question;
-        $pqs = $ilDB->queryF("SELECT * FROM rep_robj_xrev_quest WHERE review_obj=%s",
-                array("integer"), array($this->getId())
-        );
-        $pl_questions = array();
-        while ($pl_question = $ilDB->fetchAssoc($pqs))
-            $pl_questions[] = $pl_question;
-         */
         $qpl_questions = $this->getAllCourseQuestions();
         $plg_questions = $this->review_db->getCycleQuestions(array());
-
-        /*
-        foreach ($db_questions as $db_question) {
-            foreach ($pl_questions as $pl_question) {
-                if ($db_question["question_id"] == $pl_question["question_id"]) {
-                    if ($db_question["tstamp"] > $pl_question["timestamp"]) {
-                        $ilDB->update("rep_robj_xrev_quest",
-                                array("timestamp" => array("integer", $db_question["tstamp"])),
-                                array("question_id" => array("integer", $db_question["question_id"]),
-                                        "review_obj" => array("integer", $this->getId())
-                                )
-                        );
-                        //$this->copyReviewsToHistory($db_question["question_id"]);
-                        if ($pl_question["state"] == 0) {
-                            $this->proceedToNextPhase($db_question["question_id"]);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-         */
 
         $cmp_qst = function($question_a, $question_b) {
             if ($question_a->getID() > $question_b->getID()) {
@@ -181,21 +130,6 @@ class ilObjReview extends ilObjectPlugin {
         };
         $new_questions = array_udiff($qpl_questions, $plg_questions, $cmp_qst);
         $del_questions = array_udiff($plg_questions, $qpl_questions, $cmp_qst);
-
-        /*
-        foreach (array_udiff($db_questions, $pl_questions, "cmp_rec") as $new_question) {
-            $ilDB->insert("rep_robj_xrev_quest", array("id" => array("integer", $ilDB->nextId("rep_robj_xrev_quest")),
-                            "question_id" => array("integer", $new_question["question_id"]),
-                            "timestamp" => array("integer", $new_question["tstamp"]),
-                            "state" => array("integer", 0),
-                            "phase" => array("integer", 0),
-                            "review_obj" => array("integer", $this->getId())
-                    )
-            );
-            $this->proceedToNextPhase($new_question["question_id"]);
-            $this->notifyAdminsAboutNewQuestion($new_question);
-        }
-         */
 
         foreach ($new_questions as $new_question) {
             $new_cycle_question = new ilCycleQuestion(
@@ -213,20 +147,6 @@ class ilObjReview extends ilObjectPlugin {
             $this->proceedToNextPhase($new_cycle_question);
             $this->notifyAdminsAboutNewQuestion($new_cycle_question);
         }
-
-        /*
-        foreach (array_udiff($pl_questions, $db_questions, "cmp_rec") as $del_question) {
-            $this->notifyReviewersAboutDeletion($del_question);
-            $ilDB->manipulateF("DELETE FROM rep_robj_xrev_quest WHERE question_id=%s AND review_obj=%s",
-                    array("integer", "integer"),
-                    array($del_question["question_id"], $this->getId())
-            );
-            $ilDB->manipulateF("DELETE FROM rep_robj_xrev_revi WHERE question_id=%s AND review_obj=%s",
-                    array("integer", "integer"),
-                    array($del_question["question_id"], $this->getId())
-            );
-        }
-         */
 
         foreach ($del_questions as $del_question) {
             $this->notifyReviewersAboutDeletion(
@@ -261,6 +181,7 @@ class ilObjReview extends ilObjectPlugin {
                     if ($plg_question->getState() == 0) {
                         $this->proceedToNextPhase($plg_question);
                     }
+                    break;
                 }
             }
         }
@@ -378,46 +299,32 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Check if all reviews for a question are completed and evaluate them
      *
-     * @param       integer         $q_id           question id
+     * @param       ilCycleQuestion     $question       question
      */
-    public function checkPhaseProgress($q_id) {
-        global $ilDB;
-
-        $res = $ilDB->queryF(
-            "SELECT rating, state FROM rep_robj_xrev_revi"
-            . " WHERE review_obj=%s AND question_id=%s",
-            array("integer", "integer"),
-            array($this->getID(), $q_id)
+    public function checkPhaseProgress($question) {
+        $reviews = $this->review_db->getReviewForms(
+            array("question_id" => $question->getID())
         );
-        $reviews = array();
-        while ($review = $ilDB->fetchObject($res)) {
-            $reviews[] = $review;
-        }
         $accepted = true;
         $refused = true;
         foreach ($reviews as $review) {
-            if ($review->state == 0) {
+            if ($review->getState() == 0) {
                 return;
             }
-            $accepted &= $review->rating == 1;
-            $refused &= $review->rating == 3;
+            $accepted &= $review->getRating() == 1;
+            $refused &= $review->getRating() == 3;
         }
         if ($accepted) {
-            $this->proceedToNextPhase($q_id);
+            $this->proceedToNextPhase($question);
         }
         else if ($refused) {
-            $this->markQuestionAsRefused($q_id);
+            $this->markQuestionAsRefused($question);
         }
         else /* to edit */ {
-            $this->notifyAuthorAboutNeedToEdit($q_id);
-            $ilDB->update(
-                "rep_robj_xrev_quest",
-                array("state" => array("integer", 0)),
-                array(
-                    "question_id" => array("integer", $q_id),
-                    "review_obj" => array("integer", $this->getID())
-                )
-            );
+            // TODO change notify function to use the object
+            $this->notifyAuthorAboutNeedToEdit($question->getID());
+            $question->setState(0);
+            $question->storeToDB();
         }
     }
 
@@ -462,13 +369,14 @@ class ilObjReview extends ilObjectPlugin {
         return $phases;
     }
 
-    public function proceedToNextPhase($q_id) {
-        global $ilDB;
-
-        if ($q_id instanceof ilCycleQuestion) {
-            $q_id = $q_id->getID();
-        }
-
+    /*
+     * Move a question to the next phase in the review cycle or finish it, if
+     * it passed the last phase
+     *
+     * @param   ilCycleQuestion     $question       question
+     */
+    public function proceedToNextPhase($question) {
+        /*
         $max_phase = 0;
         foreach ($this->loadPhases() as $phase) {
             if ($phase->phase > $max_phase) {
@@ -499,7 +407,40 @@ class ilObjReview extends ilObjectPlugin {
                 }
             }
         }
-        $this->finishQuestion($q_id);
+        $this->finishQuestion($question);
+         */
+        for ($next_phase = $question->getPhase() + 1; ; $next_phase++) {
+            $phase = $this->review_db->getCyclePhases(
+                array("phase_nr" => $next_phase)
+            );
+            $allocation = $this->review_db->getReviewerAllocations(
+                array(
+                    "phase_nr" => $next_phase,
+                    "author" => $question->getOwner()
+                ),
+            );
+            if (count($phases) != 1 || count($allocation) != 1) {
+                break;
+            }
+            if (reset($phase)->getNumReviewers > 0
+                && reset($phase)->getNumReviewers
+                >= count(reset($allocation)->getReviewers())
+            ) {
+                $question->setPhase($next_phase);
+                $question->setState(1);
+                $question->storeToDB();
+                $reviews = $this->review_db->getReviewForms(
+                    array("question_id" => $question->getID())
+                );
+                foreach ($reviews as $review) {
+                    $review->copyToHistory();
+                    $review->delete();
+                }
+                // TODO edit function to alloacte new reviews
+                $this->allocateReviews($question);
+            }
+        }
+        $this->finishQuestion($question);
     }
 
     /*
@@ -735,22 +676,21 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Remove a question from the review cycle by marking it as finished
      *
-     * @param       integer         $q_id           question id
+     * @param   ilCycleQuestion     $question       question
      */
-    public function finishQuestion($q_id) {
-        global $ilDB;
-        $ilDB->update(
-            "rep_robj_xrev_quest",
-            array("state" => array("integer", 2)),
-            array(
-                "question_id" => array("integer", $q_id),
-                "review_obj" => array("integer", $this->getId())
-            )
+    public function finishQuestion($question) {
+        $question->setState(2);
+        $question->storeToDB();
+        $reviews = $this->review_db->getReviewForms(
+            array("question_id" => $question->getID())
         );
-        $this->copyReviewsToHistory($q_id);
-        $this->clearAllocatedReviews($q_id);
-        $this->copyQuestionToReviewedPool($q_id);
-        $this->notifyAuthorsAboutAcceptance(array($q_id));
+        foreach ($reviews as $review) {
+            $review->copyToHistory();
+            $review->delete();
+        }
+        $this->copyQuestionToReviewedPool($question);
+        // TODO change the notify function to use the object
+        $this->notifyAuthorsAboutAcceptance(array($question->getID()));
     }
 
     /*
@@ -929,21 +869,20 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Remove a question from the review cycle by marking it as refused
      *
-     * @param       integer         $q_id           question id
+     * @param   ilCycleQuestion     $question       question
      */
-    public function markQuestionAsRefused($q_id) {
-        global $ilDB;
-        $ilDB->update(
-            "rep_robj_xrev_quest",
-            array("state" => array("integer", -1)),
-            array(
-                "question_id" => array("integer", $q_id),
-                "review_obj" => array("integer", $this->getId())
-            )
+    public function markQuestionAsRefused($question) {
+        $question->setState(-1);
+        $question->storeToDB();
+        $reviews = $this->review_db->getReviewForms(
+            array("question_id" => $question->getID())
         );
-        $this->copyReviewsToHistory($q_id);
-        $this->clearAllocatedReviews($q_id);
-        $this->notifyAuthorsAboutRefusal(array($q_id));
+        foreach ($reviews as $review) {
+            $review->copyToHistory();
+            $review->delete();
+        }
+        // TODO change notify function to use the object
+        $this->notifyAuthorsAboutRefusal(array($question->getID()));
     }
 
     /*

@@ -189,10 +189,10 @@ class ilCycleQuestion {
     /*
      * Get the review object
      *
-     * @return  integer     $review_object  review object
+     * @return  integer     $review_obj     review object
      */
-    public function getReviewObject() {
-        return $this->review_object;
+    public function getReviewObj() {
+        return $this->review_obj;
     }
 
     /*
