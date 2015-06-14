@@ -46,19 +46,22 @@ class ilReviewerAllocation {
      */
     public function loadFromDB($phase_nr, $review_obj) {
         $result = $this->db->queryF(
-            "SELECT * FROM rep_robj_xrev_phases "
+            "SELECT * FROM rep_robj_xrev_alloc "
             . "WHERE phase = %s AND review_obj = %s",
             array("integer", "integer"),
             array($phase_nr, $review_obj)
         );
-        if ($result->numRows() == 1) {
-            $record = $this->db->fetchObject($result);
-            $this->phase_nr = $record->phase;
-            $this->num_reviewers = $record->nr_reviewers;
-            $this->review_obj = $record->review_obj;
-            return true;
+        if ($result->numRows() < 1) {
+            return false;
         }
-        return false;
+        $this->reviewers = array();
+        while ($record = $this->db->fetchObject($result)) {
+            $this->phase_nr = $record->phase;
+            $this->author = $record->author;
+            $this->review_obj = $record->review_obj;
+            $this->reviewers[] = $record->reviewer;
+        }
+        return true;
     }
 
     /*

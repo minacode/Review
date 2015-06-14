@@ -4,7 +4,7 @@
 $id = "xrev";
 
 // code version
-$version = "1.2.0";
+$version = "1.2.1";
 
 // ilias min and max version
 $ilias_min_version = "4.4.0";

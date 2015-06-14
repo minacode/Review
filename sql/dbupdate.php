@@ -440,3 +440,15 @@ if ($ilDB->tableExists("qpl_rev_qst")) {
     );
 }
 ?>
+
+<#22>
+<?php
+if (!$ilDB->tableExists("rep_robj_xrev_poolmap")) {
+    $fields = array(
+        'question_pool' => array('type' => 'integer', 'length' => 4),
+        'pool_for_tests' => array('type' => 'integer', 'length' => 4),
+        'review_obj' => array('type' => 'integer', 'length' => 4)
+    );
+    $ilDB->createTable('rep_robj_xrev_poolmap', $fields);
+}
+?>

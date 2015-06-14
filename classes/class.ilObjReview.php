@@ -256,47 +256,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Copy all review entries belonging to a question into the history table
-     *
-     * @param       integer         $q_id           $question_id
-     */
-    public function copyReviewsToHistory($q_id) {
-        global $ilDB;
-
-        $hist_res = $ilDB->queryF(
-            "SELECT * FROM rep_robj_xrev_revi"
-            . " WHERE question_id=%s AND state=%s",
-            array("integer", "integer"),
-            array($q_id, 1)
-        );
-        while ($review = $ilDB->fetchAssoc($hist_res)) {
-            $ilDB->insert(
-                "rep_robj_xrev_hist",
-                array(
-                    "timestamp" => array("integer", $review["timestamp"]),
-                    "desc_corr" => array("integer", $review["desc_corr"]),
-                    "desc_relv" => array("integer", $review["desc_relv"]),
-                    "desc_expr" => array("integer", $review["desc_expr"]),
-                    "quest_corr" => array("integer", $review["quest_corr"]),
-                    "quest_relv" => array("integer", $review["quest_relv"]),
-                    "quest_expr" => array("integer", $review["quest_expr"]),
-                    "answ_corr" => array("integer", $review["answ_corr"]),
-                    "answ_relv" => array("integer", $review["answ_relv"]),
-                    "answ_expr" => array("integer", $review["answ_expr"]),
-                    "taxonomy" => array("integer", $review["taxonomy"]),
-                    "knowledge_dimension" => array("integer", $review["knowledge_dimension"]),
-                    "rating" => array("integer", $review["rating"]),
-                    "eval_comment" => array("clob", $review["eval_comment"]),
-                    "expertise" => array("integer", $review["expertise"]),
-                    "question_id" => array("integer", $review["question_id"]),
-                    "id" => array("integer", $review["id"]),
-                    "reviewer" => array("integer", $review["reviewer"])
-                )
-            );
-        }
-    }
-
-    /*
      * Check if all reviews for a question are completed and evaluate them
      *
      * @param       ilCycleQuestion     $question       question
@@ -376,39 +335,6 @@ class ilObjReview extends ilObjectPlugin {
      * @param   ilCycleQuestion     $question       question
      */
     public function proceedToNextPhase($question) {
-        /*
-        $max_phase = 0;
-        foreach ($this->loadPhases() as $phase) {
-            if ($phase->phase > $max_phase) {
-                $max_phase = $phase->phase;
-            }
-        }
-        $current_phase = $this->getCurrentPhase($q_id)->phase;
-
-        for ($step = 1; $step + $current_phase <= $max_phase; $step++) {
-            foreach ($this->loadPhases() as $phase) {
-                if ($current_phase + $step == $phase->phase
-                    && $phase->nr_reviewers > 0) {
-                    $ilDB->update(
-                        "rep_robj_xrev_quest",
-                        array(
-                            "phase" => array("integer", $current_phase + $step),
-                            "state" => array("integer", 1)
-                        ),
-                        array(
-                            "question_id" => array("integer", $q_id),
-                            "review_obj" => array("integer", $this->getID())
-                        )
-                    );
-                    $this->copyReviewsToHistory($q_id);
-                    $this->clearAllocatedReviews($q_id);
-                    $this->allocateReviews($q_id);
-                    return;
-                }
-            }
-        }
-        $this->finishQuestion($question);
-         */
         for ($next_phase = $question->getPhase() + 1; ; $next_phase++) {
             $phase = $this->review_db->getCyclePhases(
                 array("phase_nr" => $next_phase)
@@ -436,7 +362,6 @@ class ilObjReview extends ilObjectPlugin {
                     $review->copyToHistory();
                     $review->delete();
                 }
-                // TODO edit function to alloacte new reviews
                 $this->allocateReviews($question);
             }
         }
@@ -549,11 +474,51 @@ class ilObjReview extends ilObjectPlugin {
      * Create review form objects for a question, one for each allocated
      * reviewer
      *
-     * @param       integer         $q_id           question id
+     * @param   ilCycleQuestion     $question       question
      */
-    public function allocateReviews($q_id) {
+    public function allocateReviews($question) {
         global $ilDB;
 
+        $num_reviewers = reset($this->review_db->getCyclePhases(
+            array("phase_nr" => $question->getPhase())
+        ))->getNumReviewers();
+        $allocation = reset($this->reviewer_db->getReviewerAllocations(
+            array(
+                "phase_nr" => $question->getPhase(),
+                "author" => $question->getOwner()
+            )
+        ))->getReviewers();
+        shuffle($allocation);
+        while ($num_reviewers-- > 0) {
+            $reviewer = array_shift($allocation);
+            $review_form = new ilReviewForm(
+                $ilDB,
+                $this->review_db,
+                $ilDB->nextID("rep_robj_xrev_revi"),
+                $this->getID(),
+                $question->getID(),
+                0,
+                $reviewer,
+                time(),
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                "",
+                0,
+                0
+            );
+            $review_form->storeToDB();
+            $this->notifyReviewerAboutAllocation($reviewer);
+        }
+        /*
         $current_phase = $this->getCurrentPhase($q_id);
         $reviewer_pool = $this->loadAllocatedReviewers(
             $q_id,
@@ -594,6 +559,7 @@ class ilObjReview extends ilObjectPlugin {
             );
             $this->notifyReviewerAboutAllocation($reviewer->reviewer);
         }
+         */
     }
 
     /*
@@ -697,11 +663,10 @@ class ilObjReview extends ilObjectPlugin {
      * Create a new question pool that stores reviewed questions
      *
      * @param   string      $old_id     id of the corresponding question pool
-     * @param   string      $title      title of the new question pool
      *
      * @return  integer     $new_id     object id of the new question pool
      */
-    public function createPoolForReviewedQuestions($old_id, $title) {
+    public function createPoolForReviewedQuestions($old_id) {
         global $ilDB;
         include_once 'Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php';
         include_once 'Services/Object/classes/class.ilObjectActivation.php';
@@ -749,16 +714,43 @@ class ilObjReview extends ilObjectPlugin {
      * Copy a question that has finished the review cycle to a special question
      * pool for use in tests
      *
-     * @param   integer     $q_id       question id
+     * @param   ilCycleQuestion     $question       question
      */
-    public function copyQuestionToReviewedPool($q_id) {
+    public function copyQuestionToReviewedPool($question) {
+        global $ilDB;
+
+        $target_pool = $ilDB->queryF(
+            "SELECT pool_for_tests FROM rep_robj_xrev_poolmap "
+            . "WHERE question_pool = %s AND review_obj = %s",
+            array("integer", "integer"),
+            array($question->getObjID(), $this->getID())
+        );
+        if ($target_pool->numRows() == 0) {
+            $pool_id =
+                $this->createPoolForReviewedQuestions($question->getObjID());
+        } else {
+            $pool_id = $ilDB->fetchObject($target_pool)->pool_for_tests;
+        }
+
+        $question = assQuestion::_instantiateQuestion($question->getID());
+        $new_qst = $question->copyObject($pool_id);
+
+        $cycle_question = new ilCycleQuestion(
+            $ilDB,
+            $this->review_db,
+            $this->getID(),
+            $new_qst,
+            2,
+            $question->getPhase(),
+            time(),
+            assQuestion::_instantiateQuestion($new_qst),
+            $ilDB->nextID("rep_robj_xrev_quest")
+        );
+        $cycle_question->storeToDB();
+
+        /* Maybe copy reviewed question data */
+
         /*
-        include_once "Modules/TestQuestionPool/classes/class.ilObjQuestionPool.php";
-        $new_pool = new ilObjQuestionPool();
-        $new_pool->setTitle("foo");
-        $new_pool->create();
-        $new_pool->save();
-         */
         $debugs = array();
 
         global $ilDB;
@@ -790,38 +782,6 @@ class ilObjReview extends ilObjectPlugin {
             $qpl_id = $this->createPoolForReviewedQuestions($old_id, $target_pool);
         }
 
-        /*
-        $new_id = $ilDB->nextID("qpl_questions");
-
-        $res = $ilDB->queryF(
-            "SELECT * FROM qpl_questions WHERE question_id = %s",
-            array("integer"),
-            array($q_id)
-        );
-        $qst = $ilDB->fetchObject($res);
-        $ilDB->insert(
-            "qpl_questions",
-            array(
-                "question_id" => array("integer", $new_id),
-                "question_type_fi" => array("integer", $qst->question_type_fi),
-                "obj_fi" => array("integer", $qpl_id),
-                "title" => array("text", $qst->title),
-                "description" => array("text", $qst->description),
-                "author" => array("text", $qst->author),
-                "owner" => array("integer", $qst->owner),
-                "working_time" => array("text", $qst->working_time),
-                "points" => array("double", $qst->points),
-                "complete" => array("text", $qst->complete),
-                "original_id" => array("integer", $qst->original_id),
-                "tstamp" => array("integer", $qst->tstamp),
-                "created" => array("integer", $qst->created),
-                "nr_of_tries" => array("integer", $qst->nr_of_tries),
-                "question_text" => array("clob", $qst->question_text),
-                "add_cont_edit_mode" => array("text", $qst->add_cont_edit_mode),
-                "external_id" => array("text", $qst->external_id)
-            )
-        );
-         */
         $question = assQuestion::_instantiateQuestion($q_id);
         $new_id = $question->copyObject($qpl_id);
         $debugs["after_copy"] = $this->checkTable($new_id);
@@ -864,6 +824,7 @@ class ilObjReview extends ilObjectPlugin {
         );
         $debugs["after_insert"] = $this->checkTable($new_id);
         return $debugs;
+         */
     }
 
     /*
