@@ -518,48 +518,6 @@ class ilObjReview extends ilObjectPlugin {
             $review_form->storeToDB();
             $this->notifyReviewerAboutAllocation($reviewer);
         }
-        /*
-        $current_phase = $this->getCurrentPhase($q_id);
-        $reviewer_pool = $this->loadAllocatedReviewers(
-            $q_id,
-            $current_phase->phase
-        );
-        $max_reviewers = $current_phase->nr_reviewers;
-        foreach ($reviewer_pool as $reviewer) {
-            if (--$max_reviewers < 0) {
-                break;
-            }
-            $ilDB->insert(
-                "rep_robj_xrev_revi",
-                array(
-                    "id" => array(
-                        "integer",
-                        $ilDB->nextID("rep_robj_xrev_revi")
-                    ),
-                    "timestamp" => array("integer", time()),
-                    "reviewer" => array("integer", $reviewer->reviewer),
-                    "question_id" => array("integer", $q_id),
-                    "state" => array("integer", 0),
-                    "desc_corr" => array("integer", 0),
-                    "desc_relv" => array("integer", 0),
-                    "desc_expr" => array("integer", 0),
-                    "quest_corr" => array("integer", 0),
-                    "quest_relv" => array("integer", 0),
-                    "quest_expr" => array("integer", 0),
-                    "answ_corr" => array("integer", 0),
-                    "answ_relv" => array("integer", 0),
-                    "answ_expr" => array("integer", 0),
-                    "taxonomy" => array("integer", 0),
-                    "knowledge_dimension" => array("integer", 0),
-                    "rating" => array("integer", 0),
-                    "eval_comment" => array("clob", ''),
-                    "expertise" => array("integer", 0),
-                    "review_obj" => array("integer", $this->getId())
-                )
-            );
-            $this->notifyReviewerAboutAllocation($reviewer->reviewer);
-        }
-         */
     }
 
     /*
@@ -680,34 +638,28 @@ class ilObjReview extends ilObjectPlugin {
         while ($ref_pool = $ilDB->fetchObject($res)) {
             $pool = new ilObjQuestionPool($ref_id);
             //$pool->create();
-            ///*
             $new_pool = $pool->cloneObject($this->getGroupID());
             foreach ($new_pool->getAllQuestions() as $question_id) {
                 $new_pool->deleteQuestion($question_id);
             }
             //$ilDB->nextID("qpl_questions");
             $new_pool->setTitle($title);
+            $new_pool->setOnline(true);
+            $group = ilGroupParticipants::getInstanceByObjID($this->getGroupID());
+            $new_pool->setOwner(reset($group->getAdmins()));
             $new_pool->update();
             ilObjectActivation::getItem($new_pool->getRefID());
-            $id = $new_pool->getID();
-            //*/
+            $new_id = $new_pool->getID();
+            $ilDB->insert(
+                "rep_robj_xrev_poolmap",
+                array(
+                    "question_pool" => array("integer", $old_id),
+                    "pool_for_tests" => array("integer", $new_id),
+                    "review_obj" => array("integer", $this->getID())
+                )
+            );
         }
-        return $id;
-    }
-
-    public function checkTable($id) {
-        global $ilDB;
-        $res = $ilDB->queryF(
-            "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
-            array("integer"),
-            array($id)
-        );
-        return ($res->numRows() > 0) ? "true" . $id : "real";
-    }
-
-    public function fooTestBar($q_id) {
-        return $this->copyQuestionToReviewedPool($q_id);
-
+        return $new_id;
     }
 
     /*
@@ -747,84 +699,7 @@ class ilObjReview extends ilObjectPlugin {
             $ilDB->nextID("rep_robj_xrev_quest")
         );
         $cycle_question->storeToDB();
-
         /* Maybe copy reviewed question data */
-
-        /*
-        $debugs = array();
-
-        global $ilDB;
-
-        $res = $ilDB->queryF(
-            "SELECT object_data.title, object_data.obj_id
-             FROM object_data
-             INNER JOIN qpl_questions
-             ON qpl_questions.obj_fi = object_data.obj_id
-             WHERE qpl_questions.question_id = %s",
-            array("integer"),
-            array($q_id)
-        );
-
-        $fetch_pool = $ilDB->fetchObject($res);
-        $old_id = $fetch_pool->obj_id;
-        $target_pool = $fetch_pool->title . " [Reviewed]";
-
-        $res = $ilDB->queryF(
-            "SELECT obj_id FROM object_data
-             WHERE title = %s AND type = 'qpl'",
-            array("text"),
-            array($target_pool)
-        );
-
-        if (($qpl = $ilDB->fetchObject($res)) != null) {
-            $qpl_id = $qpl->obj_id;
-        } else {
-            $qpl_id = $this->createPoolForReviewedQuestions($old_id, $target_pool);
-        }
-
-        $question = assQuestion::_instantiateQuestion($q_id);
-        $new_id = $question->copyObject($qpl_id);
-        $debugs["after_copy"] = $this->checkTable($new_id);
-        for ($i = 1; $i < 1000000; $i+=1) {
-        }
-
-        $res = $ilDB->queryF(
-            "SELECT * FROM qpl_rev_qst WHERE question_id = %s",
-            array("integer"),
-            array($q_id)
-        );
-        $qst = $ilDB->fetchObject($res);
-        $ilDB->insert(
-            "qpl_rev_qst",
-            array(
-                "question_id" => array("integer", $new_id),
-                "taxonomy" => array("integer", $qst->taxonomy),
-                "knowledge_dimension" => array("integer", $qst->knowledge_dimension),
-                "learning_outcome" => array("clob", $qst->learning_outcome),
-                "topic" => array("text", $qst->topic),
-            )
-        );
-
-        $res = $ilDB->queryF(
-            "SELECT * FROM rep_robj_xrev_quest WHERE question_id = %s",
-            array("integer"),
-            array($q_id)
-        );
-        $qst = $ilDB->fetchObject($res);
-        $ilDB->insert(
-            "rep_robj_xrev_quest",
-            array(
-                "question_id" => array("integer", $new_id),
-                "id" => array("integer", $ilDB->nextID("rep_robj_xrev_quest")),
-                "timestamp" => array("integer", $qst->timestamp),
-                "state" => array("integer", $qst->state),
-                "phase" => array("integer", $qst->phase),
-                "review_obj" => array("integer", $qst->review_obj),
-            )
-        );
-        $debugs["after_insert"] = $this->checkTable($new_id);
-        return $debugs;
-         */
     }
 
     /*
