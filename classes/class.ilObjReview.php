@@ -409,26 +409,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load all questions that currently have no reviewer allocated to them
-     *
-     * @return       array           $questions              the question loaded by this function as an associative array
-     */
-    public function  loadUnallocatedQuestions() {
-        global $ilDB, $ilUser;
-
-        $qpl = $ilDB->queryF("SELECT qpl_questions.question_id AS id, title, owner FROM qpl_questions ".
-                "INNER JOIN rep_robj_xrev_quest ON rep_robj_xrev_quest.question_id=qpl_questions.question_id ".
-                "WHERE qpl_questions.original_id IS NULL AND ".
-                "rep_robj_xrev_quest.state=0 AND rep_robj_xrev_quest.review_obj=%s",
-                array("integer"),
-                array($this->getId()));
-        $questions = array();
-        while ($question = $ilDB->fetchAssoc($qpl))
-            $questions[] = $question;
-        return $questions;
-    }
-
-    /*
      * Load all reviewers allocated to the author of a question in a certain
      * phase ordered by the amount of reviews they currently have to complete
      *
@@ -523,9 +503,10 @@ class ilObjReview extends ilObjectPlugin {
     /*
      * Save matrix input as author - reviewer allocation
      *
-     * @param       array       $alloc_matrix       black magic
+     * @param   array       $allocation         $phase => $author => $reviewer
      */
-    public function allocateReviewers($alloc_matrix) {
+    public function allocateReviewers($allocation) {
+        /*
         global $ilDB;
 
         $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc " .
@@ -545,29 +526,39 @@ class ilObjReview extends ilObjectPlugin {
                         "review_obj" => array("integer", $this->getId())));
             }
         }
+         */
+        foreach ($allocation as $phase => $assignment) {
+            foreach ($assignment as $author => $reviewers) {
+                $alloc_obj = reset($this->review_db->getReviewerAllocations(
+                    array("phase_nr" => $phase, "author" => $author)
+                );
+                $alloc_obj->setReviewers($reviewers);
+                $alloc_obj->storeToDB();
+            }
+        }
     }
 
     /*
      * Change the number of reviewers for a cycle phase
      *
      * @param       integer     $phase              phase to be changed
-     * @param       integer     $nr_reviewers       new number of reviewers
+     * @param       integer     $num_reviewers      new number of reviewers
      */
-    public function updateCyclePhase($phase, $nr_reviewers) {
-        global $ilDB;
-
-        $ilDB->update("rep_robj_xrev_phases",
-                array("nr_reviewers" => array("integer", $nr_reviewers)),
-                array("phase" => array("integer", $phase),
-                "review_obj" => array("integer", $this->getID())));
+    public function updateCyclePhase($phase, $num_reviewers) {
+        $phase = reset(
+            $this->review_db->getCyclePhases(array("phase_nr" => $phase))
+        );
+        $phase->setNumReviewers($num_reviewers);
+        $phase->storeToDB();
     }
 
     /*
      * Load the whole review cycle allocation
      *
-     * @return      array       $allocation         postvars and their values
+     * @return      array       $allocation     phases => authors => reviewers
      */
     public function loadReviewerAllocation() {
+        /*
         global $ilDB;
 
         $allocation = array();
@@ -593,7 +584,24 @@ class ilObjReview extends ilObjectPlugin {
         while ($phase = $ilDB->fetchObject($res)) {
             $allocation[sprintf("nr_%s", $phase->phase)] = $phase->nr_reviewers;
         }
-
+         */
+        $group = ilGroupParticipants::getInstanceByObjID($this->getGroupID());
+        $authors = $group->getParticipants();
+        $allocation = array();
+        foreach ($this->review_db->getCyclePhases(array()) as $phase) {
+            foreach ($authors as $author) {
+                $phase_alloc = array();
+                $matches = $this->review_db->getReviewerAllocations(
+                    array("author" => $author)
+                );
+                if (count($matches) == 1) {
+                    $phase_alloc[$author] = reset($matches)->getReviewers();
+                } else {
+                    $phase_alloc[$author] = array();
+                }
+            }
+            $allocation[] = $phase_alloc;
+        }
         return $allocation;
     }
 
@@ -645,7 +653,8 @@ class ilObjReview extends ilObjectPlugin {
             //$ilDB->nextID("qpl_questions");
             $new_pool->setTitle($title);
             $new_pool->setOnline(true);
-            $group = ilGroupParticipants::getInstanceByObjID($this->getGroupID());
+            $group =
+                ilGroupParticipants::getInstanceByObjID($this->getGroupID());
             $new_pool->setOwner(reset($group->getAdmins()));
             $new_pool->update();
             ilObjectActivation::getItem($new_pool->getRefID());
@@ -1048,5 +1057,17 @@ class ilObjReview extends ilObjectPlugin {
         file_put_contents("debug_log", $record->tstamp."\n", FILE_APPEND);
         return $record->tstamp;
     }
+
+    /*
+     * Return the number of reviewers set for a phase
+     *
+     * @param   integer         $phase          phase
+     *
+     * @return  integer         $_              number ob reviewers
+     */
+    static function getReviewersPerPhase($phase) {
+        $phases =
+            $this->review_db->getCyclePhases(array("phase_nr" => $phase));
+        return reset($phases)->getNumReviewers();
 }
 ?>

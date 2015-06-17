@@ -2,17 +2,25 @@
 
 /*
  * GUI class for the list of reviewer allocation matrizes
+ *
+ * @var     ilObjReviewGUI      $parent_obj         parent object
  */
 class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
+    private $parent_obj;
 
-    public function __construct($members, $phases, $parent) {
-        global $lng, $ilCtrl;
+    /*
+     * Constructor
+     */
+    public function __construct($parent_obj, $allocation) {
+        global $ilCtrl;
 
         parent::__construct();
+        $this->parent_obj = $parent_obj;
 
         $this->setTitle($lng->txt("phases"));
         $this->setFormAction($ilCtrl->getFormAction($this));
 
+        /*
         $member_names = array();
         foreach ($members as $member) {
             $member->name = $member->firstname . ' ' . $member->lastname;
@@ -37,6 +45,41 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             $nr_input = new ilNumberInputGUI($lng->txt("nr_reviewers"), "nr_" . $phase->phase);
             $nr_input->setMinValue(1);
             $nr_input->setRequired(true);
+            $this->addItem($nr_input);
+        }
+         */
+        foreach ($allocation as $phase => $assignments) {
+            $phase_head = new ilFormSectionHeaderGUI();
+            $title = $this->parent_obj->getTxt("phase") . " " . $phase + 1;
+            $phase_head->setTitle($title);
+            $this->addItem($phase_head);
+
+            $reviewer_head = new ilAspectHeaderGUI(array_map(
+                function($id) { return ilObject::_lookupTitle($id); },
+                asort(array_keys($assignments))
+            );
+            $this->addItem($reviewer_head);
+
+            foreach ($assignments as $author => $reviewers) {
+                $row_assignment = array();
+                foreach (array_keys($assignment) as $member) {
+                    $row_assignment[$member] = in_array($member, $reviewers);
+                }
+                $row = new ilAllocationRowGUI(
+                    $phase + 1,
+                    $author,
+                    ksort($row_assingment)
+                );
+                $this->addItem($row);
+            }
+
+            $nr_input = new ilNumberInputGUI(
+                $this->parent_obj->getTxt("nr_reviewers"),
+                "nr_" . $phase + 1
+            );
+            $nr_input->setMinValue(1);
+            $nr_input->setRequired(true);
+            $nr_input->setValue(ilObjReview::getReviewersPerPhase($phase + 1));
             $this->addItem($nr_input);
         }
 

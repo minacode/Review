@@ -178,9 +178,10 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs;
 
         $ilTabs->activateTab("allocation");
-        $alloc_form = new ilReviewerAllocFormGUI($this->object->loadMembers, $this->object->loadPhases, $this);
-        $alloc_form->setValuesByArray($this->object->loadReviewerAllocation());
-        //$alloc_form->setValuesByPost();
+        $alloc_form = new ilReviewerAllocFormGUI(
+            $this,
+            $this->object->loadReviewerAllocation()
+        );
         $tpl->setContent($alloc_form->getHTML());
     }
 
@@ -191,9 +192,13 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         global $tpl, $ilTabs, $lng, $ilCtrl;
 
         $ilTabs->activateTab("allocation");
-        $alloc_form = new ilReviewerAllocFormGUI($this->object->loadMembers, $this->object->loadPhases, $this);
-
+        $alloc_form = new ilReviewerAllocFormGUI(
+            $this,
+            $this->object->loadReviewerAllocation()
+        );
+        // Remove black magic starting here
         if ($alloc_form->checkInput()) {
+        /*
             $rows = array();
             foreach ($alloc_form->getItems() as $item) {
                 if (method_exists($item, "getPostVars")) {
@@ -208,6 +213,29 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
                 }
             }
             $this->object->allocateReviewers($rows);
+            */
+            // End of black magic
+            $allocation = array();
+            foreach ($alloc_form->getItem() as $item) {
+                if ($item instanceof ilAllocationRowGUI) {
+                    $reviewers = array();
+                    foreach ($item->getPostVars() as $postvar) {
+                        if ($alloc_form->getInput($postvar)) {
+                            $reviewers[] = explode("_", $postvar)[3];
+                        }
+                    }
+                    $allocation[$item->getPhase()][$item->getAuthor()] =
+                        $reviewers;
+                }
+                if ($item instanceof ilNumberInputGUI) {
+                    $this->object->updateCyclePhase(
+                        explode("_", $item->getPostVar())[1],
+                        $alloc_form->getInput($item->getPostVar())
+                    );
+                }
+
+            }
+            $this->object->allocateReviewers($allocation);
             ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilCtrl->redirect($this, "allocateReviewers");
         } else {
@@ -516,20 +544,6 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $input->setValuesByPost();
         $question_overview = new ilQuestionOverviewGUI($this, $question);
         $tpl->setContent($question_overview->getHTML() . $input->getHtml());
-    }
-
-    /*
-     * Create the question overview GUI
-     */
-    private function initQuestionOverview() {
-        global $ilPluginAdmin;
-        if (!isset($_GET["q_id"])) {
-            $this->question_overview = "";
-        } else {
-            $q_gui = assQuestionGUI::_getQuestionGUI("", $_GET["q_id"]);
-            //$quest = new ilQuestionOverviewGUI($this, $q_gui->getSolutionOutput(0), $this->object->loadQuestionMetaData($_GET["q_id"]));
-            //$this->question_overview = $quest->getHTML();
-        }
     }
 
     public function addPhase() {

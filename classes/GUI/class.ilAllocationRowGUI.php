@@ -1,76 +1,49 @@
 <?php
 /*
- * GUI, a row of checkboxes in the question-reviewer allocation matrix
+ * GUI, a row of checkboxes in the author - reviewer allocation matrix
  *
  * @var		array		$postvars		$_POST variables of each checkbox
- * @var		integer	    $row_id	        id of the row's corresponding object
- *
- * @author Richard Mörbitz <Richard.Moerbitz@mailbox.tu-dresden.de>
- *
- * $Id$
+ * @var     integer     $phase          id of the phase
+ * @var		integer	    $author	        id of the author
  */
 class ilCheckMatrixRowGUI extends ilCustomInputGUI {
     private $checkboxes;
 	private $postvars;
-	private $row_id;
+    private $phase;
+	private $author;
 
 	/*
 	 * Constructor for a line in a table-like display of ilCheckboxInputGUIs
 	 *
-     * @param   integer     $group_id       id of the whole matrix
-	 * @param	array		$object 		object behind a row
-     *                                      has a name and an title
-	 * @param	array		$column_ids     ids of the objects belonging to each checkbox
+     * @param   integer     $phase          phase id
+	 * @param	array		$author 		id of the author
+	 * @param	array		$reviewers      reviewer id => allocated?
 	 */
-	public function __construct($group_id = 0, $object, $column_ids) {
+	public function __construct($phase, $author, $reviewers) {
 
 		parent::__construct();
 
-        $this->group_id = $group_id;
-		$this->row_id = $object->id;
+        $this->phase = $phase;
+		$this->author = $author;
 		$this->postvars = array();
-		foreach ($column_ids as $column_id) {
-            $this->postvars[$column_id] = sprintf(
-                "id_%s_%s_%s", $this->group_id, $this->row_id, $column_id);
-        }
-
-		foreach ($this->postvars as $postvar) {
+		foreach ($reviewers as $reviewer => $allocated) {
+            $this->postvars[$reviewer] = sprintf(
+                "id_%s_%s_%s",
+                $this->phase,
+                $this->author,
+                $reviewer
+            );
 			$chbox = new ilCheckboxInputGUI("", $postvar);
-			if ($object->id == explode("_", $postvar)[3])
+            $chbox->setChecked($allocated);
+			if ($reviewer == $this->author) {
 				$chbox->setDisabled(true);
+            }
             $this->checkboxes[] = $chbox;
 		}
 
-		$this->setTitle($object->name);
+		$this->setTitle(ilObject::_lookupTitle($author));
 
         $this->fillTemplate();
-	}
-
-	/*
-	 * Get the $_POST keys of this object´s input
-	 *
-	 * @return	array		$this->postvars		(column_id => $_POST key in the shape of id_[row_id]_[column_id])
-	 */
-	public function getPostVars() {
-		return $this->postvars;
-	}
-
-	/*
-	 * Get the object id belonging to this row of the matrix
-	 *
-	 * @return	integer	    $this->row_id       row id
-	 */
-	public function getRowId() {
-		return $this->row_id;
-	}
-
-    /*
-	 * Get the object id belonging to the whole matrix
-	 *
-	 * @return	integer	    $this->group_id     group id
-	 */
-	public function getGroupId() {
-		return $this->group_id;
 	}
 
     /*
@@ -115,6 +88,33 @@ class ilCheckMatrixRowGUI extends ilCustomInputGUI {
             }
         }
         return $ticks;
+    }
+
+    /*
+     * Get the phase number
+     *
+     * @return  string      $phase             phase number
+     */
+    public function getPhase() {
+        return $this->phase;
+    }
+
+   /*
+    * Get the author id
+    *
+    * @return  string      $author             author id
+    */
+    public function getAuthor() {
+        return $this->author;
+    }
+
+   /*
+    * Get the POST variables
+    *
+    * @return  string      $postvars           POST variables
+    */
+    public function getPostVars() {
+        return $this->postvars;
     }
 }
 ?>
