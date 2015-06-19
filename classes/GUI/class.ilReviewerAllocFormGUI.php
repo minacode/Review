@@ -17,7 +17,7 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
         parent::__construct();
         $this->parent_obj = $parent_obj;
 
-        $this->setTitle($lng->txt("phases"));
+        $this->setTitle($this->parent_obj->getTxt("phases"));
         $this->setFormAction($ilCtrl->getFormAction($this));
 
         /*
@@ -48,27 +48,34 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             $this->addItem($nr_input);
         }
          */
+        //print_r($allocation);
         foreach ($allocation as $phase => $assignments) {
             $phase_head = new ilFormSectionHeaderGUI();
             $title = $this->parent_obj->getTxt("phase") . " " . $phase + 1;
             $phase_head->setTitle($title);
             $this->addItem($phase_head);
 
-            $reviewer_head = new ilAspectHeaderGUI(array_map(
-                function($id) { return ilObject::_lookupTitle($id); },
-                asort(array_keys($assignments))
+            ksort($assignments);
+
+            $reviewer_head = new ilAspectHeaderGUI(
+                "",
+                array_map(
+                    function($id) { return ilObject::_lookupTitle($id); },
+                    array_keys($assignments)
+                )
             );
             $this->addItem($reviewer_head);
 
             foreach ($assignments as $author => $reviewers) {
                 $row_assignment = array();
-                foreach (array_keys($assignment) as $member) {
+                foreach (array_keys($assignments) as $member) {
                     $row_assignment[$member] = in_array($member, $reviewers);
                 }
+                ksort($row_assignment);
                 $row = new ilAllocationRowGUI(
                     $phase + 1,
                     $author,
-                    ksort($row_assingment)
+                    $row_assignment
                 );
                 $this->addItem($row);
             }
@@ -79,13 +86,15 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             );
             $nr_input->setMinValue(1);
             $nr_input->setRequired(true);
-            $nr_input->setValue(ilObjReview::getReviewersPerPhase($phase + 1));
+            $nr_input->setValue(
+                $this->parent_obj->object->getReviewersPerPhase($phase + 1)
+            );
             $this->addItem($nr_input);
         }
 
-        $this->addCommandButton("saveAllocateReviewers", $lng->txt("save"));
-        $this->addCommandButton("addPhase", $lng->txt("add_phase"));
-        $this->addCommandButton("removePhase", $lng->txt("remove_phase"));
+        $this->addCommandButton("saveAllocateReviewers", $this->parent_obj->getTxt("save"));
+        $this->addCommandButton("addPhase", $this->parent_obj->getTxt("add_phase"));
+        $this->addCommandButton("removePhase", $this->parent_obj->getTxt("remove_phase"));
     }
 
     /*

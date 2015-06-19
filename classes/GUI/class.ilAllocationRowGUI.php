@@ -6,7 +6,7 @@
  * @var     integer     $phase          id of the phase
  * @var		integer	    $author	        id of the author
  */
-class ilCheckMatrixRowGUI extends ilCustomInputGUI {
+class ilAllocationRowGUI extends ilCustomInputGUI {
     private $checkboxes;
 	private $postvars;
     private $phase;

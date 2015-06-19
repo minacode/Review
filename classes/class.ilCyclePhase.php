@@ -42,21 +42,16 @@ class ilCyclePhase {
      */
     public function loadFromDB($phase_nr, $review_obj) {
         $result = $this->db->queryF(
-            "SELECT * FROM rep_robj_xrev_alloc "
+            "SELECT * FROM rep_robj_xrev_phases "
             . "WHERE phase = %s AND review_obj = %s",
             array("integer", "integer"),
             array($phase_nr, $review_obj)
         );
-        $num_reviewers = reset(
-            $this->mapper->getCyclePhases(array($phase_nr => $phase_nr))
-        );
-        if ($result->numRows() >= $num_reviewers) {
-            while ($record = $this->db->fetchObject($result)) {
-                $this->phase_nr = $record->phase;
-                $this->author = $record->author;
-                $this->review_obj = $record->review_obj;
-                $this->reviewers[] = $record->reviewer;
-            }
+        if ($result->numRows() == 1) {
+            $record = $this->db->fetchObject($result);
+            $this->phase_nr = $record->phase;
+            $this->review_obj = $record->review_obj;
+            $this->num_reviewers = $record->nr_reviewers;
             return true;
         }
         return false;

@@ -236,7 +236,7 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function loadQuestionById($question_id) {
         $questions = $this->review_db->getCycleQuestions(
-            array("question_id" => $question_id)
+            array("id" => $question_id)
         );
         return reset($questions);
     }
@@ -343,7 +343,7 @@ class ilObjReview extends ilObjectPlugin {
                 array(
                     "phase_nr" => $next_phase,
                     "author" => $question->getOwner()
-                ),
+                )
             );
             if (count($phases) != 1 || count($allocation) != 1) {
                 break;
@@ -531,7 +531,7 @@ class ilObjReview extends ilObjectPlugin {
             foreach ($assignment as $author => $reviewers) {
                 $alloc_obj = reset($this->review_db->getReviewerAllocations(
                     array("phase_nr" => $phase, "author" => $author)
-                );
+                ));
                 $alloc_obj->setReviewers($reviewers);
                 $alloc_obj->storeToDB();
             }
@@ -585,14 +585,19 @@ class ilObjReview extends ilObjectPlugin {
             $allocation[sprintf("nr_%s", $phase->phase)] = $phase->nr_reviewers;
         }
          */
-        $group = ilGroupParticipants::getInstanceByObjID($this->getGroupID());
+        $group = ilGroupParticipants::_getInstanceByObjID(
+            ilObject::_lookupObjectID($this->getGroupID())
+        );
         $authors = $group->getParticipants();
         $allocation = array();
         foreach ($this->review_db->getCyclePhases(array()) as $phase) {
+            $phase_alloc = array();
             foreach ($authors as $author) {
-                $phase_alloc = array();
                 $matches = $this->review_db->getReviewerAllocations(
-                    array("author" => $author)
+                    array(
+                        "author" => $author,
+                        "phase_nr" => $phase->getPhaseNr()
+                    )
                 );
                 if (count($matches) == 1) {
                     $phase_alloc[$author] = reset($matches)->getReviewers();
@@ -654,7 +659,9 @@ class ilObjReview extends ilObjectPlugin {
             $new_pool->setTitle($title);
             $new_pool->setOnline(true);
             $group =
-                ilGroupParticipants::getInstanceByObjID($this->getGroupID());
+                ilGroupParticipants::_getInstanceByObjID(
+                    ilObject::_lookupObjectID($this->getGroupID())
+                );
             $new_pool->setOwner(reset($group->getAdmins()));
             $new_pool->update();
             ilObjectActivation::getItem($new_pool->getRefID());
@@ -1065,9 +1072,10 @@ class ilObjReview extends ilObjectPlugin {
      *
      * @return  integer         $_              number ob reviewers
      */
-    static function getReviewersPerPhase($phase) {
+    function getReviewersPerPhase($phase) {
         $phases =
             $this->review_db->getCyclePhases(array("phase_nr" => $phase));
         return reset($phases)->getNumReviewers();
+    }
 }
 ?>

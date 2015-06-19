@@ -62,7 +62,7 @@ class ilQuestionOverviewGUI {
             "TXT_INNER_PART",
             assQuestionGUI::_getQuestionGUI(
                 "",
-                $question->getQuestionID()
+                $question->getID()
             )->getSolutionOutput(0)
         );
 		$this->html = $template->get();

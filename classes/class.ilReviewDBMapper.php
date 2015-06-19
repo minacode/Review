@@ -1,6 +1,8 @@
 <?php
 require_once 'class.ilReviewForm.php';
 require_once 'class.ilCycleQuestion.php';
+require_once 'class.ilReviewerAllocation.php';
+require_once 'class.ilCyclePhase.php';
 
 /*
  * Database abstraction class for access of ilDB
@@ -79,7 +81,7 @@ class ilReviewDBMapper {
         );
         while ($record = $this->db->fetchObject($result)) {
             $cycle_phase = new ilCyclePhase($this->db, $this);
-            $cycle_phase->loadFromDB($record->id, $this->obj_id);
+            $cycle_phase->loadFromDB($record->phase, $this->obj_id);
             $this->cycle_phases[] = $cycle_phase;
         }
     }
@@ -90,13 +92,18 @@ class ilReviewDBMapper {
      */
     private function loadReviewerAllocations() {
         $result = $this->db->queryF(
-            "SELECT phase FROM rep_robj_xrev_alloc WHERE review_obj = %s",
+            "SELECT phase, author FROM rep_robj_xrev_alloc"
+            . " WHERE review_obj = %s GROUP BY author, phase",
             array("integer"),
             array($this->obj_id)
         );
         while ($record = $this->db->fetchObject($result)) {
             $reviewer_allocation = new ilReviewerAllocation($this->db, $this);
-            $reviewer_allocation->loadFromDB($record->id, $this->obj_id);
+            $reviewer_allocation->loadFromDB(
+                $record->phase,
+                $this->obj_id,
+                $record->author
+            );
             $this->reviewer_allocations[] = $reviewer_allocation;
         }
     }

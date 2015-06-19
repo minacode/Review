@@ -107,7 +107,7 @@ class ilObjReviewAccess extends ilObjectPluginAccess {
                 }
                 if ($obj_type == "question") {
                     if (count($review_plugin->review_db->getCycleQuestions(
-                        array("question_id" => $obj_id, "owner" => $user_id)
+                        array("id" => $obj_id, "owner" => $user_id)
                     )) == 1) {
                         return true;
                     }

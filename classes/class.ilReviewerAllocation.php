@@ -41,27 +41,30 @@ class ilReviewerAllocation {
      *
      * @param   integer     $phase_nr           phase number
      * @param   integer     $review_obj         review obj
+     * @param   integer     $author             author
      *
      * @return  boolean     $success            true: operation performed
      */
-    public function loadFromDB($phase_nr, $review_obj) {
+    public function loadFromDB($phase_nr, $review_obj, $author) {
         $result = $this->db->queryF(
             "SELECT * FROM rep_robj_xrev_alloc "
-            . "WHERE phase = %s AND review_obj = %s",
-            array("integer", "integer"),
-            array($phase_nr, $review_obj)
+            . "WHERE phase = %s AND review_obj = %s AND author = %s",
+            array("integer", "integer", "integer"),
+            array($phase_nr, $review_obj, $author)
         );
-        if ($result->numRows() < 1) {
-            return false;
+        $num_reviewers = reset(
+            $this->mapper->getCyclePhases(array("phase_nr" => $phase_nr))
+        );
+        if ($result->numRows() >= $num_reviewers) {
+            while ($record = $this->db->fetchObject($result)) {
+                $this->phase_nr = $record->phase;
+                $this->author = $record->author;
+                $this->review_obj = $record->review_obj;
+                $this->reviewers[] = $record->reviewer;
+            }
+            return true;
         }
-        $this->reviewers = array();
-        while ($record = $this->db->fetchObject($result)) {
-            $this->phase_nr = $record->phase;
-            $this->author = $record->author;
-            $this->review_obj = $record->review_obj;
-            $this->reviewers[] = $record->reviewer;
-        }
-        return true;
+        return false;
     }
 
     /*
