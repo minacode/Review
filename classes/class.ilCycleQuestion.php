@@ -311,5 +311,14 @@ class ilCycleQuestion {
     public function getQuestionType() {
         return $this->question->getQuestionType();
     }
+
+    /*
+     * Get the question pool id
+     *
+     * @return string       $obj_id         question pool id
+     */
+    public function getObjID() {
+        return $this->question->getObjID();
+    }
 }
 ?>

@@ -3,6 +3,7 @@
 include_once "Services/Repository/classes/class.ilObjectPlugin.php";
 include_once "QuestionManager/class.ilReviewableQuestionPluginGenerator.php";
 include_once "class.ilReviewDBMapper.php";
+include_once "Modules/Group/classes/class.ilGroupParticipants.php";
 
 /*
  * Application class for Review repository object.
@@ -116,7 +117,15 @@ class ilObjReview extends ilObjectPlugin {
     private function syncQuestionDB() {
         global $ilDB;
 
-        $qpl_questions = $this->getAllCourseQuestions();
+        $qpl_questions = array_filter(
+            $this->getAllCourseQuestions(),
+            function($question) {
+                return strpos(
+                    $question->getQuestionType(),
+                    "Reviewable"
+                ) !== FALSE;
+            }
+        );
         $plg_questions = $this->review_db->getCycleQuestions(array());
 
         $cmp_qst = function($question_a, $question_b) {
@@ -163,7 +172,15 @@ class ilObjReview extends ilObjectPlugin {
             $del_question->deleteFromDB();
         }
 
-        $qpl_questions = $this->getAllCourseQuestions();
+        $qpl_questions = array_filter(
+            $this->getAllCourseQuestions(),
+            function($question) {
+                return strpos(
+                    $question->getQuestionType(),
+                    "Reviewable"
+                ) !== FALSE;
+            }
+        );
         $plg_questions = $this->review_db->getCycleQuestions(array());
 
         foreach ($qpl_questions as $qpl_question) {
@@ -336,7 +353,7 @@ class ilObjReview extends ilObjectPlugin {
      */
     public function proceedToNextPhase($question) {
         for ($next_phase = $question->getPhase() + 1; ; $next_phase++) {
-            $phase = $this->review_db->getCyclePhases(
+            $phases = $this->review_db->getCyclePhases(
                 array("phase_nr" => $next_phase)
             );
             $allocation = $this->review_db->getReviewerAllocations(
@@ -345,11 +362,14 @@ class ilObjReview extends ilObjectPlugin {
                     "author" => $question->getOwner()
                 )
             );
-            if (count($phases) != 1 || count($allocation) != 1) {
+            if (count($phases) != 1) {
                 break;
             }
-            if (reset($phase)->getNumReviewers > 0
-                && reset($phase)->getNumReviewers
+            if (count($allocation) != 1) {
+                continue;
+            }
+            if (reset($phases)->getNumReviewers > 0
+                && reset($phases)->getNumReviewers
                 >= count(reset($allocation)->getReviewers())
             ) {
                 $question->setPhase($next_phase);
@@ -671,7 +691,11 @@ class ilObjReview extends ilObjectPlugin {
                 $new_pool->deleteQuestion($question_id);
             }
             //$ilDB->nextID("qpl_questions");
-            $new_pool->setTitle($title);
+            $new_pool->setTitle(
+                ilObject::_lookupTitle($old_id)
+                ." "
+                .$this->txt("reviewed")
+            );
             $new_pool->setOnline(true);
             $group =
                 ilGroupParticipants::_getInstanceByObjID(
@@ -679,6 +703,7 @@ class ilObjReview extends ilObjectPlugin {
                 );
             $new_pool->setOwner(reset($group->getAdmins()));
             $new_pool->update();
+            $new_pool->saveToDB();
             ilObjectActivation::getItem($new_pool->getRefID());
             $new_id = $new_pool->getID();
             $ilDB->insert(
@@ -715,8 +740,8 @@ class ilObjReview extends ilObjectPlugin {
             $pool_id = $ilDB->fetchObject($target_pool)->pool_for_tests;
         }
 
-        $question = assQuestion::_instantiateQuestion($question->getID());
-        $new_qst = $question->copyObject($pool_id);
+        $qpl_question = assQuestion::_instantiateQuestion($question->getID());
+        $new_qst = $qpl_question->copyObject($pool_id);
 
         $cycle_question = new ilCycleQuestion(
             $ilDB,
