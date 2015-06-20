@@ -33,7 +33,7 @@ class ilAllocationRowGUI extends ilCustomInputGUI {
                 $this->author,
                 $reviewer
             );
-			$chbox = new ilCheckboxInputGUI("", $postvar);
+			$chbox = new ilCheckboxInputGUI("", $this->postvars[$reviewer]);
             $chbox->setChecked($allocated);
 			if ($reviewer == $this->author) {
 				$chbox->setDisabled(true);

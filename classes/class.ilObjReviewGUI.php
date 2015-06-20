@@ -216,16 +216,16 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             */
             // End of black magic
             $allocation = array();
-            foreach ($alloc_form->getItem() as $item) {
+            foreach ($alloc_form->getItems() as $item) {
                 if ($item instanceof ilAllocationRowGUI) {
-                    $reviewers = array();
+                    //$reviewers = array();
                     foreach ($item->getPostVars() as $postvar) {
                         if ($alloc_form->getInput($postvar)) {
-                            $reviewers[] = explode("_", $postvar)[3];
+                            $allocation[$item->getPhase()][$item->getAuthor()][] = explode("_", $postvar)[3];
                         }
                     }
-                    $allocation[$item->getPhase()][$item->getAuthor()] =
-                        $reviewers;
+                    //$allocation[$item->getPhase()][$item->getAuthor()] =
+                      //  $reviewers;
                 }
                 if ($item instanceof ilNumberInputGUI) {
                     $this->object->updateCyclePhase(

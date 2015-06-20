@@ -506,9 +506,9 @@ class ilObjReview extends ilObjectPlugin {
      * @param   array       $allocation         $phase => $author => $reviewer
      */
     public function allocateReviewers($allocation) {
-        /*
         global $ilDB;
 
+        /*
         $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc " .
                     "WHERE review_obj=%s",
                     array("integer"),
@@ -527,12 +527,27 @@ class ilObjReview extends ilObjectPlugin {
             }
         }
          */
+        foreach ($this->review_db->getReviewerAllocations(array()) as $alloc) {
+            $alloc->deleteFromDB();
+        }
         foreach ($allocation as $phase => $assignment) {
             foreach ($assignment as $author => $reviewers) {
-                $alloc_obj = reset($this->review_db->getReviewerAllocations(
+                $matches = $this->review_db->getReviewerAllocations(
                     array("phase_nr" => $phase, "author" => $author)
-                ));
-                $alloc_obj->setReviewers($reviewers);
+                );
+                if (count($matches) == 1) {
+                    $alloc_obj = reset($matches);
+                    $alloc_obj->setReviewers($reviewers);
+                } else {
+                    $alloc_obj = new ilReviewerAllocation(
+                        $ilDB,
+                        $this->review_db,
+                        $phase,
+                        $author,
+                        $reviewers,
+                        $this->getID()
+                    );
+                }
                 $alloc_obj->storeToDB();
             }
         }
@@ -1061,7 +1076,6 @@ class ilObjReview extends ilObjectPlugin {
             array($question_id)
         );
         $record = $ilDB->fetchObject($result);
-        file_put_contents("debug_log", $record->tstamp."\n", FILE_APPEND);
         return $record->tstamp;
     }
 

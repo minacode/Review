@@ -82,7 +82,7 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
 
             $nr_input = new ilNumberInputGUI(
                 $this->parent_obj->getTxt("nr_reviewers"),
-                "nr_" . $phase + 1
+                "nr_" . ($phase + 1)
             );
             $nr_input->setMinValue(1);
             $nr_input->setRequired(true);
@@ -105,7 +105,10 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
     public function checkInput() {
         global $lng;
 
-        $valid = parent::checkInput();
+        if (!parent::checkInput()) {
+            return false;
+        }
+        $valid = true;
         $nr_inputs = array();
         foreach ($this->getItems() as $item) {
             if ($item instanceof ilNumberInputGUI) {
@@ -114,9 +117,9 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             }
         }
         foreach ($this->getItems() as $item) {
-            if ($item instanceof ilCheckMatrixRowGUI) {
+            if ($item instanceof ilAllocationRowGUI) {
                 $valid &= $item->getTickCount()
-                    >= $nr_inputs["nr_" . $item->getGroupID()];
+                    >= $nr_inputs["nr_" . $item->getPhase()];
             }
         }
         if (!$valid) {

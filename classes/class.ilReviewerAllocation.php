@@ -79,18 +79,18 @@ class ilReviewerAllocation {
 
         $this->db->manipulateF(
             "DELETE FROM rep_robj_xrev_alloc "
-            . "WHERE phase = %s AND review_obj = %s",
-            array("integer", "integer"),
-            array($this->phase_nr, $this->review_obj)
+            . "WHERE phase = %s AND review_obj = %s AND author = %s",
+            array("integer", "integer", "integer"),
+            array($this->phase_nr, $this->review_obj, $this->author)
         );
         foreach ($this->reviewers as $reviewer) {
             $this->db->insert(
                 "rep_robj_xrev_alloc",
                 array(
-                    "phase" => $this->phase_nr,
-                    "author" => $this->author,
-                    "review_obj" => $this->review_obj,
-                    "reviewer" => $reviewer
+                    "phase" => array("integer", $this->phase_nr),
+                    "author" => array("integer", $this->author),
+                    "review_obj" => array("integer", $this->review_obj),
+                    "reviewer" => array("integer", $reviewer)
                 )
             );
         }
