@@ -352,7 +352,7 @@ class ilObjReview extends ilObjectPlugin {
      * @param   ilCycleQuestion     $question       question
      */
     public function proceedToNextPhase($question) {
-        for ($next_phase = $question->getPhase() + 1; ; $next_phase++) {
+        for ($next_phase = $question->getPhase() + 1; TRUE; $next_phase++) {
             $phases = $this->review_db->getCyclePhases(
                 array("phase_nr" => $next_phase)
             );
@@ -368,9 +368,9 @@ class ilObjReview extends ilObjectPlugin {
             if (count($allocation) != 1) {
                 continue;
             }
-            if (reset($phases)->getNumReviewers > 0
-                && reset($phases)->getNumReviewers
-                >= count(reset($allocation)->getReviewers())
+            if (reset($phases)->getNumReviewers() > 0
+                && reset($phases)->getNumReviewers()
+                <= count(reset($allocation)->getReviewers())
             ) {
                 $question->setPhase($next_phase);
                 $question->setState(1);
@@ -380,9 +380,10 @@ class ilObjReview extends ilObjectPlugin {
                 );
                 foreach ($reviews as $review) {
                     $review->copyToHistory();
-                    $review->delete();
+                    $review->deleteFromDB();
                 }
                 $this->allocateReviews($question);
+                return;
             }
         }
         $this->finishQuestion($question);
@@ -482,7 +483,7 @@ class ilObjReview extends ilObjectPlugin {
         $num_reviewers = reset($this->review_db->getCyclePhases(
             array("phase_nr" => $question->getPhase())
         ))->getNumReviewers();
-        $allocation = reset($this->reviewer_db->getReviewerAllocations(
+        $allocation = reset($this->review_db->getReviewerAllocations(
             array(
                 "phase_nr" => $question->getPhase(),
                 "author" => $question->getOwner()
@@ -658,7 +659,7 @@ class ilObjReview extends ilObjectPlugin {
         );
         foreach ($reviews as $review) {
             $review->copyToHistory();
-            $review->delete();
+            $review->deleteFromDB();
         }
         $this->copyQuestionToReviewedPool($question);
         // TODO change the notify function to use the object
@@ -755,7 +756,16 @@ class ilObjReview extends ilObjectPlugin {
             $ilDB->nextID("rep_robj_xrev_quest")
         );
         $cycle_question->storeToDB();
-        /* Maybe copy reviewed question data */
+        $ilDB->insert(
+            "qpl_rev_qst",
+            array(
+                "question_id" => array("integer", $new_qst),
+                "taxonomy" => array("integer", $question->getTaxonomy()),
+                "knowledge_dimension" => array("integer", $question->getKnowledgeDimension()),
+                "learning_outcome" => array("clob", $question->getLearningOutcome()),
+                "topic" => array("text", $question->getTopic())
+            )
+        );
     }
 
     /*
@@ -771,7 +781,7 @@ class ilObjReview extends ilObjectPlugin {
         );
         foreach ($reviews as $review) {
             $review->copyToHistory();
-            $review->delete();
+            $review->deleteFromDB();
         }
         // TODO change notify function to use the object
         $this->notifyAuthorsAboutRefusal(array($question->getID()));

@@ -500,6 +500,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
         $ilTabs->activateTab("content");
         if (
             !ilObjReviewAccess::checkAccessToObject(
+                $this->object,
                 $_GET["r_id"],
                 "",
                 "saveReview",
@@ -536,6 +537,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $review_form->setExpertise($input->getInput("exp"));
             $review_form->setState(1);
             $review_form->storeToDB();
+            $this->object->checkPhaseProgress($question);
             ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
             $ilCtrl->redirect($this, "showContent");
         } else {

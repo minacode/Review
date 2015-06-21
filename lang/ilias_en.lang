@@ -115,3 +115,4 @@ generate#:#Generate
 generate_plugins#:#Generate question types
 generate_question_plugins#:#Generate reviewable question types
 question_type_name#:#Question type name
+reviewed#:#[Reviewed]
