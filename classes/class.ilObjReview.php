@@ -197,6 +197,10 @@ class ilObjReview extends ilObjectPlugin {
                     $plg_question->storeToDB();
                     if ($plg_question->getState() == 0) {
                         $this->proceedToNextPhase($plg_question);
+                    } else if ($plg_question->getState() == -1) {
+                        $plg_question->setState(0);
+                        $plg_question->setPhase(0);
+                        $this->proceedToNextPhase($plg_question);
                     }
                     break;
                 }
@@ -214,6 +218,13 @@ class ilObjReview extends ilObjectPlugin {
 
         $questions = $this->review_db->getCycleQuestions(
             array("owner" => $ilUser->getID(), "state" => 1)
+        );
+        $questions = array_merge(
+            $questions,
+            $this->review_db->getCycleQuestions(array(
+                "owner" => $ilUser->getID(),
+                "state" => 0
+            ))
         );
         return $questions;
     }
@@ -305,47 +316,6 @@ class ilObjReview extends ilObjectPlugin {
     }
 
     /*
-     * Load all members of a group
-     *
-     * @return       array           $members       ids, names of the members
-     */
-    public function loadMembers() {
-        global $ilDB;
-
-        $res = $ilDB->queryF("SELECT usr_data.usr_id AS id, firstname, lastname FROM usr_data ".
-                "INNER JOIN rbac_ua ON rbac_ua.usr_id=usr_data.usr_id ".
-                "INNER JOIN object_data ON object_data.obj_id=rbac_ua.rol_id ".
-                "WHERE object_data.title='il_grp_admin_%s' OR object_data.title='il_grp_member_%s'",
-                array("integer", "integer"),
-                array($this->getGroupId(), $this->getGroupId()));
-        $members = array();
-        while ($member = $ilDB->fetchObject($res))
-            $members[] = $member;
-        return $members;
-    }
-
-    /*
-     * Load all review cycle phases
-     *
-     * @return      array           $phases         'phases' table row objects
-     */
-    public function loadPhases() {
-        global $ilDB;
-
-        $res = $ilDB->queryF("SELECT phase, nr_reviewers "
-                . "FROM rep_robj_xrev_phases "
-                . "WHERE review_obj = %s",
-                array("integer"),
-                array($this->getId()));
-
-        $phases = array();
-        while ($phase = $ilDB->fetchObject($res)) {
-            $phases[] = $phase;
-        }
-        return $phases;
-    }
-
-    /*
      * Move a question to the next phase in the review cycle or finish it, if
      * it passed the last phase
      *
@@ -387,88 +357,6 @@ class ilObjReview extends ilObjectPlugin {
             }
         }
         $this->finishQuestion($question);
-    }
-
-    /*
-     * Delete all review form objects allocated to a question
-     *
-     * @param       integer         $q_id           question id
-     */
-    public function clearAllocatedReviews($q_id) {
-        global $ilDB;
-
-        $ilDB->manipulateF(
-            "DELETE FROM rep_robj_xrev_revi"
-            . " WHERE review_obj=%s AND question_id=%s",
-            array("integer", "integer"),
-            array($this->getID(), $q_id)
-        );
-    }
-
-    /*
-     * Get the current cycle phase of a question
-     *
-     * @param       integer         $q_id           question id
-     *
-     * @return      object          $phase          phase object from record
-     */
-    public function getCurrentPhase($q_id) {
-        global $ilDB;
-
-        $res = $ilDB->queryF(
-            "SELECT rep_robj_xrev_phases.phase,"
-            . " rep_robj_xrev_phases.nr_reviewers"
-            . " FROM rep_robj_xrev_phases"
-            . " INNER JOIN rep_robj_xrev_quest"
-            . " ON rep_robj_xrev_quest.phase=rep_robj_xrev_phases.phase"
-            . " WHERE rep_robj_xrev_phases.review_obj=%s"
-            . " AND rep_robj_xrev_quest.question_id=%s",
-            array("integer", "integer"),
-            array($this->getID(), $q_id)
-        );
-        return $ilDB->fetchObject($res);
-    }
-
-    /*
-     * Load all reviewers allocated to the author of a question in a certain
-     * phase ordered by the amount of reviews they currently have to complete
-     *
-     * @param       integer         $q_id           question id
-     * @param       integer         $phase_nr       cycle phase
-     *
-     * @return      array           $reviewer_pool  objects of allocated
-     *                                              reviewers
-     */
-    public function loadAllocatedReviewers($q_id, $phase_nr) {
-        global $ilDB;
-
-        $res = $ilDB->queryF(
-            "SELECT qpl_questions.owner FROM qpl_questions"
-            . " WHERE qpl_questions.question_id=%s",
-            array("integer"),
-            array($q_id)
-        );
-        $author = $ilDB->fetchObject($res)->owner;
-
-        $res = $ilDB->queryF(
-            "SELECT rep_robj_xrev_alloc.reviewer,"
-            . " COUNT(DISTINCT rep_robj_xrev_revi.id)"
-            . " FROM rep_robj_xrev_alloc"
-            . " LEFT JOIN rep_robj_xrev_revi"
-            . " ON rep_robj_xrev_revi.reviewer=rep_robj_xrev_alloc.reviewer"
-            . " WHERE rep_robj_xrev_alloc.review_obj=%s"
-            . " AND rep_robj_xrev_alloc.author=%s"
-            . " AND rep_robj_xrev_alloc.phase=%s"
-            . " GROUP BY rep_robj_xrev_alloc.reviewer"
-            . " ORDER BY COUNT(DISTINCT rep_robj_xrev_revi.id)",
-            array("integer", "integer", "integer"),
-            array($this->getID(), $author, $phase_nr)
-        );
-        $reviewer_pool = array();
-        while ($reviewer = $ilDB->fetchObject($res)) {
-            $reviewer_pool[] = $reviewer;
-        }
-        return $reviewer_pool;
     }
 
     /*
@@ -529,25 +417,6 @@ class ilObjReview extends ilObjectPlugin {
     public function allocateReviewers($allocation) {
         global $ilDB;
 
-        /*
-        $ilDB->manipulateF("DELETE FROM rep_robj_xrev_alloc " .
-                    "WHERE review_obj=%s",
-                    array("integer"),
-                    array($this->getId()));
-
-        foreach ($alloc_matrix as $row) {
-            foreach ($row["reviewers"] as $reviewer_id => $checked) {
-                if (!$checked) {
-                    continue;
-                }
-                $ilDB->insert("rep_robj_xrev_alloc", array(
-                        "phase" => array("integer", explode("_", $reviewer_id)[1]),
-                        "reviewer" => array("integer", explode("_", $reviewer_id)[3]),
-                        "author" => array("integer", $row["q_id"]),
-                        "review_obj" => array("integer", $this->getId())));
-            }
-        }
-         */
         foreach ($this->review_db->getReviewerAllocations(array()) as $alloc) {
             $alloc->deleteFromDB();
         }
@@ -594,33 +463,6 @@ class ilObjReview extends ilObjectPlugin {
      * @return      array       $allocation     phases => authors => reviewers
      */
     public function loadReviewerAllocation() {
-        /*
-        global $ilDB;
-
-        $allocation = array();
-
-        $res = $ilDB->queryF("SELECT phase, reviewer, author "
-                . "FROM rep_robj_xrev_alloc "
-                . "WHERE review_obj=%s",
-                array("integer"),
-                array($this->getID()));
-
-        while ($alloc = $ilDB->fetchObject($res)) {
-            $allocation[sprintf("id_%s_%s_%s", $alloc->phase,
-                    $alloc->author, $alloc->reviewer)]
-                = true;
-        }
-
-        $res = $ilDB->queryF("SELECT nr_reviewers, phase "
-                . "FROM rep_robj_xrev_phases "
-                . "WHERE review_obj=%s",
-                array("integer"),
-                array($this->getID()));
-
-        while ($phase = $ilDB->fetchObject($res)) {
-            $allocation[sprintf("nr_%s", $phase->phase)] = $phase->nr_reviewers;
-        }
-         */
         $group = ilGroupParticipants::_getInstanceByObjID(
             ilObject::_lookupObjectID($this->getGroupID())
         );
@@ -704,6 +546,7 @@ class ilObjReview extends ilObjectPlugin {
                 );
             $new_pool->setOwner(reset($group->getAdmins()));
             $new_pool->update();
+            $new_pool->updateOwner();
             $new_pool->saveToDB();
             ilObjectActivation::getItem($new_pool->getRefID());
             $new_id = $new_pool->getID();

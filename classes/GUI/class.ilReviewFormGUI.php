@@ -207,19 +207,19 @@ class ilReviewFormGUI extends ilPropertyFormGUI {
             "evaluation"
         );
         $eva_1 = new ilRadioOption(
-            $this->parent_obj->getTxt("accept"),
+            $this->parent_obj->getTxt("quest_accept"),
             "1",
             ""
         );
 		$evaluation->addOption($eva_1);
         $eva_2 = new ilRadioOption(
-            $this->parent_obj->getTxt("edit"),
+            $this->parent_obj->getTxt("quest_edit"),
             "2",
             ""
         );
 		$evaluation->addOption($eva_2);
         $eva_3 = new ilRadioOption(
-            $this->parent_obj->getTxt("refuse"),
+            $this->parent_obj->getTxt("quest_refuse"),
             "3",
             ""
         );

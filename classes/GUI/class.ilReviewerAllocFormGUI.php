@@ -20,38 +20,9 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
         $this->setTitle($this->parent_obj->getTxt("phases"));
         $this->setFormAction($ilCtrl->getFormAction($this));
 
-        /*
-        $member_names = array();
-        foreach ($members as $member) {
-            $member->name = $member->firstname . ' ' . $member->lastname;
-            $member_names[] = $member->name;
-        }
-        $member_ids = array();
-        foreach ($members as $member) {
-            $member_ids[] = $member->id;
-        }
-
-        foreach ($phases as $phase) {
-            $phase_head = new ilFormSectionHeaderGUI();
-            $phase_head->setTitle($lng->txt("phase") . " " . $phase->phase);
-            $this->addItem($phase_head);
-            $reviewer_head = new ilAspectHeadGUI($member_names);
-            $this->addItem($reviewer_head);
-
-            foreach ($members as $member) {
-                $matrix_row = new ilCheckMatrixRowGUI($phase->phase, $member, $member_ids);
-                $this->addItem($matrix_row);
-            }
-            $nr_input = new ilNumberInputGUI($lng->txt("nr_reviewers"), "nr_" . $phase->phase);
-            $nr_input->setMinValue(1);
-            $nr_input->setRequired(true);
-            $this->addItem($nr_input);
-        }
-         */
-        //print_r($allocation);
         foreach ($allocation as $phase => $assignments) {
             $phase_head = new ilFormSectionHeaderGUI();
-            $title = $this->parent_obj->getTxt("phase") . " " . $phase + 1;
+            $title = $this->parent_obj->getTxt("phase") . " " . ($phase + 1);
             $phase_head->setTitle($title);
             $this->addItem($phase_head);
 

@@ -56,7 +56,7 @@ relevance#:#Relevanz für das Lernziel
 expression#:#Formulierung
 create#:#Review erstellen
 view#:#Reviews einsehen
-tax_and_know_dim#:#Taxonomiestufe und Wissensdimension
+tax_know_dim#:#Taxonomiestufe und Wissensdimension
 taxonomy#:#Taxonomie
 knowledge_dim#:#Wissensdimension
 reviewer#:#Reviewer
@@ -94,6 +94,8 @@ msg_review_requested_subj#:#Review angefordert
 msg_review_requested_intr#:#Sie wurden ausgewählt, um ein Review zu einer Frage zu erstellen.
 msg_question_accepted_subj#:#Frage akzeptiert
 msg_question_accepted_intr#:#eine von Ihnen erstellte Frage wurde im Zuge der Review-Phase akzetiert.
+msg_question_refused_subj#:#Question refused
+msg_question_refused_intr#:#a question created by you has been refused during the review cycle.
 msg_review_completed_subj#:#Review fertiggestellt
 msg_review_completed_intr#:#ein Reviewer hat ein neues Review zu einer von Ihnen erstellten Frage fertiggestellt.
 msg_question_edited_subj#:#Frage bearbeitet
@@ -116,3 +118,21 @@ generate_plugins#:#Fragentypen generieren
 generate_question_plugins#:#Generieren reviewbarer Fragentyp-Plugins
 question_type_name#:#Name des Fragentyps
 reviewed#:#[Reviewed]
+missing_data#:#Fehlende Metadaten für das Review
+learning_outcome#:#Lernziel
+topic#:#Thema
+non_reviewable_question_types#:#Nicht reviewbare Fragetypen
+type#:#Fragetyp
+review#:#Review
+too_few_reviewers_allocated#:#Zu wenige Reviewer zugewiesen
+allocateReviewers#:#Reviewer zuordnen
+saveAllocateReviewers#:#Reviewer-Zuordnung speichern
+addPhase#:#Phase hinzufügen
+removePhase#:#Phase entfernen
+showContent#:#Inhalt anzeigen
+inputReview#:#Review erstellen
+showReviews#:#Reviews anzeigen
+saveReview#:#Review speichern
+convertQuestion#:#Frage konvertieren
+performConvertQuestion#:#Fragenumwandlung durchführen
+saveConvertQuestion#:#Fragenumwandlung speichern

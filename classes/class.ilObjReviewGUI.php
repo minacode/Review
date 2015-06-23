@@ -196,36 +196,15 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $this,
             $this->object->loadReviewerAllocation()
         );
-        // Remove black magic starting here
         if ($alloc_form->checkInput()) {
-        /*
-            $rows = array();
-            foreach ($alloc_form->getItems() as $item) {
-                if (method_exists($item, "getPostVars")) {
-                    $row_postvars = $item->getPostVars();
-                    $row_values = array();
-                    foreach ($row_postvars as $row_postvar)
-                        $row_values[$row_postvar] = $alloc_form->getInput($row_postvar);
-                    $rows[] = array("q_id" => $item->getRowId(), "reviewers" => $row_values);
-                }
-                if ($item instanceof ilNumberInputGUI) {
-                    $this->object->updateCyclePhase(explode("_", $item->getPostVar())[1], $alloc_form->getInput($item->getPostVar()));
-                }
-            }
-            $this->object->allocateReviewers($rows);
-            */
-            // End of black magic
             $allocation = array();
             foreach ($alloc_form->getItems() as $item) {
                 if ($item instanceof ilAllocationRowGUI) {
-                    //$reviewers = array();
                     foreach ($item->getPostVars() as $postvar) {
                         if ($alloc_form->getInput($postvar)) {
                             $allocation[$item->getPhase()][$item->getAuthor()][] = explode("_", $postvar)[3];
                         }
                     }
-                    //$allocation[$item->getPhase()][$item->getAuthor()] =
-                      //  $reviewers;
                 }
                 if ($item instanceof ilNumberInputGUI) {
                     $this->object->updateCyclePhase(

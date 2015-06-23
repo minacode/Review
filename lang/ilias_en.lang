@@ -56,7 +56,7 @@ relevance#:#Relevance to learning outcome
 expression#:#Phrasing
 create#:#Create Review
 view#:#View Reviews
-tax_and_know_dim#:#Taxonomy and knowledge dimension
+tax_know_dim#:#Taxonomy and knowledge dimension
 taxonomy#:#Taxonomy
 knowledge_dim#:#Knowledge dimension
 reviewer#:#Reviewer
@@ -66,7 +66,7 @@ rating#:#Judgement
 comment#:#Comment
 expertise#:#Expertise
 quest_accept#:#Question acceptet
-quest_edit#:#Revise Question
+quest_edit#:#Rework question
 quest_refuse#:#Question refused
 review_input#:#Review input form
 evaluation#:#Evaluation
@@ -94,6 +94,8 @@ msg_review_requested_subj#:#Review requested
 msg_review_requested_intr#:#you have been chosen to review a question.
 msg_question_accepted_subj#:#Question accepted
 msg_question_accepted_intr#:#a question created by you has been accepted during the review cycle.
+msg_question_refused_subj#:#Question refused
+msg_question_refused_intr#:#a question created by you has been refused during the review cycle.
 msg_review_completed_subj#:#Review completed
 msg_review_completed_intr#:#a reviewer has reviewed a question you have created.
 msg_question_edited_subj#:#Question edited
@@ -116,3 +118,21 @@ generate_plugins#:#Generate question types
 generate_question_plugins#:#Generate reviewable question types
 question_type_name#:#Question type name
 reviewed#:#[Reviewed]
+missing_data#:#Missing metadata for reviews
+learning_outcome#:#Learning outcome
+topic#:#Topic
+non_reviewable_question_types#:#Non-reviewable question types
+type#:#Question type
+review#:#Review
+too_few_reviewers_allocated#:#Too few reviewers allocated
+allocateReviewers#:#Allocate reviewers
+saveAllocateReviewers#:#Save reviewer allocation
+addPhase#:#Add phase
+removePhase#:#Remove phase
+showContent#:#Show content
+inputReview#:#Input review
+showReviews#:#Show reviews
+saveReview#:#Save review
+convertQuestion#:#Convert question
+performConvertQuestion#:#Perform question conversion
+saveConvertQuestion#:#Save question Conversion
