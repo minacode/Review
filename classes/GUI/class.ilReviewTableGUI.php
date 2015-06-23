@@ -33,7 +33,7 @@ class ilReviewTableGUI extends ilTable2GUI {
         $this->write_cmd = $write_cmd;
 
         $this->addColumn(
-            $this->getParentObject()->getTxt("rep_robj_xrev_title_quest"),
+            $this->getParentObject()->getTxt("title_quest"),
             "",
             "80%"
         );

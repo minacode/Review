@@ -153,7 +153,7 @@ class ilReviewFormGUI extends ilPropertyFormGUI {
         );
         $this->addItem($aspect_header);
         $author = new ilAspectSelectInputGUI(
-            $this->parent_obj->getTxt("author"),
+            $this->parent_obj->getTxt("auth_quest"),
             array(
                 array(
                     "postvar" => "cog_a",

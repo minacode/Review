@@ -4,6 +4,7 @@ include_once "Services/Repository/classes/class.ilObjectPlugin.php";
 include_once "QuestionManager/class.ilReviewableQuestionPluginGenerator.php";
 include_once "class.ilReviewDBMapper.php";
 include_once "Modules/Group/classes/class.ilGroupParticipants.php";
+include_once("Modules/TestQuestionPool/classes/class.assQuestion.php");
 
 /*
  * Application class for Review repository object.

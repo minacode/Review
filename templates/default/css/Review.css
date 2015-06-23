@@ -5,7 +5,7 @@
 
 .iosCheckboxMatrix, .iosAspectRow{
 	text-align:center;
-	min-width:100px;
+	min-width:200px;
 	height:16px
 }
 
@@ -23,4 +23,3 @@
 .iosMin500{
 	min-width: 500px;
 }
-

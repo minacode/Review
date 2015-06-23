@@ -136,3 +136,6 @@ saveReview#:#Review speichern
 convertQuestion#:#Frage konvertieren
 performConvertQuestion#:#Fragenumwandlung durchführen
 saveConvertQuestion#:#Fragenumwandlung speichern
+phase#:#Phase
+phases#:#Phasen
+nr_reviewers#:#Min. Reviewer

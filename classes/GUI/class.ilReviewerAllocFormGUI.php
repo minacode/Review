@@ -64,8 +64,8 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
         }
 
         $this->addCommandButton("saveAllocateReviewers", $this->parent_obj->getTxt("save"));
-        $this->addCommandButton("addPhase", $this->parent_obj->getTxt("add_phase"));
-        $this->addCommandButton("removePhase", $this->parent_obj->getTxt("remove_phase"));
+        $this->addCommandButton("addPhase", $this->parent_obj->getTxt("addPhase"));
+        $this->addCommandButton("removePhase", $this->parent_obj->getTxt("removePhase"));
     }
 
     /*
