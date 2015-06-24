@@ -1,7 +1,7 @@
 <?php
 class ilReviewableQuestionPluginGenerator {
     
-    private static $ilias_path = '';
+    private static $ilias_path = ILIAS_ABSOLUTE_PATH . '/';
     
     private static $instance = null;
     
@@ -28,7 +28,7 @@ class ilReviewableQuestionPluginGenerator {
         
         $result = $ilDB->query('SELECT plugin FROM qpl_qst_type WHERE type_tag LIKE "ass'. $question_type .'"');
         if ( $result = $ilDB->fetchAssoc( $result ) ) {
-            if ($result['plugin']) {
+            if ($result['plugin'] == 1) {
                 return $this->ilias_path . 'Customizing/global/plugins/Modules/TestQuestionPool/Questions/ass'. $question_type .'/';
             } else {
                 return $this->ilias_path . 'Modules/TestQuestionPool/';
@@ -41,6 +41,7 @@ class ilReviewableQuestionPluginGenerator {
     private function calculatePlaceholderValues( $question_type ) {
         $id = $this->getQuestionTypeId( $question_type );
         $path = $this->getQuestionTypePath( $question_type );
+        echo $path;
         return array(
             '<id>'      => 'rev' . $id,
             '<minv>'    => '4.0.0',
