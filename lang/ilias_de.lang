@@ -139,3 +139,4 @@ saveConvertQuestion#:#Fragenumwandlung speichern
 phase#:#Phase
 phases#:#Phasen
 nr_reviewers#:#Min. Reviewer
+no_reviews_for_question#:#Zu dieser Frage existieren keine Reviews.

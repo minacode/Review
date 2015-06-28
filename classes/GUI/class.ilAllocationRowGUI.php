@@ -70,6 +70,8 @@ class ilAllocationRowGUI extends ilCustomInputGUI {
         foreach ((array) $this->checkboxes as $chbox) {
             if (isset($a_value[$chbox->getPostVar()])) {
                 $chbox->setChecked(true);
+            } else {
+                $chbox->setChecked(false);
             }
         }
 		$this->fillTemplate();

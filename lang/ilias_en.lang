@@ -139,3 +139,4 @@ saveConvertQuestion#:#Save question Conversion
 phase#:#Phase
 phases#:#Phases
 nr_reviewers#:#Min. reviewers
+no_reviews_for_question#:#The are no reviews of this question.

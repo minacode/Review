@@ -74,8 +74,6 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
      * @return      bool            $valid          true, if everything is okay
      */
     public function checkInput() {
-        global $lng;
-
         if (!parent::checkInput()) {
             return false;
         }
@@ -94,7 +92,9 @@ class ilReviewerAllocFormGUI extends ilPropertyFormGUI {
             }
         }
         if (!$valid) {
-			ilUtil::sendFailure($lng->txt("too_few_reviewers_allocated"));
+            ilUtil::sendFailure(
+                $this->parent_obj->getTxt("too_few_reviewers_allocated")
+            );
         }
         return $valid;
     }

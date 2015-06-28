@@ -377,6 +377,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             $this->object->loadQuestionsByUser(),
             "showReviews"
         );
+        $table_q->setTitle($this->txt("my_reviews"));
         $table_r = new ilReviewTableGUI(
             $this,
             "showContent",
@@ -384,6 +385,7 @@ class ilObjReviewGUI extends ilObjectPluginGUI {
             "showReviews",
             "inputReview"
         );
+        $table_r->setTitle($this->txt("my_questions"));
         $tpl->setContent(
             $table_q->getHtml()
             . "<br><hr><br>"
